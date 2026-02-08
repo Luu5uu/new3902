@@ -7,12 +7,18 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Celeste.Madeline
 {
-    public interface IMadeline
+    public class standMadeline : IMadeline
     {
 
-        public void update(Game1 game);
+        public void update(Game1 game)
+        {
+           dictina
+        }
 
-        public void draw(SpriteBatch sprtieBatch);
-        
+        public void draw(SpriteBatch spriteBatch)
+        {
+
+        }
+
     }
 }
