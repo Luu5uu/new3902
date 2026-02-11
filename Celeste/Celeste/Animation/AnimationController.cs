@@ -3,93 +3,87 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Celeste.Animation{
+namespace Celeste.Animation
+{
     /// <summary>
     /// Routes animation updates and rendering based on a high-level state key.
-    ///
-    /// Responsibilities:
-    /// - Maintain a mapping from state (e.g., Idle, Run) to AutoAnimation
-    /// - Ensure only the active animation is updated and drawn
-    /// - Provide safe state switching with optional restart semantics
-    ///
-    /// This class does NOT:
-    /// - Load content
-    /// - Interpret input
-    /// - Decide which state should be active
     /// </summary>
-    /// <author> Albert Liu </author>
-    internal sealed class AnimationController<TState> where TState : notnull{
+    internal sealed class AnimationController<TState> where TState : notnull
+    {
         private readonly Dictionary<TState, AutoAnimation> _animations = new();
 
-        /// <summary>Current active state. Null until a default is registered/selected.</summary>
-        public TState CurrentState { get; private set; }
-        //private bool _hasState;
+        public TState CurrentState { get; private set; } = default!;
+        private bool _hasState = false;
 
-        /// <summary>Returns true if this controller has an animation registered for <paramref name="state"/>.</summary>
         public bool HasState(TState state) => _animations.ContainsKey(state);
 
-        /// <summary>
-        /// Registers an animation for a given state.
-        /// </summary>
-        /// <param name="state">State key associated with the animation.</param>
-        /// <param name="animation">Initialized AutoAnimation instance.</param>
-        /// <param name="setAsDefault">Whether this state should become the initial active state.</param>
-        public void Register(TState state, AutoAnimation animation, bool setAsDefault = false){
+        public void Register(TState state, AutoAnimation animation, bool setAsDefault = false)
+        {
             if (animation == null) throw new ArgumentNullException(nameof(animation));
 
             _animations[state] = animation;
 
-            if (setAsDefault || CurrentState == null){
+            // Choose an initial state if none exists yet, or if explicitly set as default.
+            if (setAsDefault || !_hasState)
+            {
                 CurrentState = state;
-                // Ensure it is playing when first selected
+                _hasState = true;
                 animation.Play();
             }
         }
 
-        /// <summary>
-        /// Switches the current animation state.
-        /// </summary>
-        /// <param name="state">The target state.</param>
-        /// <param name="restart">
-        /// If true, the animation restarts from the first frame;
-        /// otherwise, it continues playing.
-        /// </param>
-        public void SetState(TState state, bool restart = false){
+        public void SetState(TState state, bool restart = false)
+        {
             if (!_animations.TryGetValue(state, out AutoAnimation next))
                 throw new KeyNotFoundException($"No animation registered for state '{state}'.");
 
+            // If no state yet, just set it.
+            if (!_hasState)
+            {
+                CurrentState = state;
+                _hasState = true;
+                if (restart) next.Stop();
+                next.Play();
+                return;
+            }
+
             // No-op if unchanged (unless caller wants a restart).
-            if (CurrentState != null && EqualityComparer<TState>.Default.Equals(CurrentState, state) && !restart)
+            if (EqualityComparer<TState>.Default.Equals(CurrentState, state) && !restart)
                 return;
 
             CurrentState = state;
 
-            if (restart){
-                next.Stop(); // resets frame/time
-                next.Play();
+            if (restart)
+            {
+                next.Stop();
             }
-            else{
-                next.Play();
-            }
+            next.Play();
         }
 
-        /// <summary>Update only the active animation.</summary>
-        public void Update(GameTime gameTime){
-            if (CurrentState == null) return;
+        public void Update(GameTime gameTime)
+        {
+            if (!_hasState) return;
             _animations[CurrentState].Update(gameTime);
         }
 
-        /// <summary>
-        /// Draw the active animation at a position. Caller owns Begin/End.
-        /// </summary>
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Color color, float scale, SpriteEffects effects){
-            if (CurrentState == null) return;
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, Color color, float scale, SpriteEffects effects)
+        {
+            if (!_hasState) return;
             _animations[CurrentState].Draw(spriteBatch, position, color, scale, effects);
         }
 
-        /// <summary>
-        /// Access a registered animation directly. May not use, or if you want to edit it you can.
-        /// </summary>
         public AutoAnimation Get(TState state) => _animations[state];
+
+        /// <summary>
+        /// Useful for one-shot animations: returns true when current animation has stopped playing.
+        /// </summary>
+        public bool IsFinished
+        {
+            get
+            {
+                if (!_hasState) return true;
+                return !_animations[CurrentState].IsPlaying;
+            }
+        }
     }
 }
