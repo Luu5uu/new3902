@@ -9,6 +9,9 @@ namespace Celeste.Animation{
     public enum PlayerState{
         Standard,
         Idle,
+        IdleFidgetA,
+        IdleFidgetB,
+        IdleFidgetC,
         Run,
         JumpFast,
         FallSlow,

@@ -18,7 +18,7 @@ namespace Celeste.Animation{
     /// It is intended to be used by AnimationController, not directly by gameplay code.
     /// </summary>
     /// <author> Albert Liu </author>
-    internal class AutoAnimation{
+    public class AutoAnimation{
         public Texture2D Texture { get; private set; } = null!;
         public int FrameWidth { get; private set; } = 32;
         public int FrameHeight { get; private set; } = 32;

@@ -8,7 +8,7 @@ namespace Celeste.Animation
     /// <summary>
     /// Routes animation updates and rendering based on a high-level state key.
     /// </summary>
-    internal sealed class AnimationController<TState> where TState : notnull
+    public sealed class AnimationController<TState> where TState : notnull
     {
         private readonly Dictionary<TState, AutoAnimation> _animations = new();
 
