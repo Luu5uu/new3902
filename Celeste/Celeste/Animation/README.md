@@ -61,3 +61,13 @@ or directly use string key
 4th step - Implement Playback Logic
 
 5th step - Draw the Current Frame
+
+Example to show hows the dictionary store the data:
+Dictionary<string, AnimationClip>
+    └── "Player/Run"
+            └── AnimationClip
+                    ├── Texture → run.png
+                    ├── FrameWidth = 32
+                    ├── FrameCount = 8
+                    ├── Fps = 12
+                    └── Loop = true
