@@ -63,6 +63,7 @@ or directly use string key
 5th step - Draw the Current Frame
 
 Example to show hows the dictionary store the data:
+```csharp
 Dictionary<string, AnimationClip>
     └── "Player/Run"
             └── AnimationClip
@@ -71,3 +72,4 @@ Dictionary<string, AnimationClip>
                     ├── FrameCount = 8
                     ├── Fps = 12
                     └── Loop = true
+```
