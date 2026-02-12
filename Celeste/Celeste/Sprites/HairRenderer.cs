@@ -211,15 +211,18 @@ namespace Celeste.Sprites
             Vector2 circleOrigin = new Vector2(_circleWidth / 2f, _circleHeight / 2f);
 
             // Bangs setup (shared by outline and fill passes).
-            int bangFrame = Math.Clamp(BangsFrame, 0, _bangsFrameCount - 1);
+            // Use the actual left-facing bangs frame (2) when facing left
+            // instead of flipping frame 0 -- the artist-drawn frames differ
+            // in shape/height, so flipping produces misalignment.
+            int bangFrame = _faceLeft
+                ? 2
+                : Math.Clamp(BangsFrame, 0, _bangsFrameCount - 1);
             Rectangle bangSrc = new Rectangle(
                 bangFrame * _bangsFrameWidth, 0,
                 _bangsFrameWidth, _bangsFrameHeight);
             // No nudge -- bangs center aligns directly to node 0 (head anchor).
             Vector2 bangsPos = _nodes[0];
-            SpriteEffects bangEffects = _faceLeft
-                ? SpriteEffects.FlipHorizontally
-                : SpriteEffects.None;
+            SpriteEffects bangEffects = SpriteEffects.None;
             Vector2 bangsOrigin = new Vector2(
                 _bangsFrameWidth / 2f,
                 _bangsFrameHeight / 2f);
