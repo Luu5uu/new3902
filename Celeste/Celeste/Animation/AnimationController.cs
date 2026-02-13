@@ -5,9 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Celeste.Animation
 {
-    /// <summary>
-    /// Routes animation updates and rendering based on a high-level state key.
-    /// </summary>
+    // State machine that routes updates/rendering to the active AutoAnimation.
     public sealed class AnimationController<TState> where TState : notnull
     {
         private readonly Dictionary<TState, AutoAnimation> _animations = new();
@@ -20,10 +18,8 @@ namespace Celeste.Animation
         public void Register(TState state, AutoAnimation animation, bool setAsDefault = false)
         {
             if (animation == null) throw new ArgumentNullException(nameof(animation));
-
             _animations[state] = animation;
 
-            // Choose an initial state if none exists yet, or if explicitly set as default.
             if (setAsDefault || !_hasState)
             {
                 CurrentState = state;
@@ -37,7 +33,6 @@ namespace Celeste.Animation
             if (!_animations.TryGetValue(state, out AutoAnimation next))
                 throw new KeyNotFoundException($"No animation registered for state '{state}'.");
 
-            // If no state yet, just set it.
             if (!_hasState)
             {
                 CurrentState = state;
@@ -47,16 +42,11 @@ namespace Celeste.Animation
                 return;
             }
 
-            // No-op if unchanged (unless caller wants a restart).
             if (EqualityComparer<TState>.Default.Equals(CurrentState, state) && !restart)
                 return;
 
             CurrentState = state;
-
-            if (restart)
-            {
-                next.Stop();
-            }
+            if (restart) next.Stop();
             next.Play();
         }
 
@@ -72,9 +62,6 @@ namespace Celeste.Animation
             _animations[CurrentState].Draw(spriteBatch, position, color, scale, effects);
         }
 
-        /// <summary>
-        /// Draws using Vector2 scale (supports negative X for facing direction).
-        /// </summary>
         public void Draw(SpriteBatch spriteBatch, Vector2 position, Color color, Vector2 scale)
         {
             if (!_hasState) return;
@@ -83,16 +70,6 @@ namespace Celeste.Animation
 
         public AutoAnimation Get(TState state) => _animations[state];
 
-        /// <summary>
-        /// Useful for one-shot animations: returns true when current animation has stopped playing.
-        /// </summary>
-        public bool IsFinished
-        {
-            get
-            {
-                if (!_hasState) return true;
-                return !_animations[CurrentState].IsPlaying;
-            }
-        }
+        public bool IsFinished => !_hasState || !_animations[CurrentState].IsPlaying;
     }
 }
