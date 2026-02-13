@@ -34,11 +34,12 @@ The window title bar (and console when frame or animation changes) shows:
 
 1. Enable debug (**G**).
 2. Pause (**P**).
-3. Step to the desired frame (**Left** / **Right**).
-4. Optionally hide the crosshair (**C**) if it blocks the view.
-5. Nudge with **WASD** until the hair lines up with the head.
-6. Note the **effective (X,Y)** from the console or title bar.
-7. Put that value into `HairOffsetData.cs` for that animation and frame.
+3. Use **Tab** / **Shift+Tab** to cycle to the animation you want (through all animations in the catalog).
+4. Step to the desired frame (**Left** / **Right**).
+5. Optionally hide the crosshair (**C**) if it blocks the view.
+6. Nudge with **WASD** until the hair lines up with the head.
+7. Note the **effective (X,Y)** from the console or title bar.
+8. Put that value into `HairOffsetData.cs` for that animation and frame.
 
 ## Adding a new animation with dynamic hair
 

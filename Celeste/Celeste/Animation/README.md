@@ -1,5 +1,14 @@
 Animation Pack Usage Guide
 
+## Current setup (what we use)
+
+- **Default path (catalog):** Game1 loads the catalog with `AnimationLoader.LoadAll(Content)` and passes it to `MaddySprite.Build(Content, _catalog, GraphicsDevice)`. All body animations and procedural hair use this **data-driven system** (AnimationLoader + AnimationCatalog + AnimationClip + AnimationKeys).
+- **Legacy path (H toggle):** Press **H** to switch to **static hair** — manually drawn strips. Legacy uses the **same catalog**: `PlayerAnimations.Build(_catalog)` registers only clips whose keys end with `*_static_hair` (see `AnimationKeys.PlayerIdleStaticHair`, etc.). If no `*_static_hair` assets are in Content, H still works and the default (Maddy) is drawn.
+
+**Legacy assets:** Rename old manually-drawn-hair strips to `*_static_hair` (e.g. `idle_static_hair.png`, `run_static_hair.png`) and add them to Content. The loader loads them optionally; after this sprint you can remove the `*_static_hair` assets and the legacy path entirely.
+
+---
+
 The animation system is split into two responsibilities:
 AnimationLoader --- Loads sprite strips from Content and builds animation data.
 AnimationClip --- Stores pure animation metadata (no playback logic).
@@ -31,7 +40,7 @@ Stores everything inside a dictionary
 
 2nd step - Pass AnimationCatalog to Your Character Class
 Your gameplay class (Player, Enemy, etc.) should receive the catalog.
-Eaxmple
+Example
 In your class.cs:
 ```csharp
     private readonly AnimationCatalog _catalog;
@@ -48,12 +57,12 @@ Game1.cs:
 
 
 3rd step - Retrieve an AnimationClip
-Example:
+Use the keys in `AnimationKeys` (preferred) or the same string literals:
 ```csharp
     AnimationClip runClip = _catalog.Clips[AnimationKeys.PlayerRun];
 ```
 
-or directly use string key
+or by string key (same values as in AnimationKeys):
 ```csharp
     AnimationClip idleClip = _catalog.Clips["Player/Idle"];
 ```

@@ -1,12 +1,13 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Celeste.Animation{
+namespace Celeste.Animation
+{
     /// <summary>
     /// High-level animation states for the player character.
     /// </summary>
-    public enum PlayerState{
+    public enum PlayerState
+    {
         Standard,
         Idle,
         IdleFidgetA,
@@ -19,110 +20,66 @@ namespace Celeste.Animation{
         ClimbUp,
         Dangling
     }
+
     /// <summary>
-    /// High-level animation facade for the player character.
-    ///
-    /// Responsibilities:
-    /// - Load and configure all player animations
-    /// - Register animations with AnimationController
-    /// - Expose semantic methods (Idle, Run, etc.) for gameplay code
-    ///
-    /// This is the ONLY animation class that gameplay code should use.
-    /// <author> Albert Liu </author>
-    public sealed class PlayerAnimations{
+    /// Legacy player animations (H toggle): full strips with manually-drawn hair.
+    /// Builds from the same catalog as the new system; uses *_static_hair clips when present.
+    /// </summary>
+    public sealed class PlayerAnimations
+    {
         private readonly AnimationController<PlayerState> _controller = new();
+        private static readonly Vector2 Origin = new(16, 32);
 
         private PlayerAnimations() { }
 
         /// <summary>
-        /// Builds and initializes the full player animation set.
-        /// Should be called once during LoadContent.
+        /// Builds the legacy set from the catalog. Only registers states for which a *_static_hair clip exists.
+        /// Call after AnimationLoader.LoadAll(Content); pass the same catalog used by MaddySprite.
         /// </summary>
-        public static PlayerAnimations Build(ContentManager content){
+        public static PlayerAnimations Build(AnimationCatalog catalog)
+        {
             var anims = new PlayerAnimations();
-            // ---- Standard ----
-            var standard = new AutoAnimation();
-            standard.Detect(content.Load<Texture2D>("standard"), 32, 32, 1f, true);
+            bool anyRegistered = false;
 
-            // ---- Idle ----
-            var idle = new AutoAnimation();
-            idle.Detect(content.Load<Texture2D>("idelA"), 32, 32, 8f, true);
+            void RegisterIfPresent(string key, PlayerState state)
+            {
+                if (!catalog.Clips.TryGetValue(key, out var clip)) return;
+                var auto = AutoAnimation.FromClip(clip);
+                auto.Origin = Origin;
+                anims._controller.Register(state, auto, setAsDefault: !anyRegistered);
+                anyRegistered = true;
+            }
 
-            // ---- Run ----
-            var run = new AutoAnimation();
-            run.Detect(content.Load<Texture2D>("run"), 32, 32, 12f, true);
+            RegisterIfPresent(AnimationKeys.PlayerStandardStaticHair,  PlayerState.Standard);
+            RegisterIfPresent(AnimationKeys.PlayerIdleStaticHair,       PlayerState.Idle);
+            RegisterIfPresent(AnimationKeys.PlayerRunStaticHair,        PlayerState.Run);
+            RegisterIfPresent(AnimationKeys.PlayerJumpFastStaticHair,   PlayerState.JumpFast);
+            RegisterIfPresent(AnimationKeys.PlayerFallSlowStaticHair,   PlayerState.FallSlow);
+            RegisterIfPresent(AnimationKeys.PlayerDashStaticHair,       PlayerState.Dash);
+            RegisterIfPresent(AnimationKeys.PlayerClimbUpStaticHair,    PlayerState.ClimbUp);
+            RegisterIfPresent(AnimationKeys.PlayerDanglingStaticHair,   PlayerState.Dangling);
 
-            // ---- Jump (fast) ----
-            var jumpFast = new AutoAnimation();
-            jumpFast.Detect(content.Load<Texture2D>("jumpfast"), 32, 32, fps: 4f, loop: false);
-
-            // ---- Fall (slow) ----
-            var fallSlow = new AutoAnimation();
-            fallSlow.Detect(content.Load<Texture2D>("fallSlow"), 32, 32, fps: 4f, loop: true);
-
-            // ---- Dash ----
-            var dash = new AutoAnimation();
-            dash.Detect(content.Load<Texture2D>("dash"), 32, 32, fps: 8f, loop: false);
-
-            // ---- Climb Up ----
-            var climbUp = new AutoAnimation();
-            climbUp.Detect(content.Load<Texture2D>("climbup"), 32, 32, fps: 12f, loop: true);
-
-            // ---- Dangling (hang on wall) ----
-            var dangling = new AutoAnimation();
-            dangling.Detect(content.Load<Texture2D>("dangling"), 32, 32, fps: 8f, loop: true);
-
-            anims._controller.Register(PlayerState.Standard,standard, setAsDefault: true);
-            anims._controller.Register(PlayerState.Idle, idle);
-            anims._controller.Register(PlayerState.Run, run);
-            anims._controller.Register(PlayerState.JumpFast, jumpFast);
-            anims._controller.Register(PlayerState.FallSlow, fallSlow);
-            anims._controller.Register(PlayerState.Dash, dash);
-            anims._controller.Register(PlayerState.ClimbUp, climbUp);
-            anims._controller.Register(PlayerState.Dangling, dangling);
             return anims;
         }
-        /// Switches to the Standard animation.
-        public void Standard(bool restart = false)      => _controller.SetState(PlayerState.Standard, restart);
 
-        /// Switches to the idle animation.
-        public void Idle(bool restart = false)      => _controller.SetState(PlayerState.Idle, restart);
-
-        /// Switches to the run animation.
-        public void Run(bool restart = false)       => _controller.SetState(PlayerState.Run, restart);
-
-        /// Switches to the JumpFast animation.
-        public void JumpFast(bool restart = true)   => _controller.SetState(PlayerState.JumpFast, restart);
-
-        /// Switches to the FallSlow animation.
-        public void FallSlow(bool restart = true)  => _controller.SetState(PlayerState.FallSlow, restart);
-
-        /// Switches to the Dash animation.
-        public void Dash(bool restart = true)       => _controller.SetState(PlayerState.Dash, restart);
-
-        /// Switches to the ClimbUp animation.
-        public void ClimbUp(bool restart = false)   => _controller.SetState(PlayerState.ClimbUp, restart);
-
-        /// Switches to the Dangling animation.
+        public void Standard(bool restart = false)   => _controller.SetState(PlayerState.Standard, restart);
+        public void Idle(bool restart = false)       => _controller.SetState(PlayerState.Idle, restart);
+        public void Run(bool restart = false)        => _controller.SetState(PlayerState.Run, restart);
+        public void JumpFast(bool restart = true)    => _controller.SetState(PlayerState.JumpFast, restart);
+        public void FallSlow(bool restart = true)    => _controller.SetState(PlayerState.FallSlow, restart);
+        public void Dash(bool restart = true)        => _controller.SetState(PlayerState.Dash, restart);
+        public void ClimbUp(bool restart = false)    => _controller.SetState(PlayerState.ClimbUp, restart);
         public void Dangling(bool restart = false)  => _controller.SetState(PlayerState.Dangling, restart);
 
-        /// <summary>
-        /// Updates the currently active animation.
-        /// Must be called once per frame.
-        /// </summary>
-        public void Update(GameTime gameTime)
-            => _controller.Update(gameTime);
+        public void Update(GameTime gameTime) => _controller.Update(gameTime);
 
-        /// <summary>
-        /// Draws the current animation, automatically handling facing direction.
-        /// </summary>
-        /// <param name="faceLeft">
-        /// If true, the animation is drawn flipped horizontally.
-        /// </param>
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Color color, float scale = 1f, bool faceLeft = false){
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, Color color, float scale = 1f, bool faceLeft = false)
+        {
+            if (!_controller.HasAnyState) return;
             var effects = faceLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
             _controller.Draw(spriteBatch, position, color, scale, effects);
         }
 
+        public bool IsUsable => _controller.HasAnyState;
     }
 }

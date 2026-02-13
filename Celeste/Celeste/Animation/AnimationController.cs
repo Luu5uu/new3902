@@ -14,6 +14,7 @@ namespace Celeste.Animation
         private bool _hasState = false;
 
         public bool HasState(TState state) => _animations.ContainsKey(state);
+        public bool HasAnyState => _hasState;
 
         public void Register(TState state, AutoAnimation animation, bool setAsDefault = false)
         {
@@ -31,7 +32,7 @@ namespace Celeste.Animation
         public void SetState(TState state, bool restart = false)
         {
             if (!_animations.TryGetValue(state, out AutoAnimation next))
-                throw new KeyNotFoundException($"No animation registered for state '{state}'.");
+                return; // State not registered (e.g. legacy has no *_static_hair clip for this state).
 
             if (!_hasState)
             {

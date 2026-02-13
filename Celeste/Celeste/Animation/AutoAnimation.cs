@@ -22,7 +22,7 @@ namespace Celeste.Animation{
         public float FrameTime { get; private set; } = 1f / 12f;
         private float _accumulator = 0f;
 
-        // Factory: create from an AnimationClip (data-driven).
+        // Factory: create from an AnimationClip (data-driven). Only way to create an AutoAnimation.
         public static AutoAnimation FromClip(AnimationClip clip)
         {
             var anim = new AutoAnimation();
@@ -36,27 +36,6 @@ namespace Celeste.Animation{
             anim._accumulator = 0f;
             anim.IsPlaying = true;
             return anim;
-        }
-
-        // Initialize from a horizontal sprite strip texture.
-        public void Detect(Texture2D texture, int frameWidth = 32, int frameHeight = 32, float fps = 12f, bool loop = true){
-            Texture = texture;
-            FrameWidth = frameWidth;
-            FrameHeight = frameHeight;
-            Loop = loop;
-
-            if (fps <= 0f) fps = 12f;
-            FrameTime = 1f / fps;
-
-            if (Texture.Height < FrameHeight)
-                throw new System.ArgumentException($"Texture height {Texture.Height} < frameHeight {FrameHeight}.");
-            if (Texture.Width % FrameWidth != 0)
-                throw new System.ArgumentException($"Texture width {Texture.Width} is not divisible by frameWidth {FrameWidth}.");
-
-            FrameCount = Texture.Width / FrameWidth;
-            CurrentFrame = 0;
-            _accumulator = 0f;
-            IsPlaying = true;
         }
 
         public void Play(){

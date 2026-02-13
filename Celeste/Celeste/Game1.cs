@@ -52,7 +52,7 @@ namespace Celeste
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _catalog = AnimationLoader.LoadAll(Content);
             _maddy = MaddySprite.Build(Content, _catalog, GraphicsDevice);
-            _playerAnims = PlayerAnimations.Build(Content);
+            _playerAnims = PlayerAnimations.Build(_catalog);
             // TODO: Re-add items once ItemAnimations is rebuilt.
 
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
@@ -194,7 +194,7 @@ namespace Celeste
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
 
-            if (_useComposite)
+            if (_useComposite || !_playerAnims.IsUsable)
                 _maddy.Draw(_spriteBatch, _playerPos, Color.White, scale: 2f, faceLeft: _faceLeft);
             else
             {
