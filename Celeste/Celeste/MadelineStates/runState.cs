@@ -26,6 +26,12 @@ namespace Celeste.MadelineStates
                 return;
             }
 
+            if (m.dashPressed)
+            {
+                m.changeState(m.dashState);
+                return;
+            }
+
             float x = m.moveX;
             if (x == 0f)
             {

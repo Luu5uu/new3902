@@ -21,11 +21,14 @@ namespace Celeste.Character
 
         KeyboardState prev;
         public Boolean jumpPressed;
+        public Boolean dashPressed;
+        public Boolean isDashing;
 
         public IMadelineState standState;
         public IMadelineState runState;
         public IMadelineState jumpState;
         public IMadelineState fallState;
+        public IMadelineState dashState;
 
         public float ground;
         public Vector2 position;
@@ -52,6 +55,7 @@ namespace Celeste.Character
             runState = new runState();
             jumpState = new jumpState();
             fallState = new fallState();
+            dashState = new dashState();
 
             _state = new standState();
             _state.setState(this);
@@ -73,7 +77,7 @@ namespace Celeste.Character
             else if(k.IsKeyDown(Keys.A)) moveX -= 1f;
 
             jumpPressed = k.IsKeyDown(Keys.Space) && !prev.IsKeyDown(Keys.Space);
-
+            dashPressed = k.IsKeyDown(Keys.Enter) && !prev.IsKeyDown(Keys.Enter);
 
             prev = k;
 
@@ -84,12 +88,16 @@ namespace Celeste.Character
 
         public void physics(float dt)
         {
-            if (!onGround)
+            if (!isDashing)
             {
-                velocityY += gravity * dt;
+                if (!onGround)
+                {
+                    velocityY += gravity * dt;
 
+                }
+                position.Y += velocityY;
             }
-            position.Y += velocityY;
+
 
 
             if(position.Y>= ground)
