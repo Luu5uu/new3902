@@ -23,7 +23,7 @@ namespace Celeste.Character
         KeyboardState prev;
         public Boolean jumpPressed;
         public Boolean dashPressed;
-        public Boolean isDashing;
+
 
         // Initialize all states
         public IMadelineState standState;
@@ -46,6 +46,9 @@ namespace Celeste.Character
         public float gravity = 60f;
         public Boolean onGround;
         
+        //Set values for dash
+        public Boolean isDashing;
+        public Boolean canDash = true;
 
         public Madeline(AnimationCatalog anima, Vector2 startPos)
         {
@@ -94,6 +97,8 @@ namespace Celeste.Character
         // Necessary elements for jumping and falling
         public void physics(float dt)
         {
+
+            //change Y-velocity and Y-position
             if (!isDashing)
             {
                 if (!onGround)
@@ -111,6 +116,7 @@ namespace Celeste.Character
             {
                 position.Y = ground;
                 onGround = true;
+                canDash = true;
                 velocityY = 0f;
             }
             else

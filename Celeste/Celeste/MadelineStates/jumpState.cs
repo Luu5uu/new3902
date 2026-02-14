@@ -20,7 +20,8 @@ namespace Celeste.MadelineStates
         }
         public void update(Madeline m, float dt)
         {
-            if (m.dashPressed)
+            // Change state to dash
+            if (m.dashPressed && m.canDash)
             {
                 m.changeState(m.dashState);
                 return;

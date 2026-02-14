@@ -19,12 +19,14 @@ namespace Celeste.MadelineStates
 
         public void setState(Madeline m)
         {
+            // Initial settings for dashing
             m._player.setCurrentAnimation(m._anima[AnimationKeys.PlayerDash]);
             m.isDashing = true;
+            m.canDash = false;
             m.velocityY = 0f;
 
             _timeLeft = DashDuration;
-
+            //comfirm dash direction
             float x = m.moveX;
             if (x < 0f) _dashDir = -1f;
             else if (x > 0f) _dashDir = 1f;
@@ -37,8 +39,11 @@ namespace Celeste.MadelineStates
         }
         public void update(Madeline m, float dt)
         {
+            //dashing start
             float dashSpeed = m.velocity * DashSpeedMul;
             m.position.X += _dashDir * dashSpeed * dt;
+
+            //dashing end
             _timeLeft -= dt;
             if (_timeLeft <= 0f)
             {

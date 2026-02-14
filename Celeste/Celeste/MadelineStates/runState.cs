@@ -26,8 +26,8 @@ namespace Celeste.MadelineStates
                 m.changeState(m.jumpState);
                 return;
             }
-
-            if (m.dashPressed)
+            // Change state to dash
+            if (m.dashPressed && m.canDash)
             {
                 m.changeState(m.dashState);
                 return;

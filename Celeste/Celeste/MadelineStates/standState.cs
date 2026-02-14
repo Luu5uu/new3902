@@ -23,7 +23,7 @@ namespace Celeste.MadelineStates
                 m.changeState(m.jumpState);
                 return;
             }
-
+            // Check whether user wants to dash
             if (m.dashPressed)
             {
                 m.changeState(m.dashState);
