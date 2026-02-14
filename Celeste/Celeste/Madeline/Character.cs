@@ -19,21 +19,24 @@ namespace Celeste.Character
         public AnimationPlayer _player = new AnimationPlayer();
         public IMadelineState _state;
 
+        // Keyboard settings
         KeyboardState prev;
         public Boolean jumpPressed;
 
+        // Initialize all states
         public IMadelineState standState;
         public IMadelineState runState;
         public IMadelineState jumpState;
         public IMadelineState fallState;
 
+        // Settings for horizontal movements
         public float ground;
         public Vector2 position;
         public float moveX;
         public float velocity = 100;
         public SpriteEffects effect = SpriteEffects.None;
 
-        // Test for jump
+        // Set values for jump
         public float airSpeed = 200f;
         public float velocityY;
         public float jumpSpeed = 15f;
@@ -53,10 +56,12 @@ namespace Celeste.Character
             jumpState = new jumpState();
             fallState = new fallState();
 
+            // Initial state
             _state = new standState();
             _state.setState(this);
         }
 
+        // Change state
         public void changeState(IMadelineState nextState) 
         {
             _state = nextState;
@@ -65,6 +70,7 @@ namespace Celeste.Character
 
         }
 
+        //  Mainly for keyboard settings
         public void setMovX()
         {
             var k = Keyboard.GetState();
@@ -81,18 +87,19 @@ namespace Celeste.Character
 
         }
 
-
+        // Necessary elements for jumping and falling
         public void physics(float dt)
-        {
+        {   
+            //If not on ground (in air), gravity will influence the upward speed
             if (!onGround)
             {
-                velocityY += gravity * dt;
+                velocityY += gravity * dt; // Multiply delta time will make it smooth
 
             }
-            position.Y += velocityY;
+            position.Y += velocityY; // Vertial postion change
 
-
-            if(position.Y>= ground)
+            // Whether the sprite is already on ground
+            if(position.Y>= ground) 
             {
                 position.Y = ground;
                 onGround = true;
@@ -110,10 +117,6 @@ namespace Celeste.Character
 
 
             setMovX();
-            
-
-
-
 
             _state.update(this, dt);
             physics(dt);

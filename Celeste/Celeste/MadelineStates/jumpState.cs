@@ -13,21 +13,26 @@ namespace Celeste.MadelineStates
     {
         public void setState(Madeline m)
         {
+            // Initial settings for jumping
             m.velocityY = -m.jumpSpeed;
             m.onGround = false;
             m._player.setCurrentAnimation(m._anima[AnimationKeys.PlayerJumpFast]);
         }
         public void update(Madeline m, float dt)
         {
+
+            // User can control sprite to move in air
             var x = m.moveX * m.airSpeed * dt;
             m.position.X += x;
 
 
+            // This means we reach the highest point and gonna fall
             if (m.velocityY > 0)
             {
                 m.changeState(m.fallState);
             }
 
+            // Change facing side when move in air
             if (x < 0f) m.effect = SpriteEffects.FlipHorizontally;
             else if (x > 0f) m.effect = SpriteEffects.None;
         }
