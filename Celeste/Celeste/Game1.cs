@@ -1,11 +1,11 @@
 ﻿using Celeste.Animation;
-
 using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Celeste.Character;
-
+// Test Item Animation
+using Celeste.CollectableItems;
 
 namespace Celeste
 {
@@ -17,6 +17,15 @@ namespace Celeste
         private SpriteBatch _spriteBatch;
         private AnimationCatalog _anims = null!;
         Madeline m;
+
+        // Test Item Animation
+        private ItemAnimation _normalStawAnim = null!;
+        private ItemAnimation _flyStawAnim = null!;
+        private ItemAnimation _crystalAnim = null!;
+
+        private Vector2 _normalPos;
+        private Vector2 _flyPos;
+        private Vector2 _crystalPos;
 
         public Vector2 startPosition;
         
@@ -48,9 +57,15 @@ namespace Celeste
             _anims = AnimationLoader.LoadAll(Content);
             m = new Madeline(_anims,startPosition);
 
-           
+            // Create item animations
+            _normalStawAnim = ItemAnimationFactory.CreateNormalStaw(_anims);
+            _flyStawAnim    = ItemAnimationFactory.CreateFlyStaw(_anims);
+            _crystalAnim    = ItemAnimationFactory.CreateCrystal(_anims);
 
-            
+            // Place them on screen (simple layout)
+            _normalPos  = new Vector2(120f, 120f);
+            _flyPos     = new Vector2(220f, 120f);
+            _crystalPos = new Vector2(340f, 120f);  
         }
 
         protected override void Update(GameTime gameTime)
@@ -59,6 +74,9 @@ namespace Celeste
                 Exit();
 
             m.update(gameTime);
+            _normalStawAnim.Update(gameTime);
+            _flyStawAnim.Update(gameTime);
+            _crystalAnim.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -71,6 +89,11 @@ namespace Celeste
             // ===== Start drawing =====
 
             m.draw(_spriteBatch);
+            
+            // Draw three items
+            _normalStawAnim.Draw(_spriteBatch, _normalPos, scale: 2f);
+            _flyStawAnim.Draw(_spriteBatch, _flyPos, scale: 2f);
+            _crystalAnim.Draw(_spriteBatch, _crystalPos, scale: 2f);
 
             // ===== End drawing =====
             _spriteBatch.End();

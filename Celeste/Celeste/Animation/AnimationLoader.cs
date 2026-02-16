@@ -33,6 +33,12 @@ namespace Celeste.Animation
             // ---- Items ----
             catalog.Clips[AnimationKeys.ItemNormalStaw] = BuildClip(content, "normalStaw", 32, 32, 12f, true);
             catalog.Clips[AnimationKeys.ItemFlyStaw]    = BuildClip(content, "flyStaw",    40, 40, 12f, true);
+            catalog.Clips[AnimationKeys.ItemCrystal]    = BuildClip(content, "crystal",    20, 20, 12f, true);
+
+            // ---- Devices ----
+            catalog.Clips[AnimationKeys.DevicesSpring]    = BuildClip(content, "spring",       16, 16, 8f, true);
+            catalog.Clips[AnimationKeys.DevicesMoveBlock]    = BuildClip(content, "moveBlock", 24, 24, 1f, true);
+            catalog.Clips[AnimationKeys.DevicesCrushBlock] = BuildClip(content, "crushBlock", 32, 32, 1f, true);
 
             return catalog;
         }
