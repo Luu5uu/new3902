@@ -15,7 +15,7 @@ Albert: Draw and add players animation to the loader of animation system for oth
 
 Henry: 
 
-Isaac: 
+Isaac: Draw the blocks and "animate" the moving ones.
 
 Sihao: 
 
