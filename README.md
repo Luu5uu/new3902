@@ -15,7 +15,13 @@ Albert: Draw and add players animation to the loader of animation system for oth
 
 Henry: 
 
-Isaac: Draw the blocks and "animate" the moving ones.
+Flip static hair animations to dynamic (jump, dash, idleA-idleD)
+Death Animation
+Particle System
+
+Isaac: 
+
+Draw the blocks and "animate" the moving ones.
 
 Sihao: 
 
