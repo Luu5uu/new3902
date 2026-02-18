@@ -13,55 +13,34 @@ namespace Celeste.Animation
     {
         /// <summary>
         /// Loads the full animation catalog once during LoadContent.
-        /// Player body strips (idle, runFast, etc.) are required. Legacy *_static_hair strips are optional.
         /// </summary>
         public static AnimationCatalog LoadAll(ContentManager content)
         {
             if (content == null) throw new ArgumentNullException(nameof(content));
             var catalog = new AnimationCatalog();
 
-            // ---- Player (strips used by MaddySprite: idle, idleA, runFast, etc.) ----
-            TryAddClip(catalog, content, AnimationKeys.PlayerStandard,   "standard",  32, 32,  1f, true);
-            catalog.Clips[AnimationKeys.PlayerIdle]        = BuildClip(content, "idle",      32, 32,  0.001f, false);
-            catalog.Clips[AnimationKeys.PlayerIdleFidgetA] = BuildClip(content, "idleA",     32, 32,  6f, true);
-            catalog.Clips[AnimationKeys.PlayerRun]         = BuildClip(content, "runFast",   32, 32, 12f, true);
-            catalog.Clips[AnimationKeys.PlayerJumpFast]    = BuildClip(content, "jumpfast",  32, 32,  4f, false);
-            catalog.Clips[AnimationKeys.PlayerFallSlow]    = BuildClip(content, "fallSlow",  32, 32,  4f, true);
-            catalog.Clips[AnimationKeys.PlayerDash]        = BuildClip(content, "dash",      32, 32,  8f, false);
-            catalog.Clips[AnimationKeys.PlayerClimbUp]     = BuildClip(content, "climbup",   32, 32, 12f, true);
-            catalog.Clips[AnimationKeys.PlayerDangling]    = BuildClip(content, "dangling",  32, 32,  8f, true);
-
-            // ---- Player legacy (H): manually-drawn hair strips. Optional; add to Content as *_static_hair. ----
-            TryAddClip(catalog, content, AnimationKeys.PlayerStandardStaticHair,  "standard_static_hair",  32, 32,  1f, true);
-            TryAddClip(catalog, content, AnimationKeys.PlayerIdleStaticHair,      "idelA_static_hair",    32, 32,  8f, true);
-            TryAddClip(catalog, content, AnimationKeys.PlayerRunStaticHair,       "run_static_hair",      32, 32, 12f, true);
-            TryAddClip(catalog, content, AnimationKeys.PlayerJumpFastStaticHair, "jumpfast_static_hair", 32, 32,  4f, false);
-            TryAddClip(catalog, content, AnimationKeys.PlayerFallSlowStaticHair,  "fallSlow_static_hair", 32, 32,  4f, true);
-            TryAddClip(catalog, content, AnimationKeys.PlayerDashStaticHair,      "dash_static_hair",     32, 32,  8f, false);
-            TryAddClip(catalog, content, AnimationKeys.PlayerClimbUpStaticHair,   "climbup_static_hair",  32, 32, 12f, true);
-            TryAddClip(catalog, content, AnimationKeys.PlayerDanglingStaticHair,   "dangling_static_hair", 32, 32,  8f, true);
+            // ---- Player ----
+            catalog.Clips[AnimationKeys.PlayerStandard]    = BuildClip(content, "standard",  32, 32,  1f,     true);
+            catalog.Clips[AnimationKeys.PlayerIdle]        = BuildClip(content, "idle",       32, 32,  0.001f, false);
+            catalog.Clips[AnimationKeys.PlayerIdleFidgetA] = BuildClip(content, "idleA",      32, 32,  6f,     true);
+            catalog.Clips[AnimationKeys.PlayerRun]         = BuildClip(content, "runFast",    32, 32, 12f,     true);
+            catalog.Clips[AnimationKeys.PlayerJumpFast]    = BuildClip(content, "jumpfast",   32, 32,  4f,     false);
+            catalog.Clips[AnimationKeys.PlayerFallSlow]    = BuildClip(content, "fallSlow",   32, 32,  4f,     true);
+            catalog.Clips[AnimationKeys.PlayerDash]        = BuildClip(content, "dash",       32, 32,  8f,     false);
+            catalog.Clips[AnimationKeys.PlayerClimbUp]     = BuildClip(content, "climbup",    32, 32, 12f,     true);
+            catalog.Clips[AnimationKeys.PlayerDangling]    = BuildClip(content, "dangling",   32, 32,  8f,     true);
 
             // ---- Items ----
             catalog.Clips[AnimationKeys.ItemNormalStaw] = BuildClip(content, "normalStaw", 32, 32, 12f, true);
             catalog.Clips[AnimationKeys.ItemFlyStaw]    = BuildClip(content, "flyStaw",    40, 40, 12f, true);
+            catalog.Clips[AnimationKeys.ItemCrystal]    = BuildClip(content, "crystal",    20, 20, 12f, true);
+
+            // ---- Devices ----
+            catalog.Clips[AnimationKeys.DevicesSpring]     = BuildClip(content, "spring",           16, 16,  8f, true);
+            catalog.Clips[AnimationKeys.DevicesMoveBlock]  = BuildClip(content, "moveBlock",         24, 24,  1f, true);
+            catalog.Clips[AnimationKeys.DevicesCrushBlock] = BuildClip(content, "crushBlock",        32, 32,  1f, true);
 
             return catalog;
-        }
-
-        /// <summary>
-        /// Tries to load a clip and add it to the catalog. If the asset is missing, the clip is not added.
-        /// </summary>
-        private static void TryAddClip(AnimationCatalog catalog, ContentManager content,
-            string key, string assetName, int frameWidth, int frameHeight, float fps, bool loop)
-        {
-            try
-            {
-                catalog.Clips[key] = BuildClip(content, assetName, frameWidth, frameHeight, fps, loop);
-            }
-            catch (ContentLoadException)
-            {
-                // Asset not in Content; legacy (H) will have fewer or no animations until *_static_hair strips are added.
-            }
         }
 
         /// <summary>

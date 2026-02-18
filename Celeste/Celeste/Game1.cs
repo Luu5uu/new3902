@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Celeste.Animation;
+using Celeste.CollectableItems;
 using Celeste.Sprites;
 
 namespace Celeste
@@ -14,16 +15,22 @@ namespace Celeste
 
         private AnimationCatalog _catalog;
         private MaddySprite _maddy;
-        private PlayerAnimations _playerAnims;  // legacy (press H to compare)
-        private bool _useComposite = true;
 
         // Position = feet (center-bottom origin, matches Celeste's Justify=(0.5,1.0)).
         private Vector2 _playerPos = new Vector2(232, 264);
         private float _moveSpeed = 150f;
         private bool _faceLeft = false;
 
+        // Item animations
+        private ItemAnimation _normalStawAnim;
+        private ItemAnimation _flyStawAnim;
+        private ItemAnimation _crystalAnim;
+        private Vector2 _normalPos  = new Vector2(120f, 120f);
+        private Vector2 _flyPos     = new Vector2(220f, 120f);
+        private Vector2 _crystalPos = new Vector2(340f, 120f);
+
         // Key debounce
-        private bool _hWasDown, _gWasDown, _fWasDown;
+        private bool _gWasDown, _fWasDown;
         private bool _useIdleA = false;
 
         // Debug overlay (G)
@@ -52,8 +59,10 @@ namespace Celeste
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _catalog = AnimationLoader.LoadAll(Content);
             _maddy = MaddySprite.Build(Content, _catalog, GraphicsDevice);
-            _playerAnims = PlayerAnimations.Build(_catalog);
-            // TODO: Re-add items once ItemAnimations is rebuilt.
+
+            _normalStawAnim = ItemAnimationFactory.CreateNormalStaw(_catalog);
+            _flyStawAnim    = ItemAnimationFactory.CreateFlyStaw(_catalog);
+            _crystalAnim    = ItemAnimationFactory.CreateCrystal(_catalog);
 
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
@@ -68,17 +77,20 @@ namespace Celeste
             var kb = Keyboard.GetState();
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // H: composite vs legacy toggle
-            bool hDown = kb.IsKeyDown(Keys.H);
-            if (hDown && !_hWasDown) _useComposite = !_useComposite;
-            _hWasDown = hDown;
-
-            // G: debug overlay
+            // G: debug overlay (closing resets nudge so stored offsets drive the hair)
             bool gDown = kb.IsKeyDown(Keys.G);
-            if (gDown && !_gWasDown) _showDebug = !_showDebug;
+            if (gDown && !_gWasDown)
+            {
+                _showDebug = !_showDebug;
+                if (!_showDebug)
+                {
+                    _maddy.DebugNudge = Vector2.Zero;
+                    if (_maddy.DebugPaused) _maddy.DebugPauseToggle();
+                }
+            }
             _gWasDown = gDown;
 
-            // F: idle vs idleA
+            // F: idle vs idleA toggle
             bool fDown = kb.IsKeyDown(Keys.F);
             if (fDown && !_fWasDown)
             {
@@ -88,7 +100,7 @@ namespace Celeste
             _fWasDown = fDown;
 
             // --- Debug controls (only when G overlay is on) ---
-            if (_showDebug && _useComposite)
+            if (_showDebug)
             {
                 bool cDown = kb.IsKeyDown(Keys.C);
                 if (cDown && !_cWasDown) _showCrosshair = !_showCrosshair;
@@ -142,39 +154,41 @@ namespace Celeste
                 }
             }
 
+            bool debugPaused = _showDebug && _maddy.DebugPaused;
             bool isMoving = false;
-            bool debugPaused = _showDebug && _useComposite && _maddy.DebugPaused;
 
             if (!debugPaused && kb.IsKeyDown(Keys.A))
             {
                 _playerPos.X -= _moveSpeed * dt;
                 _faceLeft = true;
-                _maddy.Run(); _playerAnims.Run();
+                _maddy.Run();
                 isMoving = true;
             }
             if (!debugPaused && kb.IsKeyDown(Keys.D))
             {
                 _playerPos.X += _moveSpeed * dt;
                 _faceLeft = false;
-                _maddy.Run(); _playerAnims.Run();
+                _maddy.Run();
                 isMoving = true;
             }
             if (!debugPaused && kb.IsKeyDown(Keys.T))
             {
                 _faceLeft = false;
-                _maddy.ClimbUp(); _playerAnims.ClimbUp();
+                _maddy.ClimbUp();
                 isMoving = true;
             }
 
             if (!isMoving && !debugPaused)
             {
                 if (_useIdleA) _maddy.IdleA(); else _maddy.Idle();
-                _playerAnims.Idle();
             }
 
             _maddy.SetPosition(_playerPos, scale: 2f, faceLeft: _faceLeft);
             _maddy.Update(gameTime);
-            _playerAnims.Update(gameTime);
+
+            _normalStawAnim.Update(gameTime);
+            _flyStawAnim.Update(gameTime);
+            _crystalAnim.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -194,16 +208,14 @@ namespace Celeste
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
 
-            if (_useComposite || !_playerAnims.IsUsable)
-                _maddy.Draw(_spriteBatch, _playerPos, Color.White, scale: 2f, faceLeft: _faceLeft);
-            else
-            {
-                Vector2 legacyPos = _playerPos - new Vector2(16 * 2f, 32 * 2f);
-                _playerAnims.Draw(_spriteBatch, legacyPos, Color.White, scale: 2f, faceLeft: _faceLeft);
-            }
+            _maddy.Draw(_spriteBatch, _playerPos, Color.White, scale: 2f, faceLeft: _faceLeft);
+
+            _normalStawAnim.Draw(_spriteBatch, _normalPos, scale: 2f);
+            _flyStawAnim.Draw(_spriteBatch, _flyPos, scale: 2f);
+            _crystalAnim.Draw(_spriteBatch, _crystalPos, scale: 2f);
 
             // --- Debug overlay ---
-            if (_showDebug && _useComposite)
+            if (_showDebug)
             {
                 Vector2 anchor = _maddy.LastHairAnchor;
 
@@ -233,8 +245,6 @@ namespace Celeste
                     _debugLastAnim = anim;
                 }
             }
-            else if (_showDebug)
-                Window.Title = "Debug: switch to composite mode (H)";
             else
                 Window.Title = "Celeste";
 

@@ -32,7 +32,7 @@ namespace Celeste.Animation
         public void SetState(TState state, bool restart = false)
         {
             if (!_animations.TryGetValue(state, out AutoAnimation next))
-                return; // State not registered (e.g. legacy has no *_static_hair clip for this state).
+                return; // State not registered.
 
             if (!_hasState)
             {
