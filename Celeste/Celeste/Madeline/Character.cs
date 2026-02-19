@@ -31,8 +31,8 @@ namespace Celeste.Character
         public bool FaceLeft;
         public float ground;
 
-        // Horizontal movement speed
-        public float velocity = 100f;
+        // Horizontal movement speed (tuned for visible hair lag at 60fps)
+        public float velocity = 200f;
 
         // Jump / fall
         public float airSpeed  = 200f;
