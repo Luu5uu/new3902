@@ -4,14 +4,14 @@ namespace Celeste.MadelineStates
 {
     public class jumpState : IMadelineState
     {
-        public void setState(Madeline m)
+        public void SetState(Madeline m)
         {
             m.velocityY = -m.jumpSpeed;
             m.onGround  = false;
             m.Maddy.JumpFast();
         }
 
-        public void update(Madeline m, float dt)
+        public void Update(Madeline m, float dt)
         {
             if (m.dashPressed && m.canDash)
             {
@@ -28,6 +28,6 @@ namespace Celeste.MadelineStates
             else if (x > 0f) m.FaceLeft = false;
         }
 
-        public void exit(Madeline m) { }
+        public void Exit(Madeline m) { }
     }
 }

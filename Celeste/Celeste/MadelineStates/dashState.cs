@@ -10,7 +10,7 @@ namespace Celeste.MadelineStates
         private float _timeLeft;
         private float _dashDir;
 
-        public void setState(Madeline m)
+        public void SetState(Madeline m)
         {
             m.Maddy.Dash();
             m.isDashing = true;
@@ -27,7 +27,7 @@ namespace Celeste.MadelineStates
             m.FaceLeft = _dashDir < 0f;
         }
 
-        public void update(Madeline m, float dt)
+        public void Update(Madeline m, float dt)
         {
             m.position.X += _dashDir * m.velocity * DashSpeedMul * dt;
 
@@ -41,6 +41,6 @@ namespace Celeste.MadelineStates
             }
         }
 
-        public void exit(Madeline m) { }
+        public void Exit(Madeline m) { }
     }
 }

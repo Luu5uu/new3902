@@ -18,14 +18,14 @@ namespace Celeste.MadelineStates
         private float _idleTimer  = 0f;  // time standing still before next fidget
         private float _fidgetTimer = -1f; // countdown for current fidget; -1 = not playing
 
-        public void setState(Madeline m)
+        public void SetState(Madeline m)
         {
             _idleTimer   = 0f;
             _fidgetTimer = -1f;
             m.Maddy.Idle();
         }
 
-        public void update(Madeline m, float dt)
+        public void Update(Madeline m, float dt)
         {
             // --- Idle fidget cycling ---
             if (_fidgetTimer >= 0f)
@@ -56,7 +56,7 @@ namespace Celeste.MadelineStates
             if (m.moveX != 0f)                     { m.changeState(m.runState);  return; }
         }
 
-        public void exit(Madeline m)
+        public void Exit(Madeline m)
         {
             _idleTimer   = 0f;
             _fidgetTimer = -1f;

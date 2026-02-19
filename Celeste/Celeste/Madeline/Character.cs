@@ -1,14 +1,16 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Celeste.Animation;
+using Celeste.Input;
 using Celeste.MadelineStates;
 using Celeste.Sprites;
 
+using static Celeste.GameConstants;
+
 namespace Celeste.Character
 {
-    public class Madeline
+    public class Madeline : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable
     {
         public MaddySprite Maddy { get; private set; }
 
@@ -20,8 +22,7 @@ namespace Celeste.Character
         public IMadelineState fallState;
         public IMadelineState dashState;
 
-        // Input (read each frame by setMovX)
-        KeyboardState _prev;
+        // Set each frame by input layer via SetMovementCommand; consumed in Update.
         public bool jumpPressed;
         public bool dashPressed;
         public float moveX;
@@ -59,29 +60,28 @@ namespace Celeste.Character
             dashState  = new dashState();
 
             _state = new standState();
-            _state.setState(this);
+            _state.SetState(this);
         }
 
         public void changeState(IMadelineState next)
         {
             _state = next;
-            _state.setState(this);
+            _state.SetState(this);
         }
 
-        public void update(GameTime gameTime)
+        // Called by input layer each frame before Update.
+        public void SetMovementCommand(PlayerCommand cmd)
+        {
+            moveX = cmd.MoveX;
+            jumpPressed = cmd.JumpPressed;
+            dashPressed = cmd.DashPressed;
+        }
+
+        public void Update(GameTime gameTime)
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var kb = Keyboard.GetState();
-            moveX = 0f;
-            if (kb.IsKeyDown(Keys.D)) moveX += 1f;
-            else if (kb.IsKeyDown(Keys.A)) moveX -= 1f;
-
-            jumpPressed = kb.IsKeyDown(Keys.Space) && !_prev.IsKeyDown(Keys.Space);
-            dashPressed = kb.IsKeyDown(Keys.Enter)  && !_prev.IsKeyDown(Keys.Enter);
-            _prev = kb;
-
-            _state.update(this, dt);
+            _state.Update(this, dt);
 
             // Gravity & vertical position
             if (!isDashing)
@@ -104,13 +104,13 @@ namespace Celeste.Character
 
             jumpPressed = false;
 
-            Maddy.SetPosition(position, scale: 2f, faceLeft: FaceLeft);
+            Maddy.SetPosition(position, scale: DefaultScale, faceLeft: FaceLeft);
             Maddy.Update(gameTime);
         }
 
-        public void draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch)
         {
-            Maddy.Draw(spriteBatch, position, Color.White, scale: 2f, faceLeft: FaceLeft);
+            Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
         }
     }
 }

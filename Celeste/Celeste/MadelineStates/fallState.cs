@@ -4,12 +4,12 @@ namespace Celeste.MadelineStates
 {
     public class fallState : IMadelineState
     {
-        public void setState(Madeline m)
+        public void SetState(Madeline m)
         {
             m.Maddy.FallSlow();
         }
 
-        public void update(Madeline m, float dt)
+        public void Update(Madeline m, float dt)
         {
             if (m.dashPressed && m.canDash)
             {
@@ -26,6 +26,6 @@ namespace Celeste.MadelineStates
             if (m.onGround) m.changeState(m.standState);
         }
 
-        public void exit(Madeline m) { }
+        public void Exit(Madeline m) { }
     }
 }

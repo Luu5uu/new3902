@@ -5,12 +5,8 @@ using Celeste.Animation;
 
 namespace Celeste.CollectableItems
 {
-    /// <summary>
-    /// Renderable animation wrapper for items: owns clip + animator.
-    /// No gameplay logic (no collisions, no collect state).
-    /// </summary>
-    /// <author> Albert Liu </author>
-    public sealed class ItemAnimation
+    // Item animation: clip + animator. IDrawable/IUpdateable; set Position/Scale or use Draw(sb, pos, scale).
+    public sealed class ItemAnimation : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable
     {
         private readonly AnimationClip _clip;
         private readonly ItemAnimator _animator;
@@ -23,36 +19,26 @@ namespace Celeste.CollectableItems
 
         public AnimationClip Clip => _clip;
 
+        public Vector2 Position { get; set; }
+        public float Scale { get; set; } = 1f;
+
         public void Reset() => _animator.Reset();
 
         public void Update(GameTime gameTime) => _animator.Update(gameTime);
 
-        /// <summary>
-        /// Draw at a position with optional scale & sprite effects.
-        /// Caller can decide world transform; this method stays minimal.
-        /// </summary>
-        public void Draw(
-            SpriteBatch spriteBatch,
-            Vector2 position,
-            float scale = 1f,
-            SpriteEffects effects = SpriteEffects.None,
-            float layerDepth = 0f)
+        public void Draw(SpriteBatch spriteBatch)
         {
             if (spriteBatch == null) throw new ArgumentNullException(nameof(spriteBatch));
+            Draw(spriteBatch, Position, Scale);
+        }
 
+        // Draw at position/scale without setting Position/Scale.
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, float scale = 1f,
+            SpriteEffects effects = SpriteEffects.None, float layerDepth = 0f)
+        {
+            if (spriteBatch == null) throw new ArgumentNullException(nameof(spriteBatch));
             Rectangle src = _clip.GetSourceRect(_animator.FrameIndex);
-
-            spriteBatch.Draw(
-                _clip.Texture,
-                position,
-                src,
-                Color.White,
-                rotation: 0f,
-                origin: Vector2.Zero,
-                scale: scale,
-                effects: effects,
-                layerDepth: layerDepth
-            );
+            spriteBatch.Draw(_clip.Texture, position, src, Color.White, 0f, Vector2.Zero, scale, effects, layerDepth);
         }
     }
 }
