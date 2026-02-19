@@ -1,148 +1,116 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Celeste.Animation;
 using Celeste.MadelineStates;
-using Microsoft.Xna.Framework.Input;
+using Celeste.Sprites;
 
-
-// // This file represents the object of the character itself.
-// // So, it should include all general elements about the character such as its current posion, velocity, side it faces to etc..
 namespace Celeste.Character
 {
     public class Madeline
     {
-        // Catalog is used to load all necessary textures
-        public AnimationCatalog _anima;
-        public AnimationPlayer _player = new AnimationPlayer();
+        public MaddySprite Maddy { get; private set; }
+
+        // State machine
         public IMadelineState _state;
-
-        // Keyboard settings
-        KeyboardState prev;
-        public Boolean jumpPressed;
-        public Boolean dashPressed;
-
-
-        // Initialize all states
         public IMadelineState standState;
         public IMadelineState runState;
         public IMadelineState jumpState;
         public IMadelineState fallState;
         public IMadelineState dashState;
 
-        // Settings for horizontal movements
-        public float ground;
-        public Vector2 position;
+        // Input (read each frame by setMovX)
+        KeyboardState _prev;
+        public bool jumpPressed;
+        public bool dashPressed;
         public float moveX;
-        public float velocity = 100;
-        public SpriteEffects effect = SpriteEffects.None;
 
-        // Set values for jump
-        public float airSpeed = 200f;
+        // Position & facing
+        public Vector2 position;
+        public bool FaceLeft;
+        public float ground;
+
+        // Horizontal movement speed
+        public float velocity = 100f;
+
+        // Jump / fall
+        public float airSpeed  = 200f;
         public float velocityY;
         public float jumpSpeed = 15f;
-        public float gravity = 60f;
-        public Boolean onGround;
-        
-        //Set values for dash
-        public Boolean isDashing;
-        public Boolean canDash = true;
+        public float gravity   = 60f;
+        public bool  onGround;
 
-        public Madeline(AnimationCatalog anima, Vector2 startPos)
+        // Dash
+        public bool isDashing;
+        public bool canDash = true;
+
+        public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
-            _anima = anima;
+            Maddy    = MaddySprite.Build(content, catalog);
             position = startPos;
-            ground = position.Y;
+            ground   = startPos.Y;
             onGround = true;
 
             standState = new standState();
-            runState = new runState();
-            jumpState = new jumpState();
-            fallState = new fallState();
-            dashState = new dashState();
+            runState   = new runState();
+            jumpState  = new jumpState();
+            fallState  = new fallState();
+            dashState  = new dashState();
 
-            // Initial state
             _state = new standState();
             _state.setState(this);
         }
 
-        // Change state
-        public void changeState(IMadelineState nextState) 
+        public void changeState(IMadelineState next)
         {
-            _state = nextState;
+            _state = next;
             _state.setState(this);
-
-
         }
 
-        //  Mainly for keyboard settings and readings
-        public void setMovX()
+        public void update(GameTime gameTime)
         {
-            var k = Keyboard.GetState();
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            var kb = Keyboard.GetState();
             moveX = 0f;
-            if (k.IsKeyDown(Keys.D)) moveX += 1f;
-            else if(k.IsKeyDown(Keys.A)) moveX -= 1f;
+            if (kb.IsKeyDown(Keys.D)) moveX += 1f;
+            else if (kb.IsKeyDown(Keys.A)) moveX -= 1f;
 
-            jumpPressed = k.IsKeyDown(Keys.Space) && !prev.IsKeyDown(Keys.Space);
-            dashPressed = k.IsKeyDown(Keys.Enter) && !prev.IsKeyDown(Keys.Enter);
+            jumpPressed = kb.IsKeyDown(Keys.Space) && !_prev.IsKeyDown(Keys.Space);
+            dashPressed = kb.IsKeyDown(Keys.Enter)  && !_prev.IsKeyDown(Keys.Enter);
+            _prev = kb;
 
-            prev = k;
+            _state.update(this, dt);
 
-
-
-        }
-
-        // Necessary elements for jumping and falling
-        public void physics(float dt)
-        {
-
-            //change Y-velocity and Y-position
+            // Gravity & vertical position
             if (!isDashing)
             {
-                if (!onGround)
-                {
-                    velocityY += gravity * dt;
-
-                }
+                if (!onGround) velocityY += gravity * dt;
                 position.Y += velocityY;
             }
 
-
-
-            // Whether the sprite is already on ground
-            if(position.Y>= ground) 
+            if (position.Y >= ground)
             {
                 position.Y = ground;
-                onGround = true;
-                canDash = true;
-                velocityY = 0f;
+                onGround   = true;
+                canDash    = true;
+                velocityY  = 0f;
             }
             else
             {
                 onGround = false;
             }
-        }
 
-        public void update(GameTime gameTime)
-        {
-            float dt = (float) gameTime.ElapsedGameTime.TotalSeconds;
-
-
-            setMovX();
-
-            _state.update(this, dt);
-            physics(dt);
-            
-            _player.update(dt);
             jumpPressed = false;
+
+            Maddy.SetPosition(position, scale: 2f, faceLeft: FaceLeft);
+            Maddy.Update(gameTime);
         }
 
         public void draw(SpriteBatch spriteBatch)
         {
-            _player.draw(spriteBatch, position, effect);
+            Maddy.Draw(spriteBatch, position, Color.White, scale: 2f, faceLeft: FaceLeft);
         }
-
     }
 }

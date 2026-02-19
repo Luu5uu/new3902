@@ -3,8 +3,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Celeste.Animation;
+using Celeste.Character;
 using Celeste.CollectableItems;
-using Celeste.Sprites;
 
 namespace Celeste
 {
@@ -14,12 +14,7 @@ namespace Celeste
         private SpriteBatch _spriteBatch;
 
         private AnimationCatalog _catalog;
-        private MaddySprite _maddy;
-
-        // Position = feet (center-bottom origin, matches Celeste's Justify=(0.5,1.0)).
-        private Vector2 _playerPos = new Vector2(232, 264);
-        private float _moveSpeed = 150f;
-        private bool _faceLeft = false;
+        private Madeline _player;
 
         // Item animations
         private ItemAnimation _normalStawAnim;
@@ -30,8 +25,7 @@ namespace Celeste
         private Vector2 _crystalPos = new Vector2(340f, 120f);
 
         // Key debounce
-        private bool _gWasDown, _fWasDown;
-        private bool _useIdleA = false;
+        private bool _gWasDown;
 
         // Debug overlay (G)
         private bool _showDebug = false;
@@ -58,7 +52,11 @@ namespace Celeste
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _catalog = AnimationLoader.LoadAll(Content);
-            _maddy = MaddySprite.Build(Content, _catalog, GraphicsDevice);
+
+            var startPos = new Vector2(
+                Window.ClientBounds.Width  / 2f,
+                Window.ClientBounds.Height / 2f);
+            _player = new Madeline(Content, _catalog, startPos);
 
             _normalStawAnim = ItemAnimationFactory.CreateNormalStaw(_catalog);
             _flyStawAnim    = ItemAnimationFactory.CreateFlyStaw(_catalog);
@@ -75,29 +73,19 @@ namespace Celeste
                 Exit();
 
             var kb = Keyboard.GetState();
-            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // G: debug overlay (closing resets nudge so stored offsets drive the hair)
+            // G: debug overlay (closing resets nudge and unpauses)
             bool gDown = kb.IsKeyDown(Keys.G);
             if (gDown && !_gWasDown)
             {
                 _showDebug = !_showDebug;
                 if (!_showDebug)
                 {
-                    _maddy.DebugNudge = Vector2.Zero;
-                    if (_maddy.DebugPaused) _maddy.DebugPauseToggle();
+                    _player.Maddy.DebugNudge = Vector2.Zero;
+                    if (_player.Maddy.DebugPaused) _player.Maddy.DebugPauseToggle();
                 }
             }
             _gWasDown = gDown;
-
-            // F: idle vs idleA toggle
-            bool fDown = kb.IsKeyDown(Keys.F);
-            if (fDown && !_fWasDown)
-            {
-                _useIdleA = !_useIdleA;
-                Console.WriteLine(_useIdleA ? "Idle -> IdleA" : "IdleA -> Idle");
-            }
-            _fWasDown = fDown;
 
             // --- Debug controls (only when G overlay is on) ---
             if (_showDebug)
@@ -109,82 +97,51 @@ namespace Celeste
                 bool pDown = kb.IsKeyDown(Keys.P);
                 if (pDown && !_pWasDown)
                 {
-                    _maddy.DebugPauseToggle();
-                    Console.WriteLine(_maddy.DebugPaused ? ">>> PAUSED <<<" : ">>> RESUMED <<<");
+                    _player.Maddy.DebugPauseToggle();
+                    Console.WriteLine(_player.Maddy.DebugPaused ? ">>> PAUSED <<<" : ">>> RESUMED <<<");
                 }
                 _pWasDown = pDown;
 
-                if (_maddy.DebugPaused)
+                if (_player.Maddy.DebugPaused)
                 {
-                    // Arrow keys: frame step
                     bool rDown = kb.IsKeyDown(Keys.Right);
-                    if (rDown && !_rightWasDown) { _maddy.DebugStepFrame(+1); Console.WriteLine($"  stepped -> frame {_maddy.DebugFrame}"); }
+                    if (rDown && !_rightWasDown) { _player.Maddy.DebugStepFrame(+1); Console.WriteLine($"  stepped -> frame {_player.Maddy.DebugFrame}"); }
                     _rightWasDown = rDown;
 
                     bool lDown = kb.IsKeyDown(Keys.Left);
-                    if (lDown && !_leftWasDown) { _maddy.DebugStepFrame(-1); Console.WriteLine($"  stepped -> frame {_maddy.DebugFrame}"); }
+                    if (lDown && !_leftWasDown) { _player.Maddy.DebugStepFrame(-1); Console.WriteLine($"  stepped -> frame {_player.Maddy.DebugFrame}"); }
                     _leftWasDown = lDown;
 
-                    // Tab: cycle animation
                     bool tabDown = kb.IsKeyDown(Keys.Tab);
                     bool shiftHeld = kb.IsKeyDown(Keys.LeftShift) || kb.IsKeyDown(Keys.RightShift);
                     if (tabDown && !_tabWasDown)
                     {
-                        _maddy.DebugCycleAnimation(shiftHeld ? -1 : +1);
-                        Console.WriteLine($">>> switched to: {_maddy.DebugAnimName} <<<");
+                        _player.Maddy.DebugCycleAnimation(shiftHeld ? -1 : +1);
+                        Console.WriteLine($">>> switched to: {_player.Maddy.DebugAnimName} <<<");
                     }
                     _tabWasDown = tabDown;
 
-                    // WASD: nudge delta
                     bool wN = kb.IsKeyDown(Keys.W);
-                    if (wN && !_wNudgeWasDown) { _maddy.DebugNudge += new Vector2(0, -1); PrintNudge(); }
+                    if (wN && !_wNudgeWasDown) { _player.Maddy.DebugNudge += new Vector2(0, -1); PrintNudge(); }
                     _wNudgeWasDown = wN;
 
                     bool sN = kb.IsKeyDown(Keys.S);
-                    if (sN && !_sNudgeWasDown) { _maddy.DebugNudge += new Vector2(0, 1); PrintNudge(); }
+                    if (sN && !_sNudgeWasDown) { _player.Maddy.DebugNudge += new Vector2(0, 1); PrintNudge(); }
                     _sNudgeWasDown = sN;
 
                     bool aN = kb.IsKeyDown(Keys.A);
-                    if (aN && !_aNudgeWasDown) { _maddy.DebugNudge += new Vector2(-1, 0); PrintNudge(); }
+                    if (aN && !_aNudgeWasDown) { _player.Maddy.DebugNudge += new Vector2(-1, 0); PrintNudge(); }
                     _aNudgeWasDown = aN;
 
                     bool dN = kb.IsKeyDown(Keys.D);
-                    if (dN && !_dNudgeWasDown) { _maddy.DebugNudge += new Vector2(1, 0); PrintNudge(); }
+                    if (dN && !_dNudgeWasDown) { _player.Maddy.DebugNudge += new Vector2(1, 0); PrintNudge(); }
                     _dNudgeWasDown = dN;
                 }
             }
 
-            bool debugPaused = _showDebug && _maddy.DebugPaused;
-            bool isMoving = false;
-
-            if (!debugPaused && kb.IsKeyDown(Keys.A))
-            {
-                _playerPos.X -= _moveSpeed * dt;
-                _faceLeft = true;
-                _maddy.Run();
-                isMoving = true;
-            }
-            if (!debugPaused && kb.IsKeyDown(Keys.D))
-            {
-                _playerPos.X += _moveSpeed * dt;
-                _faceLeft = false;
-                _maddy.Run();
-                isMoving = true;
-            }
-            if (!debugPaused && kb.IsKeyDown(Keys.T))
-            {
-                _faceLeft = false;
-                _maddy.ClimbUp();
-                isMoving = true;
-            }
-
-            if (!isMoving && !debugPaused)
-            {
-                if (_useIdleA) _maddy.IdleA(); else _maddy.Idle();
-            }
-
-            _maddy.SetPosition(_playerPos, scale: 2f, faceLeft: _faceLeft);
-            _maddy.Update(gameTime);
+            // Player physics + state machine (skipped while debug-paused)
+            if (!(_showDebug && _player.Maddy.DebugPaused))
+                _player.update(gameTime);
 
             _normalStawAnim.Update(gameTime);
             _flyStawAnim.Update(gameTime);
@@ -195,8 +152,10 @@ namespace Celeste
 
         private void PrintNudge()
         {
-            Vector2 s = _maddy.DebugDelta, n = _maddy.DebugNudge, e = s + n;
-            Console.WriteLine($"  [f{_maddy.DebugFrame}] stored=({s.X},{s.Y}) + nudge=({n.X},{n.Y}) => effective=({e.X},{e.Y})");
+            var s = _player.Maddy.DebugDelta;
+            var n = _player.Maddy.DebugNudge;
+            var e = s + n;
+            Console.WriteLine($"  [f{_player.Maddy.DebugFrame}] stored=({s.X},{s.Y}) + nudge=({n.X},{n.Y}) => effective=({e.X},{e.Y})");
         }
 
         protected override void Draw(GameTime gameTime)
@@ -208,7 +167,7 @@ namespace Celeste
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
 
-            _maddy.Draw(_spriteBatch, _playerPos, Color.White, scale: 2f, faceLeft: _faceLeft);
+            _player.draw(_spriteBatch);
 
             _normalStawAnim.Draw(_spriteBatch, _normalPos, scale: 2f);
             _flyStawAnim.Draw(_spriteBatch, _flyPos, scale: 2f);
@@ -217,7 +176,7 @@ namespace Celeste
             // --- Debug overlay ---
             if (_showDebug)
             {
-                Vector2 anchor = _maddy.LastHairAnchor;
+                Vector2 anchor = _player.Maddy.LastHairAnchor;
 
                 if (_showCrosshair)
                 {
@@ -225,15 +184,17 @@ namespace Celeste
                         null, Color.Lime, 0f, Vector2.Zero, new Vector2(9f, 1f), SpriteEffects.None, 0f);
                     _spriteBatch.Draw(_pixelTexture, new Vector2(anchor.X, anchor.Y - 4f),
                         null, Color.Lime, 0f, Vector2.Zero, new Vector2(1f, 9f), SpriteEffects.None, 0f);
-                    _spriteBatch.Draw(_pixelTexture, _playerPos - Vector2.One,
+                    _spriteBatch.Draw(_pixelTexture, _player.position - Vector2.One,
                         null, Color.Yellow, 0f, Vector2.Zero, 3f, SpriteEffects.None, 0f);
                 }
 
-                string dir = _maddy.DebugFaceLeft ? "L" : "R";
-                Vector2 d = _maddy.DebugDelta, n = _maddy.DebugNudge, eff = d + n;
-                int frame = _maddy.DebugFrame;
-                string anim = _maddy.DebugAnimName;
-                string pause = _maddy.DebugPaused ? " PAUSED" : "";
+                string dir   = _player.Maddy.DebugFaceLeft ? "L" : "R";
+                var d        = _player.Maddy.DebugDelta;
+                var n        = _player.Maddy.DebugNudge;
+                var eff      = d + n;
+                int frame    = _player.Maddy.DebugFrame;
+                string anim  = _player.Maddy.DebugAnimName;
+                string pause = _player.Maddy.DebugPaused ? " PAUSED" : "";
 
                 string info = $"[{anim} f{frame}] stored=({d.X},{d.Y}) nudge=({n.X},{n.Y}) eff=({eff.X},{eff.Y}) anchor=({anchor.X:F0},{anchor.Y:F0}) {dir}{pause}";
                 Window.Title = info;
@@ -242,7 +203,7 @@ namespace Celeste
                 {
                     Console.WriteLine(info);
                     _debugLastFrame = frame;
-                    _debugLastAnim = anim;
+                    _debugLastAnim  = anim;
                 }
             }
             else
