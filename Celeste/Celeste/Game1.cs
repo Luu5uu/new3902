@@ -37,7 +37,7 @@ namespace Celeste
         private bool _showCrosshair = true;
         private bool _cWasDown, _pWasDown, _rightWasDown, _leftWasDown;
         private bool _wNudgeWasDown, _sNudgeWasDown, _aNudgeWasDown, _dNudgeWasDown;
-        private bool _tabWasDown;
+        private bool _tabWasDown, _backspaceWasDown;
 
         public Game1()
         {
@@ -121,6 +121,14 @@ namespace Celeste
                     }
                     _tabWasDown = tabDown;
 
+                    bool backspaceDown = kb.IsKeyDown(Keys.Back);
+                    if (backspaceDown && !_backspaceWasDown)
+                    {
+                        _player.Maddy.DebugCycleAnimation(-1);
+                        Console.WriteLine($">>> switched to: {_player.Maddy.DebugAnimName} <<<");
+                    }
+                    _backspaceWasDown = backspaceDown;
+
                     bool wN = kb.IsKeyDown(Keys.W);
                     if (wN && !_wNudgeWasDown) { _player.Maddy.DebugNudge += new Vector2(0, -1); PrintNudge(); }
                     _wNudgeWasDown = wN;
@@ -139,9 +147,17 @@ namespace Celeste
                 }
             }
 
-            // Player physics + state machine (skipped while debug-paused)
-            if (!(_showDebug && _player.Maddy.DebugPaused))
+            // Player physics + state machine (skipped while debug-paused).
+            // Hair still updates while paused so nudge changes are visible in real time.
+            if (_showDebug && _player.Maddy.DebugPaused)
+            {
+                _player.Maddy.SetPosition(_player.position, scale: 2f, faceLeft: _player.FaceLeft);
+                _player.Maddy.Update(gameTime);
+            }
+            else
+            {
                 _player.update(gameTime);
+            }
 
             _normalStawAnim.Update(gameTime);
             _flyStawAnim.Update(gameTime);
