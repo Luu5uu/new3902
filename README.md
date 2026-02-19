@@ -36,7 +36,7 @@ In Class Code Check: Friday, Feb 20
 
 Aaron: Controller functionality 
 
-Albert: Draw and add players animation to the loader of animation system for other possible future actions with "only body"
+Albert: Do the death animation currently
 
 Henry: 
 
