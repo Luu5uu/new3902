@@ -11,6 +11,8 @@ namespace Celeste.Animation
         public const string PlayerStandard    = "Player/Standard";
         public const string PlayerIdle        = "Player/Idle";
         public const string PlayerIdleFidgetA = "Player/IdleFidgetA";
+        public const string PlayerIdleFidgetB = "Player/IdleFidgetB";
+        public const string PlayerIdleFidgetC = "Player/IdleFidgetC";
         public const string PlayerRun         = "Player/Run";
         public const string PlayerJumpFast    = "Player/JumpFast";
         public const string PlayerFallSlow    = "Player/FallSlow";

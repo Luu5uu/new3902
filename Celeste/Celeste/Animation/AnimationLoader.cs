@@ -21,8 +21,10 @@ namespace Celeste.Animation
 
             // ---- Player ----
             catalog.Clips[AnimationKeys.PlayerStandard]    = BuildClip(content, "standard",  32, 32,  1f,     true);
-            catalog.Clips[AnimationKeys.PlayerIdle]        = BuildClip(content, "idle",       32, 32,  0.001f, false);
-            catalog.Clips[AnimationKeys.PlayerIdleFidgetA] = BuildClip(content, "idleA",      32, 32,  6f,     true);
+            catalog.Clips[AnimationKeys.PlayerIdle]        = BuildClip(content, "idleD",      32, 32,  6f,     true);
+            catalog.Clips[AnimationKeys.PlayerIdleFidgetA] = BuildClip(content, "idleA",      32, 32,  6f,     false);
+            catalog.Clips[AnimationKeys.PlayerIdleFidgetB] = BuildClip(content, "idleB",      32, 32,  6f,     false);
+            catalog.Clips[AnimationKeys.PlayerIdleFidgetC] = BuildClip(content, "idleC",      32, 32,  6f,     false);
             catalog.Clips[AnimationKeys.PlayerRun]         = BuildClip(content, "runFast",    32, 32, 12f,     true);
             catalog.Clips[AnimationKeys.PlayerJumpFast]    = BuildClip(content, "jumpfast",   32, 32,  4f,     false);
             catalog.Clips[AnimationKeys.PlayerFallSlow]    = BuildClip(content, "fallSlow",   32, 32,  4f,     true);

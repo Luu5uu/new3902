@@ -1,5 +1,26 @@
 Animation Pack Usage Guide
 
+---
+
+## Debug Mode (Hair Calibration)
+
+Press **G** to toggle the debug overlay. The window title updates live with animation and anchor info.
+
+| Key | Action |
+|-----|--------|
+| G | Toggle debug overlay (closing resets hair nudge and unpauses) |
+| P | Pause / resume animation |
+| → / ← | Step one frame forward / backward (while paused) |
+| Tab | Cycle to next animation (while paused) |
+| Backspace | Cycle to previous animation (while paused) |
+| W / S / A / D | Nudge hair anchor up / down / left / right 1px (while paused) |
+| C | Toggle crosshair overlay |
+
+The lime crosshair marks the current hair anchor. The yellow dot marks the character's feet.
+Window title format: `[animName fN] stored=(x,y) nudge=(x,y) eff=(x,y) anchor=(x,y) L/R [PAUSED]`
+
+---
+
 ## Current setup (what we use)
 
 - **Default path (catalog):** Game1 loads the catalog with `AnimationLoader.LoadAll(Content)` and passes it to `MaddySprite.Build(Content, _catalog, GraphicsDevice)`. All body animations and procedural hair use this **data-driven system** (AnimationLoader + AnimationCatalog + AnimationClip + AnimationKeys).
