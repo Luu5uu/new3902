@@ -8,8 +8,10 @@ namespace Celeste.Sprites
     {
         private static readonly Dictionary<string, int[]> Frames = new()
         {
-            ["idle"]     = new[] { 0 },
+            ["idled"]    = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             ["idlea"]    = new[] { 0, 0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0 },
+            ["idleb"]    = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            ["idlec"]    = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             ["run"]      = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             ["dash"]     = new[] { 0, 0, 0, 0 },
             ["jumpfast"] = new[] { 0, 0 },

@@ -7,15 +7,47 @@ Sprint 2: Due Feb 21
 Grader CheckIn: Monday, Feb 16
 In Class Code Check: Friday, Feb 20
 
-Tasks assigned to individuals:
+---
+
+## Controls
+
+- **Move:** A / D or Left / Right arrows
+- **Jump:** Space
+- **Dash:** Enter, Z, or N
+- **Quit:** Escape (or Back on gamepad)
+- **Debug overlay (G):** G toggles; P pause, Tab/Backspace cycle animation, arrows step frame, W/S/A/D nudge hair anchor, C crosshair. See `Celeste/Animation/README.md` for full debug keys.
+
+---
+
+## Known bugs
+
+C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(7,15): error CS0234: The namespace "Celeste" does not contain a type or namespace named "Debug" (is there a missing assembly reference?)
+C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(26,17): error CS0246: The type or namespace named "DebugOverlay" could not be found (is there a missing using directive or assembly reference?) 
+Generation failed. Please fix the generation error and run again.
+
+---
+
+## Tools
+
+- **strip_builder.py** — Builds horizontal sprite strips from frame PNGs (e.g. `Madeline_Assets/Animations/player/idleD/` → `Content/idleD.png`). Requires Pillow; run via venv if system Python is externally managed.
+- **Animation system** — `Celeste/Animation/README.md` documents the catalog, loader, and debug mode.
+
+---
+
+## Tasks assigned to individuals
 
 Aaron: Controller functionality 
 
-Albert: Draw and add players animation to the loader of animation system for other possible future actions with "only body"
+Albert: Do the death animation currently
 
 Henry: 
 
+Flip static hair animations to dynamic (jump, dash, idleA-idleD)
+
+
 Isaac: 
+
+Draw the blocks and "animate" the moving ones.
 
 Sihao: 
 

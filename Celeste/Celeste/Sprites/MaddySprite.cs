@@ -13,7 +13,7 @@ namespace Celeste.Sprites
         private readonly HairRenderer _hair;
 
         private bool _faceLeft;
-        private string _currentAnimName = "idle";
+        private string _currentAnimName = "idled";
         private readonly List<(PlayerState state, string name)> _allAnims = new();
 
         public IBodySprite Body => _body;
@@ -40,6 +40,8 @@ namespace Celeste.Sprites
 
             RegisterFromClip(controller, catalog, AnimationKeys.PlayerIdle,         PlayerState.Idle,         setAsDefault: true);
             RegisterFromClip(controller, catalog, AnimationKeys.PlayerIdleFidgetA,  PlayerState.IdleFidgetA,  setAsDefault: false);
+            RegisterFromClip(controller, catalog, AnimationKeys.PlayerIdleFidgetB,  PlayerState.IdleFidgetB,  setAsDefault: false);
+            RegisterFromClip(controller, catalog, AnimationKeys.PlayerIdleFidgetC,  PlayerState.IdleFidgetC,  setAsDefault: false);
             RegisterFromClip(controller, catalog, AnimationKeys.PlayerRun,          PlayerState.Run,          setAsDefault: false);
             RegisterFromClip(controller, catalog, AnimationKeys.PlayerJumpFast,     PlayerState.JumpFast,     setAsDefault: false);
             RegisterFromClip(controller, catalog, AnimationKeys.PlayerFallSlow,       PlayerState.FallSlow,     setAsDefault: false);
@@ -53,8 +55,10 @@ namespace Celeste.Sprites
 
             var maddy = new MaddySprite(body, hair);
 
-            maddy._allAnims.Add((PlayerState.Idle, "idle"));
+            maddy._allAnims.Add((PlayerState.Idle, "idled"));
             maddy._allAnims.Add((PlayerState.IdleFidgetA, "idlea"));
+            maddy._allAnims.Add((PlayerState.IdleFidgetB, "idleb"));
+            maddy._allAnims.Add((PlayerState.IdleFidgetC, "idlec"));
             maddy._allAnims.Add((PlayerState.Run, "run"));
             maddy._allAnims.Add((PlayerState.JumpFast, "jumpfast"));
             maddy._allAnims.Add((PlayerState.FallSlow, "fallslow"));
@@ -82,8 +86,10 @@ namespace Celeste.Sprites
             _currentAnimName = animName;
         }
 
-        public void Idle(bool restart = false) => SetAnimation(PlayerState.Idle, "idle", restart);
-        public void IdleA(bool restart = false) => SetAnimation(PlayerState.IdleFidgetA, "idlea", restart);
+        public void Idle(bool restart = false)  => SetAnimation(PlayerState.Idle,        "idled", restart);
+        public void IdleA(bool restart = true)  => SetAnimation(PlayerState.IdleFidgetA, "idlea", restart);
+        public void IdleB(bool restart = true)  => SetAnimation(PlayerState.IdleFidgetB, "idleb", restart);
+        public void IdleC(bool restart = true)  => SetAnimation(PlayerState.IdleFidgetC, "idlec", restart);
         public void Run(bool restart = false) => SetAnimation(PlayerState.Run, "run", restart);
         public void JumpFast(bool restart = true) => SetAnimation(PlayerState.JumpFast, "jumpfast", restart);
         public void FallSlow(bool restart = true) => SetAnimation(PlayerState.FallSlow, "fallslow", restart);
