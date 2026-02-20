@@ -31,7 +31,7 @@ namespace Celeste.Input
                 (current.IsKeyDown(Keys.Enter) || current.IsKeyDown(Keys.Z) || current.IsKeyDown(Keys.N))
                 && !(previous.IsKeyDown(Keys.Enter) || previous.IsKeyDown(Keys.Z) || previous.IsKeyDown(Keys.N));
 
-            bool deathPressed = current.IsKeyDown(Keys.T) && !previous.IsKeyDown(Keys.T); // NEW
+            bool deathPressed = current.IsKeyDown(Keys.E) && !previous.IsKeyDown(Keys.E); // NEW
 
             return new PlayerCommand(moveX, jumpPressed, dashPressed, deathPressed);
         }
