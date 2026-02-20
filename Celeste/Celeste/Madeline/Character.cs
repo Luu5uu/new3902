@@ -25,6 +25,7 @@ namespace Celeste.Character
         public IMadelineState jumpState;
         public IMadelineState fallState;
         public IMadelineState dashState;
+        public IMadelineState dangleState;
 
         // NEW: DeathState
         public IMadelineState deathState;
@@ -54,6 +55,9 @@ namespace Celeste.Character
         public bool isDashing;
         public bool canDash = true;
 
+        // Climb / Dangle
+        public float dangleFallSpeed = 20f;
+
         // ===== DeathAnimation integration (DeathEffect already includes sprite+particles) =====
         private AnimationClip _deathClip;
         private Texture2D _deathDotTex;
@@ -71,6 +75,7 @@ namespace Celeste.Character
             jumpState = new jumpState();
             fallState = new fallState();
             dashState = new dashState();
+            dangleState = new danglingState();
 
             // NEW
             deathState = new DeathState();
