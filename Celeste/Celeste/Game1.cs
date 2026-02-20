@@ -32,6 +32,12 @@ namespace Celeste
         // NEW: particle dot texture
         private Texture2D _deathDotTex;
 
+        private ControllerLoader _controllerLoader;
+        private int _activeItemIndex = 0;
+        private int _activeBlockIndex = 0;
+        private int _totalItems = 3;
+        private int _totalBlocks; // Set based on total block types
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -81,6 +87,7 @@ namespace Celeste
 
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
+            _controllerLoader = new ControllerLoader(this);
         }
 
         protected override void Update(GameTime gameTime)
@@ -95,6 +102,8 @@ namespace Celeste
             var cmd = PlayerCommand.FromKeyboard(kb, _prevKb);
             _prevKb = kb;
             _player.SetMovementCommand(cmd);
+
+            _controllerLoader.Update();
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
             {
@@ -124,10 +133,24 @@ namespace Celeste
 
             _player.Draw(_spriteBatch);
 
-            _normalStawAnim.Draw(_spriteBatch);
-            _flyStawAnim.Draw(_spriteBatch);
-            _crystalAnim.Draw(_spriteBatch);
+            switch (_activeItemIndex)
+            {
+                case 0:
+                    _normalStawAnim.Draw(_spriteBatch);
+                    break;
+                case 1:
+                    _flyStawAnim.Draw(_spriteBatch);
+                    break;
+                case 2:
+                    _crystalAnim.Draw(_spriteBatch);
+                    break;
+            }
 
+            /* switch (_activeBlockIndex)
+            {
+                // Need block sprites and drawing logic to implement 
+            }
+            */
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);
             else
@@ -135,6 +158,22 @@ namespace Celeste
 
             _spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        public void CycleActiveItem(int direction)
+        {
+            _activeItemIndex += direction;
+
+            if (_activeItemIndex < 0) _activeItemIndex = _totalItems -1;
+            if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
+        }
+
+        public void CycleActiveBlock(int direction)
+        {
+            _activeBlockIndex += direction;
+
+            if (_activeBlockIndex < 0) _activeBlockIndex = _totalBlocks -1;
+            if (_activeBlockIndex >= _totalBlocks) _activeBlockIndex = 0;
         }
     }
 }

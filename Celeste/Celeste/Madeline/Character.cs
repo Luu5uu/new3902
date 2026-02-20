@@ -143,7 +143,7 @@ namespace Celeste.Character
             if (position.Y >= ground)
             {
                 position.Y = ground;
-                onGround  = true;
+                onGround = true;
                 velocityY = 0f;
                 if (!isDashing)
                 {
