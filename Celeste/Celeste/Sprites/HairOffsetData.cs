@@ -10,7 +10,7 @@ namespace Celeste.Sprites
     {
         private static readonly Dictionary<string, Vector2[]> Deltas = new()
         {
-            // idleD: 9 frames, default standing. Calibrated.
+            // idleD: 9 frames, default standing
             ["idled"] = new[]
             {
                 new Vector2(0, 0),  // f0
@@ -24,7 +24,7 @@ namespace Celeste.Sprites
                 new Vector2(0, 1),  // f8
             },
 
-            // idleA: 12 frames, head-turn fidget. Hand-tuned.
+            // idleA: 12 frames, head-turn fidget
             ["idlea"] = new[]
             {
                 new Vector2( 0, 0),  // f0
@@ -41,7 +41,7 @@ namespace Celeste.Sprites
                 new Vector2( 0, 1),  // f11
             },
 
-            // run: 12 frames. Y tracks body bob (+1 dip, -1 rise). Hand-tuned.
+            // run: 12 frames. Y tracks body bob (+1 dip, -1 rise)
             ["run"] = new[]
             {
                 new Vector2(1, 0),  // f0
@@ -64,20 +64,20 @@ namespace Celeste.Sprites
                 new Vector2(2, 1), new Vector2(2, 2)
             },
 
-            // jumpfast: 2 frames. Calibrated.
+            // jumpfast: 2 frames
             ["jumpfast"] = new[] { new Vector2(1, -1), new Vector2(1, -1) },
 
-            // fallslow: 2 frames. Calibrated.
+            // fallslow: 2 frames
             ["fallslow"] = new[] { new Vector2(1, 0), new Vector2(0, 0) },
 
-            // climbup: 6 frames. Calibrated.
+            // climbup: 6 frames
             ["climbup"] = new[]
             {
                 new Vector2( 0, 0), new Vector2( 0, 0), new Vector2( 0, 0),  // f0–f2
                 new Vector2( 0, 0), new Vector2(-1, 0), new Vector2(-1, 0)   // f3–f5
             },
 
-            // dangling: 10 frames. Calibrated.
+            // dangling: 10 frames
             ["dangling"] = new[]
             {
                 new Vector2( 0, 0), new Vector2( 0, 0), new Vector2( 0, 0), new Vector2( 0, 0),  // f0–f3
@@ -85,7 +85,7 @@ namespace Celeste.Sprites
                 new Vector2(-1, 0), new Vector2(-1, 0)                                           // f8–f9
             },
 
-            // idleB: 24 frames. Calibrated (debug wrapped f23→f0).
+            // idleB: 24 frames
             ["idleb"] = new[]
             {
                 new Vector2( 0, 0),  // f0
@@ -114,7 +114,7 @@ namespace Celeste.Sprites
                 new Vector2( 0, 1),  // f23
             },
 
-            // idleC: 12 frames. Calibrated (debug wrapped f11→f0).
+            // idleC: 12 frames
             ["idlec"] = new[]
             {
                 new Vector2(-1, 0),  // f0

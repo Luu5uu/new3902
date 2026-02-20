@@ -12,5 +12,7 @@ namespace Celeste.Sprites
         void Update(GameTime gameTime);
         void Draw(SpriteBatch spriteBatch, Vector2 position, Color color,
                   float scale = 1f, bool faceLeft = false);
+        void OnDashUsed();
+        void OnDashRefill();
     }
 }

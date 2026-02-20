@@ -32,7 +32,7 @@ namespace Celeste.Character
         public bool FaceLeft;
         public float ground;
 
-        // Horizontal movement speed (tuned for visible hair lag at 60fps)
+        // Horizontal movement speed 
         public float velocity = 200f;
 
         // Jump / fall
@@ -93,9 +93,13 @@ namespace Celeste.Character
             if (position.Y >= ground)
             {
                 position.Y = ground;
-                onGround   = true;
-                canDash    = true;
-                velocityY  = 0f;
+                onGround  = true;
+                velocityY = 0f;
+                if (!isDashing)
+                {
+                    Maddy.OnDashRefill(); // MaddySprite ignores this until blue display timer expires
+                    canDash = true;
+                }
             }
             else
             {
