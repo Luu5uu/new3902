@@ -154,7 +154,7 @@ namespace Celeste.Sprites
             DebugNudge = Vector2.Zero;
         }
 
-        // --- Dash hair color (Celeste-accurate) ---
+        // --- Dash hair color  ---
 
         // Call when dash activates: hair immediately turns blue.
         public void OnDashUsed()
@@ -183,7 +183,6 @@ namespace Celeste.Sprites
 
         // --- Update: body animation + hair anchor calculation ---
 
-        // Native pixels from feet to crown. Matches Celeste's PlayerHair offset.
         private const float BaseHeadY = 12f;
 
         public void Update(GameTime gameTime)
