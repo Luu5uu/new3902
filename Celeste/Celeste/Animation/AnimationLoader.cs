@@ -31,6 +31,7 @@ namespace Celeste.Animation
             catalog.Clips[AnimationKeys.PlayerDash]        = BuildClip(content, "dash",       32, 32,  8f,     false);
             catalog.Clips[AnimationKeys.PlayerClimbUp]     = BuildClip(content, "climbup",    32, 32, 12f,     true);
             catalog.Clips[AnimationKeys.PlayerDangling]    = BuildClip(content, "dangling",   32, 32,  8f,     true);
+            catalog.Clips[AnimationKeys.PlayerDeath]    = BuildClip(content, "death",         32, 32,  8f,     false);
 
             // ---- Items ----
             catalog.Clips[AnimationKeys.ItemNormalStaw] = BuildClip(content, "normalStaw", 32, 32, 12f, true);

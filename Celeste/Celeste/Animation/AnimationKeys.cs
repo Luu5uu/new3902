@@ -19,6 +19,7 @@ namespace Celeste.Animation
         public const string PlayerDash        = "Player/Dash";
         public const string PlayerClimbUp     = "Player/ClimbUp";
         public const string PlayerDangling    = "Player/Dangling";
+        public const string PlayerDeath   = "Player/Death";
 
         // Items
         public const string ItemNormalStaw = "Item/NormalStaw";
