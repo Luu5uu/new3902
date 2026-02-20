@@ -1,10 +1,13 @@
 ## Completed
-Added Controller Interface and implemented concrete classes for the Keyboard and Mouse controllers. Began work on the controller loader that loads the controllers during the LoadContent() class in Game1.
+-Added Controller Interface and implemented concrete classes for the Keyboard and Mouse controllers. 
+-Added the controller loader that loads the controllers during the LoadContent() class in Game1.
+-Added Command inteface and classes in order to handle various inputs
+-Adjusted Game1 to reflect changes with the new Scripts
 
 ## To-Do
--Need Command Interface and Concrete classes to implement different commands. 
--Need to finish Controller Loader
--Need to map keys to different actions, ie. movement and switching between sprite scenes (Sprint 2 requirement)
+-Need to implement cycling between block states
+-Integrate the PlayerCommand script into the Controller and Command scripts
+-Complete mouse controller for eventual use
 
 ## Explanation
-Keyboard controller and mouse controller and implemented by using Dictionarys (key and position of mouse on screen, Command). Every key can be mapped for different functions, and mouse functions can also be mapped based on position on the screen and whether the input is left or right click. 
+Keyboard controllerare  implemented by using Dictionarys (key, Command). Every key can be mapped for different functions. Command script handles the to-do of pressing keys, while controller handles the registering (at a high level, controller loader actually assigns keys to in game inputs.)
