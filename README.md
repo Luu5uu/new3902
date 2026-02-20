@@ -14,6 +14,7 @@ In Class Code Check: Friday, Feb 20
 - **Move:** A / D or Left / Right arrows
 - **Jump:** Space
 - **Dash:** Enter, Z, or N
+- **Death:** T   (For Test & Show only)
 - **Quit:** Escape (or Back on gamepad) or Q
 - **Restart:** R
 - **Cycle Block Forward & Backward:** Y & T
@@ -37,7 +38,7 @@ In Class Code Check: Friday, Feb 20
 
 Aaron: Controller functionality and Command functionality to seperate controls from specific objects.
 
-Albert: Do the death animation currently
+Albert: Finish the death animation 
 
 Henry: 
 
