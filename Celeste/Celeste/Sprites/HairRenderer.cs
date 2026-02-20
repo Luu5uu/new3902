@@ -5,16 +5,15 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Celeste.Sprites
 {
-    // Procedural hair using the full Celeste PlayerHair algorithm:
     // node 0 pinned to head, nodes 1+ trail with gravity/facing bias,
     // hard 3px distance constraint, bangs overlay at node 0,
     // 1px black outline pass before colored fill pass.
     public sealed class HairRenderer : IHairSprite
     {
-        private const int DefaultNodeCount = 5;
-        private const float MaxNodeDistNative = 3f;      // PlayerHair.cs clamp
-        private const float StepApproachNative = 64f;     // PlayerHair.cs approach speed
-        private static readonly Vector2 StepPerSegNative = new(0f, 2f);
+        private const int DefaultNodeCount = 4;            
+        private const float MaxNodeDistNative = 3f;        // PlayerHair.cs clamp
+        private const float StepApproachNative = 64f;      // PlayerHair.cs approach speed
+        private static readonly Vector2 StepPerSegNative = new(0f, 2f); // matches Celeste PlayerHair default
         private const float StepFacingNative = 0.5f;
 
         public float DrawScale { get; set; } = 1f;

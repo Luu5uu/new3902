@@ -13,6 +13,7 @@ namespace Celeste.MadelineStates
         public void SetState(Madeline m)
         {
             m.Maddy.Dash();
+            m.Maddy.OnDashUsed();
             m.isDashing = true;
             m.canDash   = false;
             m.velocityY = 0f;
