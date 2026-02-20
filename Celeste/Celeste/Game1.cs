@@ -63,7 +63,7 @@ namespace Celeste
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
 
-           // _debugOverlay = new DebugOverlay();
+            _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
             _controllerLoader = new ControllerLoader(this);
         }
