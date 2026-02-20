@@ -21,7 +21,9 @@ In Class Code Check: Friday, Feb 20
 
 ## Known bugs
 
-(Add any known issues here.)
+C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(7,15): error CS0234: The namespace "Celeste" does not contain a type or namespace named "Debug" (is there a missing assembly reference?)
+C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(26,17): error CS0246: The type or namespace named "DebugOverlay" could not be found (is there a missing using directive or assembly reference?) 
+Generation failed. Please fix the generation error and run again.
 
 ---
 
@@ -36,7 +38,7 @@ In Class Code Check: Friday, Feb 20
 
 Aaron: Controller functionality 
 
-Albert: Draw and add players animation to the loader of animation system for other possible future actions with "only body"
+Albert: Do the death animation currently
 
 Henry: 
 
