@@ -1,11 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
 using Celeste.Animation;
 using Celeste.Character;
 using Celeste.CollectableItems;
 using Celeste.DevTools;
 using Celeste.Input;
+
+using Celeste.DeathAnimation.Particles;
 
 namespace Celeste
 {
@@ -24,6 +28,9 @@ namespace Celeste
         private KeyboardState _prevKb;
         private Texture2D _pixelTexture;
         private DebugOverlay _debugOverlay;
+
+        // NEW: particle dot texture
+        private Texture2D _deathDotTex;
 
         private ControllerLoader _controllerLoader;
         private int _activeItemIndex = 0;
@@ -46,13 +53,28 @@ namespace Celeste
             _catalog = AnimationLoader.LoadAll(Content);
 
             var startPos = new Vector2(
-                Window.ClientBounds.Width  / 2f,
+                Window.ClientBounds.Width / 2f,
                 Window.ClientBounds.Height / 2f);
+
             _player = new Madeline(Content, _catalog, startPos);
 
+            // ===== Inject DeathAnimation resources (no constructor change) =====
+            _deathDotTex = ProceduralParticleTexture.CreateHardDot(GraphicsDevice, size: 5);
+
+            // Use the SAME key as AnimationLoader registered.
+            const string DeathClipKey = AnimationKeys.PlayerDeath; // "Player/Death"
+
+            if (!_catalog.Clips.TryGetValue(DeathClipKey, out var deathClip))
+                throw new ContentLoadException(
+                    $"Death clip key '{DeathClipKey}' not found in AnimationCatalog. " +
+                    $"Available keys: {string.Join(", ", _catalog.Clips.Keys)}");
+
+            _player.ConfigureDeathAnimation(deathClip, _deathDotTex);
+
+            // ===== Items =====
             _normalStawAnim = ItemAnimationFactory.CreateNormalStaw(_catalog);
-            _flyStawAnim    = ItemAnimationFactory.CreateFlyStaw(_catalog);
-            _crystalAnim    = ItemAnimationFactory.CreateCrystal(_catalog);
+            _flyStawAnim = ItemAnimationFactory.CreateFlyStaw(_catalog);
+            _crystalAnim = ItemAnimationFactory.CreateCrystal(_catalog);
             _normalStawAnim.Position = new Vector2(GameConstants.ItemNormalStawX, GameConstants.ItemRowY);
             _normalStawAnim.Scale = GameConstants.DefaultScale;
             _flyStawAnim.Position = new Vector2(GameConstants.ItemFlyStawX, GameConstants.ItemRowY);

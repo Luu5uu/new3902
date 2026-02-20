@@ -1,10 +1,14 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+
 using Celeste.Animation;
 using Celeste.Input;
 using Celeste.MadelineStates;
 using Celeste.Sprites;
+
+using Celeste.DeathAnimation;
+using Celeste.DeathAnimation.Particles;
 
 using static Celeste.GameConstants;
 
@@ -22,9 +26,13 @@ namespace Celeste.Character
         public IMadelineState fallState;
         public IMadelineState dashState;
 
+        // NEW: DeathState
+        public IMadelineState deathState;
+
         // Set each frame by input layer via SetMovementCommand; consumed in Update.
         public bool jumpPressed;
         public bool dashPressed;
+        public bool deathPressed; // NEW
         public float moveX;
 
         // Position & facing
@@ -36,31 +44,49 @@ namespace Celeste.Character
         public float velocity = 200f;
 
         // Jump / fall
-        public float airSpeed  = 200f;
+        public float airSpeed = 200f;
         public float velocityY;
         public float jumpSpeed = 15f;
-        public float gravity   = 60f;
-        public bool  onGround;
+        public float gravity = 60f;
+        public bool onGround;
 
         // Dash
         public bool isDashing;
         public bool canDash = true;
 
+        // ===== DeathAnimation integration (DeathEffect already includes sprite+particles) =====
+        private AnimationClip _deathClip;
+        private Texture2D _deathDotTex;
+        private DeathEffect _deathEffect;
+
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
-            Maddy    = MaddySprite.Build(content, catalog);
+            Maddy = MaddySprite.Build(content, catalog);
             position = startPos;
-            ground   = startPos.Y;
+            ground = startPos.Y;
             onGround = true;
 
             standState = new standState();
-            runState   = new runState();
-            jumpState  = new jumpState();
-            fallState  = new fallState();
-            dashState  = new dashState();
+            runState = new runState();
+            jumpState = new jumpState();
+            fallState = new fallState();
+            dashState = new dashState();
+
+            // NEW
+            deathState = new DeathState();
 
             _state = new standState();
             _state.SetState(this);
+        }
+
+        /// <summary>
+        /// Inject DeathAnimation resources (called from Game1 after constructing Madeline).
+        /// Keeps Madeline constructor unchanged (fixes CS1729).
+        /// </summary>
+        public void ConfigureDeathAnimation(AnimationClip deathClip, Texture2D dotTexture)
+        {
+            _deathClip = deathClip;
+            _deathDotTex = dotTexture;
         }
 
         public void changeState(IMadelineState next)
@@ -75,13 +101,37 @@ namespace Celeste.Character
             moveX = cmd.MoveX;
             jumpPressed = cmd.JumpPressed;
             dashPressed = cmd.DashPressed;
+            deathPressed = cmd.DeathPressed; // NEW
         }
 
         public void Update(GameTime gameTime)
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            // ===== Global trigger: do NOT depend on standState transition =====
+            // Only allow if resources are configured.
+            if (deathPressed && _deathClip != null && _deathDotTex != null)
+            {
+                // Avoid re-entering DeathState if already playing
+                if (_deathEffect == null)
+                {
+                    changeState(deathState);
+                }
+            }
+
+            // State logic
             _state.Update(this, dt);
+
+            // If death effect is playing, we generally want to block physics + sprite updates.
+            // DeathState itself updates the effect; here we just early-out from normal physics when active.
+            if (_deathEffect != null)
+            {
+                // consume one-frame inputs
+                jumpPressed = false;
+                dashPressed = false;
+                deathPressed = false;
+                return;
+            }
 
             // Gravity & vertical position
             if (!isDashing)
@@ -93,16 +143,19 @@ namespace Celeste.Character
             if (position.Y >= ground)
             {
                 position.Y = ground;
-                onGround   = true;
-                canDash    = true;
-                velocityY  = 0f;
+                onGround = true;
+                canDash = true;
+                velocityY = 0f;
             }
             else
             {
                 onGround = false;
             }
 
+            // consume one-frame inputs
             jumpPressed = false;
+            dashPressed = false;
+            deathPressed = false;
 
             Maddy.SetPosition(position, scale: DefaultScale, faceLeft: FaceLeft);
             Maddy.Update(gameTime);
@@ -110,7 +163,48 @@ namespace Celeste.Character
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            // If death effect exists, draw it (DeathAnimation folder implementation).
+            if (_deathEffect != null)
+            {
+                _deathEffect.Draw(spriteBatch);
+                return;
+            }
+
             Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
+        }
+
+        // ===== Methods used by DeathState =====
+        internal void StartDeathEffect()
+        {
+            if (_deathClip == null || _deathDotTex == null)
+                return;
+
+            float scale = DefaultScale;
+
+            // Assume Madeline.position is bottom-center:
+            // topLeft.x = centerX - halfWidth
+            // topLeft.y = bottomY - fullHeight
+            Vector2 topLeft = position - new Vector2(
+                _deathClip.FrameWidth * scale * 0.5f,
+                _deathClip.FrameHeight * scale
+            );
+
+            _deathEffect = new DeathEffect(_deathClip, _deathDotTex, topLeft, scale);
+        }
+
+        internal void UpdateDeathEffect(float dt)
+        {
+            _deathEffect?.Update(dt);
+        }
+
+        internal bool IsDeathEffectFinished()
+        {
+            return _deathEffect != null && _deathEffect.IsFinished;
+        }
+
+        internal void ClearDeathEffect()
+        {
+            _deathEffect = null;
         }
     }
 }
