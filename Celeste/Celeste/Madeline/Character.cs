@@ -30,10 +30,15 @@ namespace Celeste.Character
         // NEW: DeathState
         public IMadelineState deathState;
 
+        //New
+        public IMadelineState climbState;
+        public IMadelineState danglingState;
+
         // Set each frame by input layer via SetMovementCommand; consumed in Update.
         public bool jumpPressed;
         public bool dashPressed;
         public bool deathPressed; // NEW
+        public bool climbHeld;
         public float moveX;
 
         // Position & facing
@@ -51,12 +56,12 @@ namespace Celeste.Character
         public float gravity = 60f;
         public bool onGround;
 
+        //Climb
+        public float climbSpeed = 120f;
+
         // Dash
         public bool isDashing;
         public bool canDash = true;
-
-        // Climb / Dangle
-        public float dangleFallSpeed = 20f;
 
         // ===== DeathAnimation integration (DeathEffect already includes sprite+particles) =====
         private AnimationClip _deathClip;
@@ -79,6 +84,7 @@ namespace Celeste.Character
 
             // NEW
             deathState = new DeathState();
+            climbState = new climbState();
 
             _state = new standState();
             _state.SetState(this);
@@ -107,6 +113,7 @@ namespace Celeste.Character
             jumpPressed = cmd.JumpPressed;
             dashPressed = cmd.DashPressed;
             deathPressed = cmd.DeathPressed; // NEW
+            climbHeld = cmd.ClimbHeld;
         }
 
         public void Update(GameTime gameTime)
@@ -139,7 +146,7 @@ namespace Celeste.Character
             }
 
             // Gravity & vertical position
-            if (!isDashing)
+            if (!isDashing && !isClimbing)
             {
                 if (!onGround) velocityY += gravity * dt;
                 position.Y += velocityY;
