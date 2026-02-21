@@ -17,6 +17,7 @@ namespace Celeste.MadelineStates
             if(m.moveX != 0)
             {
                 m.changeState(m.fallState);
+                return;
             }
 
             if (m.jumpPressed)
@@ -24,7 +25,13 @@ namespace Celeste.MadelineStates
                 m.changeState(m.jumpState);
                 return;
             }
-            
+
+            if (m.dashPressed && m.canDash)
+            {
+                m.changeState(m.dashState);
+                return;
+            }
+
             if (!m.climbHeld)
             {                   
                 m.changeState(m.dangleState);

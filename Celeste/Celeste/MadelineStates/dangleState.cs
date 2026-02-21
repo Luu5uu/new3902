@@ -21,13 +21,24 @@ namespace Celeste.MadelineStates
             if (m.jumpPressed)
             {
                 m.changeState(m.jumpState);
+                return;
             }
-            if (m.climbHeld) { m.changeState(m.climbState); return; }
+            if (m.climbHeld) 
+            { 
+                m.changeState(m.climbState); 
+                return; 
+            }
 
+            if (m.dashPressed && m.canDash)
+            {
+                m.changeState(m.dashState);
+                return;
+            }
 
             if (m.moveX != 0)
             {
                 m.changeState(m.fallState);
+                return;
             }
 
             if (!m.onGround)
@@ -37,7 +48,6 @@ namespace Celeste.MadelineStates
             }
             else if (m.onGround)
             {
-                m.isClimbing = false;
                 m.changeState(m.standState);
             }
         }
