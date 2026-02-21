@@ -51,7 +51,7 @@ Draw the blocks and "animate" the moving ones.
 
 Sihao: 
 
-Zijun: 
+Zijun: Finish Character, runState, jumpState, fallState, dangleState classes.
 
 Sprint 3: Due Mar 14
 Tasks assigned to individuals: TBD
