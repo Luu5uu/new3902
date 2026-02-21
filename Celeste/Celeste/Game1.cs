@@ -8,6 +8,7 @@ using Celeste.CollectableItems;
 using Celeste.Input;
 using Celeste.Blocks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Celeste
 {
@@ -42,11 +43,11 @@ namespace Celeste
 
         protected override void LoadContent()
         {
+            _blocks = new List<IBlocks>();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _catalog = AnimationLoader.LoadAll(Content);
 
             BlockFactory.Instance.LoadAllTextures(Content);
-            _blocks = new List<IBlocks>();
             //non-moving mass blocks
             _blocks.Add(BlockFactory.Instance.CreateSnowBlock(new Vector2(200, 200)));
             _blocks.Add(BlockFactory.Instance.CreateCementBlock(new Vector2(200, 200)));
@@ -69,6 +70,9 @@ namespace Celeste
             _blocks.Add(new Spring(new Vector2(200, 200), _catalog));
             _blocks.Add(new CrushBlock(new Vector2(200, 200), _catalog));
             _blocks.Add(new MoveBlock(new Vector2(200, 400), 100f, 50f, -20f, _catalog));
+
+            //debugging  for sizes of blocks
+            _blocks.Add(new AllBlocks(_blocks.Take(_blocks.Count).ToList(), _catalog));
 
             var startPos = new Vector2(
                 Window.ClientBounds.Width / 2f,
@@ -175,16 +179,28 @@ namespace Celeste
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
 
+            // BLOCKS
+            if (_blocks != null && _blocks.Count > 0 && _currentBlock >= 0 && _currentBlock < _blocks.Count)
+            {
+                var curBlock = _blocks[_currentBlock];
+                if (curBlock is AllBlocks gallery)
+                {
+                    gallery.Draw(_spriteBatch, GraphicsDevice);
+
+                }
+                else
+                {
+                    curBlock.Draw(_spriteBatch);
+                }
+            }
+
             _player.Draw(_spriteBatch);
 
             _normalStawAnim.Draw(_spriteBatch);
             _flyStawAnim.Draw(_spriteBatch);
             _crystalAnim.Draw(_spriteBatch);
 
-            if (_blocks != null && _blocks.Count > 0 && _currentBlock < _blocks.Count)
-            {
-                _blocks[_currentBlock].Draw(_spriteBatch);
-            }
+
 
             /* if (_debugOverlay.ShowDebug)
                  _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);

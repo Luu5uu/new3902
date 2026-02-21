@@ -9,9 +9,10 @@ namespace Celeste.Blocks
         public string Type { get; }
 
         public Texture2D Texture { get; set; }
+        public float Scale { get; set; } = 2.0f;
 
         // Constructor
-        public Blocks(string type, Vector2 position, Texture2D texture = null)
+        public Blocks(string type, Vector2 position, Texture2D texture = null, float scale = 2.5f)
         {
             Type = type;
             Position = position;
@@ -23,7 +24,7 @@ namespace Celeste.Blocks
             if (Texture != null)
             {
                 spriteBatch.Draw(
-                    Texture, Position, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    Texture, Position, null, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
             }
         }
 

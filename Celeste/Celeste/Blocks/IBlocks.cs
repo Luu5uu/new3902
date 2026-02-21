@@ -8,6 +8,8 @@ namespace Celeste.Blocks
         Vector2 Position { get; set; }
         Texture2D Texture { get; set; }
         string Type { get; }
+        // increasing size overall
+        float Scale { get; set; }
         void Draw(SpriteBatch spriteBatch);
 
     }

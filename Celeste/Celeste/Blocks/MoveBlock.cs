@@ -20,6 +20,7 @@ namespace Celeste.Blocks
         }
 
         public string Type => "moveBlock";
+        public float Scale { get; set; } = 2.0f;
 
         private ItemAnimation _animation;
         // for movement
@@ -31,7 +32,7 @@ namespace Celeste.Blocks
         private bool _forwardCheck = true;
 
 
-        public MoveBlock(Vector2 start, float distance, float speed, float angleD, AnimationCatalog catalog)
+        public MoveBlock(Vector2 start, float distance, float speed, float angleD, AnimationCatalog catalog, float scale = 2.5f)
         {
             AnimationClip clip = catalog.Clips[AnimationKeys.DevicesMoveBlock];
             _animation = new ItemAnimation(clip);
@@ -44,6 +45,8 @@ namespace Celeste.Blocks
             _end = start + _direction * distance;
 
             _animation.Position = _start;
+
+            Scale = scale;
 
         }
 
@@ -73,7 +76,7 @@ namespace Celeste.Blocks
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            _animation.Draw(spriteBatch);
+            _animation.Draw(spriteBatch, Position, Scale);
         }
     }
 }

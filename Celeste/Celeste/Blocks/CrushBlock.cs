@@ -19,14 +19,15 @@ namespace Celeste.Blocks
         }
 
         public string Type => "crushBlock";
+        public float Scale { get; set; } = 2.0f;
 
         private ItemAnimation _animation;
-
-        public CrushBlock(Vector2 position, AnimationCatalog catalog)
+        public CrushBlock(Vector2 position, AnimationCatalog catalog, float scale = 2.5f)
         {
             AnimationClip clip = catalog.Clips[AnimationKeys.DevicesCrushBlock];
             _animation = new ItemAnimation(clip);
             _animation.Position = position;
+            Scale = scale;
 
         }
 
@@ -37,7 +38,7 @@ namespace Celeste.Blocks
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            _animation.Draw(spriteBatch);
+            _animation.Draw(spriteBatch, Position, Scale);
         }
     }
 }
