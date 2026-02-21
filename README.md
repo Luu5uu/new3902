@@ -43,11 +43,11 @@ Ensure the version of Monogame written in **dotnet-tools.json** matches the vers
 
 Aaron: Controller Functionality 
 
-Albert: Do the death animation currently
+Albert: Death Animations and main animation process.
 
 Henry: Flip static hair animations to dynamic (jump, dash, idleA-idleD)
 
-Isaac:  Draw the "level 1" blocks and animate the moving ones. Swap through different block drawings using T & Y keys.
+Isaac:  Draw the blocks and animate the moving ones. Swap through different blocks using T & Y keys.
 
 Sihao: 
 
