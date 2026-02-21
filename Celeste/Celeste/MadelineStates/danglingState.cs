@@ -16,12 +16,14 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
+            if (m.climbHeld) { m.changeState(m.climbState); return; }
             if (!m.onGround)
             {
-                m.position.Y += m.dangleFallSpeed;
+                m.position.Y += m.dangleFallSpeed*dt;
             }
             else if (m.onGround)
             {
+                m.isClimbing = false;
                 m.changeState(m.standState);
             }
         }

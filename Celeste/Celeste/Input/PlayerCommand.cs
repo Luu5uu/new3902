@@ -14,13 +14,13 @@ namespace Celeste.Input
         public bool ClimbHeld { get; }
         // NEW
 
-        public PlayerCommand(float moveX, bool jumpPressed, bool dashPressed, bool deathPressed, bool climbheld)
+        public PlayerCommand(float moveX, bool jumpPressed, bool dashPressed, bool deathPressed, bool climbHeld)
         {
             MoveX = moveX;
             JumpPressed = jumpPressed;
             DashPressed = dashPressed;
             DeathPressed = deathPressed;
-            ClimbHeld = climbheld;
+            ClimbHeld = climbHeld;
         }
 
         // Arrow + WASD move; Space jump; Enter/Z/N dash; T death.
@@ -38,9 +38,9 @@ namespace Celeste.Input
 
             bool deathPressed = current.IsKeyDown(Keys.E) && !previous.IsKeyDown(Keys.E); // NEW
 
-            bool climbheld = current.IsKeyDown(Keys.W);
+            bool climbHeld = current.IsKeyDown(Keys.W);
 
-            return new PlayerCommand(moveX, jumpPressed, dashPressed, deathPressed, climbheld);
+            return new PlayerCommand(moveX, jumpPressed, dashPressed, deathPressed, climbHeld);
         }
     }
 }

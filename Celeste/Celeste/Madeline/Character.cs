@@ -32,7 +32,6 @@ namespace Celeste.Character
 
         //New
         public IMadelineState climbState;
-        public IMadelineState danglingState;
 
         // Set each frame by input layer via SetMovementCommand; consumed in Update.
         public bool jumpPressed;
@@ -57,11 +56,13 @@ namespace Celeste.Character
         public bool onGround;
 
         //Climb
-        public float climbSpeed = 120f;
-
+        public float climbSpeed = 60f;
+        public bool isClimbing;
         // Dash
         public bool isDashing;
         public bool canDash = true;
+        //Dangling
+        public float dangleFallSpeed =40f;
 
         // ===== DeathAnimation integration (DeathEffect already includes sprite+particles) =====
         private AnimationClip _deathClip;
