@@ -15,6 +15,7 @@ namespace Celeste.Animation
         FallSlow,
         Dash,
         ClimbUp,
-        Dangling
+        Dangling,
+        Death
     }
 }

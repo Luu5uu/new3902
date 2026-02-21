@@ -12,6 +12,15 @@ namespace Celeste.Sprites
         private readonly BodySprite<PlayerState> _body;
         private readonly HairRenderer _hair;
 
+        // Hair color constants — values from the official Celeste source (Player.cs)
+        private static readonly Color NormalHairColor = new Color(0xAC, 0x32, 0x32); // #AC3232 — dash available
+        private static readonly Color UsedHairColor   = new Color(0x44, 0xB7, 0xFF); // #44B7FF — dash used
+
+        private bool  _dashUsed            = false;
+        private float _hairFlashTimer      = 0f;
+        private float _hairUsedDisplayTimer = 0f;    // minimum time blue stays visible
+        private const float MinUsedDisplayTime = 0.35f;
+
         private bool _faceLeft;
         private string _currentAnimName = "idled";
         private readonly List<(PlayerState state, string name)> _allAnims = new();
@@ -145,6 +154,26 @@ namespace Celeste.Sprites
             DebugNudge = Vector2.Zero;
         }
 
+        // --- Dash hair color  ---
+
+        // Call when dash activates: hair immediately turns blue.
+        public void OnDashUsed()
+        {
+            _dashUsed             = true;
+            _hairFlashTimer       = 0f;
+            _hairUsedDisplayTimer = MinUsedDisplayTime;
+            _hair.HairColor       = UsedHairColor;
+        }
+
+        // Call every frame while on ground after dash ends.
+        // Internally ignored until the minimum blue display time has elapsed.
+        public void OnDashRefill()
+        {
+            if (!_dashUsed || _hairUsedDisplayTimer > 0f) return;
+            _dashUsed       = false;
+            _hairFlashTimer = 0.12f;
+        }
+
         public void SetPosition(Vector2 position, float scale = 1f, bool faceLeft = false)
         {
             _lastPosition = position;
@@ -154,12 +183,23 @@ namespace Celeste.Sprites
 
         // --- Update: body animation + hair anchor calculation ---
 
-        // Native pixels from feet to crown. Matches Celeste's PlayerHair offset.
         private const float BaseHeadY = 12f;
 
         public void Update(GameTime gameTime)
         {
             _body.Update(gameTime);
+
+            // Hair color flash (matches Celeste UpdateHair logic)
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (_hairUsedDisplayTimer > 0f) _hairUsedDisplayTimer -= dt;
+            if (_hairFlashTimer > 0f)
+            {
+                _hair.HairColor  = Color.White;
+                _hairFlashTimer -= dt;
+                if (_hairFlashTimer <= 0f)
+                    _hair.HairColor = _dashUsed ? UsedHairColor : NormalHairColor;
+            }
+
             _hair.DrawScale = _lastScale;
 
             // Hair anchor = feetPos + head offset + per-frame delta.

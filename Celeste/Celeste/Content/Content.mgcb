@@ -1,4 +1,3 @@
-
 #----------------------------- Global Properties ----------------------------#
 
 /outputDir:bin/$(Platform)
@@ -120,6 +119,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:dash.png
+
+#begin death.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:death.png
 
 #begin dirt.png
 /importer:TextureImporter
@@ -408,4 +419,3 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:top_a03.png
-
