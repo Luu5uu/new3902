@@ -13,6 +13,18 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
+
+            if(m.moveX != 0)
+            {
+                m.changeState(m.fallState);
+            }
+
+            if (m.jumpPressed)
+            {
+                m.changeState(m.jumpState);
+                return;
+            }
+            
             if (!m.climbHeld)
             {                   
                 m.changeState(m.dangleState);
@@ -23,6 +35,9 @@ namespace Celeste.MadelineStates
 
         }
 
-        public void Exit(Madeline m) { }
+        public void Exit(Madeline m) {
+            m.isClimbing = false;
+
+        }
     }
 }

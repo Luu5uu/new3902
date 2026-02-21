@@ -11,6 +11,7 @@ using Celeste.DeathAnimation;
 using Celeste.DeathAnimation.Particles;
 
 using static Celeste.GameConstants;
+using System;
 
 namespace Celeste.Character
 {
@@ -62,6 +63,7 @@ namespace Celeste.Character
         public bool isDashing;
         public bool canDash = true;
         //Dangling
+        public bool isDangle;
         public float dangleFallSpeed =40f;
 
         // ===== DeathAnimation integration (DeathEffect already includes sprite+particles) =====
@@ -81,7 +83,7 @@ namespace Celeste.Character
             jumpState = new jumpState();
             fallState = new fallState();
             dashState = new dashState();
-            dangleState = new danglingState();
+            dangleState = new dangleState();
 
             // NEW
             deathState = new DeathState();
@@ -103,6 +105,7 @@ namespace Celeste.Character
 
         public void changeState(IMadelineState next)
         {
+            _state.Exit(this);
             _state = next;
             _state.SetState(this);
         }
@@ -147,7 +150,7 @@ namespace Celeste.Character
             }
 
             // Gravity & vertical position
-            if (!isDashing && !isClimbing)
+            if (!isDashing && !isClimbing && !isDangle)
             {
                 if (!onGround) velocityY += gravity * dt;
                 position.Y += velocityY;
