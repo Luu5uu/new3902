@@ -14,7 +14,7 @@ In Class Code Check: Friday, Feb 20
 - **Move:** A / D or Left / Right arrows
 - **Jump:** Space
 - **Dash:** Enter, Z, or N
-- **Death:** T   (For Test & Show only)
+- **Death:** E   (For Test & Show only)
 - **Quit:** Escape (or Back on gamepad) or Q
 - **Restart:** R
 - **Cycle Block Forward & Backward:** Y & T
