@@ -119,7 +119,7 @@ Isaac:
 
 Draw the blocks and "animate" the moving ones.
 
-Sihao: 
+Sihao: Finish dashState, climbState and related modification.
 
 Zijun: Finish Character, standState, runState, jumpState, fallState and dangleState.
 
