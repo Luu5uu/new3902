@@ -29,7 +29,7 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
-            m.position.X += _dashDir * m.velocity * PlayerDashSpeedMultiplier * dt;
+            m.position.X += _dashDir * PlayerRunSpeed * PlayerDashSpeedMultiplier * dt;
 
             _timeLeft -= dt;
             if (_timeLeft <= 0f)

@@ -41,14 +41,8 @@ namespace Celeste.Character
         public bool FaceLeft;
         public float ground;
 
-        // Horizontal movement speed
-        public float velocity = PlayerRunSpeed;
-
-        // Jump / fall
-        public float airSpeed = PlayerAirSpeed;
+        // Physics (runtime state only — speed constants live in PlayerConstants)
         public float velocityY;
-        public float jumpSpeed = PlayerJumpSpeed;
-        public float gravity = PlayerGravity;
         public bool onGround;
 
         // Dash
@@ -137,7 +131,7 @@ namespace Celeste.Character
             // Gravity & vertical position
             if (!isDashing)
             {
-                if (!onGround) velocityY += gravity * dt;
+                if (!onGround) velocityY += PlayerGravity * dt;
                 position.Y += velocityY;
             }
 
