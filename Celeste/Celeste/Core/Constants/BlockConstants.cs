@@ -6,7 +6,7 @@ namespace Celeste
     public static class BlockConstants
     {
         // Single block/obstacle display position (T/Y cycle which block is shown here)
-        public const float BlockDisplayX = 400f;
+        public const float BlockDisplayX = 480f;
         public const float BlockDisplayY = 120f;
     }
 }
