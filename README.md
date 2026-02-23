@@ -16,7 +16,7 @@
 | `D` / `→` | Move right |
 | `Space` | Jump |
 | `Z` / `N` / `Enter` | Dash |
-| `W` (hold) | Climb (while adjacent to wall) |
+| `W` (hold) | Climb |
 | `E` | Trigger death sequence (test / demo only) |
 
 ### Block / Obstacle Controls
@@ -82,23 +82,23 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 #### Sprint 2 Tasks — Aaron
 
-_(Aaron to fill in completed tasks)_
+ `- [x] Task name` for completed, `- [ ] Task name` for in progress
 
 #### Sprint 2 Tasks — Albert
 
-_(Albert to fill in completed tasks)_
+ `- [x] Task name` for completed, `- [ ] Task name` for in progress
 
 #### Sprint 2 Tasks — Isaac
 
-_(Isaac to fill in completed tasks)_
+ `- [x] Task name` for completed, `- [ ] Task name` for in progress
 
 #### Sprint 2 Tasks — Sihao
 
-_(Sihao to fill in completed tasks)_
+ `- [x] Task name` for completed, `- [ ] Task name` for in progress
 
 #### Sprint 2 Tasks — Zijun
 
-_(Zijun to fill in — example format: `- [x] Task name` for completed, `- [ ] Task name` for in progress)_
+ `- [x] Task name` for completed, `- [ ] Task name` for in progress
 
 ---
 
