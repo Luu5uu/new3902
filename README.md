@@ -20,8 +20,6 @@ In Class Code Check: (Pushed to Monday, Feb 23rd)
 - **Cycle Block Forward & Backward:** Y & T
 - **Cycle Item Forward & Backward:** U & I
 - **Debug overlay (G):** G toggles; P pause, Tab/Backspace cycle animation, arrows step frame, W/S/A/D nudge hair anchor, C crosshair. See `Celeste/Animation/README.md` for full debug keys.
-- **Change Block Forward:** Y
-- **Change Blocks Backward:** T
 
 ---
 
