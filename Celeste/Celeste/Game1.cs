@@ -6,10 +6,12 @@ using Microsoft.Xna.Framework.Input;
 using Celeste.Animation;
 using Celeste.Character;
 using Celeste.Items;
+using Celeste.Blocks;
 using Celeste.DevTools;
 using Celeste.Input;
 
 using Celeste.DeathAnimation.Particles;
+using System.Collections.Generic;
 
 namespace Celeste
 {
@@ -34,9 +36,17 @@ namespace Celeste
 
         private ControllerLoader _controllerLoader;
         private int _activeItemIndex = 0;
-        private int _activeBlockIndex = 0;
+        private int _activeBlockIndex = 0;  // T = previous, Y = next; only this block is drawn
         private int _totalItems = 3;
-        private int _totalBlocks; // Set based on total block types
+        private int _totalBlocks;            // Set from _blockList.Count after load
+
+        private List<IBlocks> _blockList;
+
+        /// <summary>When true, the currently displayed block (if animated) is updated each frame.</summary>
+        private bool _blockAnimateEnabled;
+
+        /// <summary>When true, the current block/obstacle is drawn. Toggle with V.</summary>
+        private bool _blocksVisible = true;
 
         public Game1()
         {
@@ -75,15 +85,36 @@ namespace Celeste
             _normalStawAnim = ItemAnimationFactory.CreateNormalStaw(_catalog);
             _flyStawAnim = ItemAnimationFactory.CreateFlyStaw(_catalog);
             _crystalAnim = ItemAnimationFactory.CreateCrystal(_catalog);
-            _normalStawAnim.Position = new Vector2(GameConstants.ItemNormalStawX, GameConstants.ItemRowY);
-            _normalStawAnim.Scale = GameConstants.DefaultScale;
-            _flyStawAnim.Position = new Vector2(GameConstants.ItemFlyStawX, GameConstants.ItemRowY);
-            _flyStawAnim.Scale = GameConstants.DefaultScale;
-            _crystalAnim.Position = new Vector2(GameConstants.ItemCrystalX, GameConstants.ItemRowY);
-            _crystalAnim.Scale = GameConstants.DefaultScale;
+            _normalStawAnim.Position = new Vector2(ItemConstants.ItemNormalStawX, ItemConstants.ItemRowY);
+            _normalStawAnim.Scale = GlobalConstants.DefaultScale;
+            _flyStawAnim.Position = new Vector2(ItemConstants.ItemFlyStawX, ItemConstants.ItemRowY);
+            _flyStawAnim.Scale = GlobalConstants.DefaultScale;
+            _crystalAnim.Position = new Vector2(ItemConstants.ItemCrystalX, ItemConstants.ItemRowY);
+            _crystalAnim.Scale = GlobalConstants.DefaultScale;
 
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
+
+            // ---- Blocks (from allBlocks, adapted to new structure) ----
+            var factory = BlockFactory.GetInstance;
+            factory.LoadTextures(Content);
+            _blockList = new List<IBlocks>();
+            var pos = new Vector2(0, 0);
+            if (factory.CreateSnowBlock(pos) is IBlocks b0) _blockList.Add(b0);
+            if (factory.CreateCementBlock(pos) is IBlocks b1) _blockList.Add(b1);
+            if (factory.CreateDirtBlock(pos) is IBlocks b2) _blockList.Add(b2);
+            if (factory.CreateGirderBlock(pos) is IBlocks b3) _blockList.Add(b3);
+            if (factory.CreateBlock("4", pos) is IBlocks b4) _blockList.Add(b4);
+            if (factory.CreateBlock("7", pos) is IBlocks b5) _blockList.Add(b5);
+            if (factory.CreateBlock("spikeUp", pos) is IBlocks b6) _blockList.Add(b6);
+            if (factory.CreateBlock("top_a00", pos) is IBlocks b7) _blockList.Add(b7);
+            if (factory.CreateBlock("top_a01", pos) is IBlocks b8) _blockList.Add(b8);
+            if (factory.CreateBlock("top_a02", pos) is IBlocks b9) _blockList.Add(b9);
+            if (factory.CreateBlock("top_a03", pos) is IBlocks b10) _blockList.Add(b10);
+            _blockList.Add(new Spring(new Vector2(0, 0), _catalog));
+            _blockList.Add(new MoveBlock(new Vector2(0, 0), 80f, 60f, 0f, _catalog));
+            _blockList.Add(new CrushBlock(new Vector2(0, 0), _catalog));
+            _totalBlocks = _blockList.Count;
 
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
@@ -107,7 +138,7 @@ namespace Celeste
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
             {
-                _player.Maddy.SetPosition(_player.position, scale: GameConstants.DefaultScale, faceLeft: _player.FaceLeft);
+                _player.Maddy.SetPosition(_player.position, scale: GlobalConstants.DefaultScale, faceLeft: _player.FaceLeft);
                 _player.Maddy.Update(gameTime);
             }
             else
@@ -118,6 +149,18 @@ namespace Celeste
             _normalStawAnim.Update(gameTime);
             _flyStawAnim.Update(gameTime);
             _crystalAnim.Update(gameTime);
+
+            // When animation toggle is on, update the current block if it's an animated type (spring, move, crush).
+            if (_blockAnimateEnabled && _totalBlocks > 0)
+            {
+                var block = _blockList[_activeBlockIndex];
+                if (block is Spring spring)
+                    spring.Update(gameTime);
+                else if (block is MoveBlock moveBlock)
+                    moveBlock.Update(gameTime);
+                else if (block is CrushBlock crushBlock)
+                    crushBlock.Update(gameTime);
+            }
 
             base.Update(gameTime);
         }
@@ -146,11 +189,14 @@ namespace Celeste
                     break;
             }
 
-            /* switch (_activeBlockIndex)
+            // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
+            if (_blocksVisible && _totalBlocks > 0)
             {
-                // Need block sprites and drawing logic to implement 
+                var block = _blockList[_activeBlockIndex];
+                block.Position = new Vector2(BlockConstants.BlockDisplayX, BlockConstants.BlockDisplayY);
+                block.Draw(_spriteBatch);
             }
-            */
+
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);
             else
@@ -175,5 +221,11 @@ namespace Celeste
             if (_activeBlockIndex < 0) _activeBlockIndex = _totalBlocks -1;
             if (_activeBlockIndex >= _totalBlocks) _activeBlockIndex = 0;
         }
+
+        /// <summary>Toggles whether the currently displayed block (if animated) is updated each frame. Bound to B.</summary>
+        public void ToggleBlockAnimation() => _blockAnimateEnabled = !_blockAnimateEnabled;
+
+        /// <summary>Toggles whether the current block/obstacle is drawn at all. Bound to V.</summary>
+        public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
     }
 }

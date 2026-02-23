@@ -21,6 +21,10 @@ namespace Celeste.Input
             keyboard.RegisterCommand(Keys.U, new CycleItemCommand(game, -1));
             keyboard.RegisterCommand(Keys.I, new CycleItemCommand(game, 1));
 
+            keyboard.RegisterCommand(Keys.B, new ToggleBlockAnimationCommand(game));
+
+            keyboard.RegisterCommand(Keys.V, new ToggleBlockDisplayCommand(game));
+
             _controllers.Add(keyboard);
         }
 

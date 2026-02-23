@@ -2,7 +2,7 @@ using Celeste.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using static Celeste.GameConstants;
+using static Celeste.PlayerConstants;
 
 namespace Celeste.Sprites
 {

@@ -10,7 +10,8 @@ using Celeste.Sprites;
 using Celeste.DeathAnimation;
 using Celeste.DeathAnimation.Particles;
 
-using static Celeste.GameConstants;
+using static Celeste.PlayerConstants;
+using static Celeste.GlobalConstants;
 
 namespace Celeste.Character
 {

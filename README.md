@@ -19,6 +19,8 @@ In Class Code Check: Friday, Feb 20
 - **Restart:** R
 - **Cycle Block Forward & Backward:** Y & T
 - **Cycle Item Forward & Backward:** U & I
+- **Block animation:** B toggles animation for the currently displayed block (spring, move block, crush block). When off, blocks are stationary.
+- **Block display:** V toggles whether the current block/obstacle is shown at all (on by default).
 - **Debug overlay (G):** G toggles; P pause, Tab/Backspace cycle animation, arrows step frame, W/S/A/D nudge hair anchor, C crosshair. See `Celeste/Animation/README.md` for full debug keys.
 
 ---
@@ -41,8 +43,12 @@ Current layout after the organizational refactor (moves/renames only; no functio
 ```
 Celeste/Celeste/
   Core/
-    GameConstants.cs       # Shared scale/position constants
-    GameLoopInterfaces.cs  # IUpdateable, IDrawable
+    Constants/
+      GlobalConstants.cs   # Global scale only
+      PlayerConstants.cs   # Player frame size, movement, physics
+      ItemConstants.cs     # Item display positions
+      BlockConstants.cs    # Block display position
+    GameLoopInterfaces.cs
   Character/
     Madeline.cs            # Player entity (sprite, state machine, physics, death)
     Death/                 # Death sequence (sprite + particles + orbit ring); namespace Celeste.DeathAnimation
@@ -94,7 +100,7 @@ flowchart TB
   Input --> Game1
 ```
 
-**What was consolidated:** Madeline/Character.cs → Character/Madeline.cs; GamePlay (2 files) → Core/GameLoopInterfaces.cs; GameConstants → Core/; Command + Controller + Input → single Input/ folder; DeathAnimation → Character/Death/; CollectableItems → Items/. All moves/renames only; behavior unchanged.
+**What was consolidated:** Madeline/Character.cs → Character/Madeline.cs; GamePlay (2 files) → Core/GameLoopInterfaces.cs; constants → Core/Constants/ (GlobalConstants, PlayerConstants, ItemConstants, BlockConstants); Command + Controller + Input → single Input/ folder; DeathAnimation → Character/Death/; CollectableItems → Items/. All moves/renames only; behavior unchanged.
 
 ---
 

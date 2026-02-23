@@ -42,4 +42,18 @@ namespace Celeste.Input
         }
         public void Execute() => _game.CycleActiveItem(_direction);
     }
+
+    public class ToggleBlockAnimationCommand : ICommand
+    {
+        private readonly Game1 _game;
+        public ToggleBlockAnimationCommand(Game1 game) => _game = game;
+        public void Execute() => _game.ToggleBlockAnimation();
+    }
+
+    public class ToggleBlockDisplayCommand : ICommand
+    {
+        private readonly Game1 _game;
+        public ToggleBlockDisplayCommand(Game1 game) => _game = game;
+        public void Execute() => _game.ToggleBlockDisplay();
+    }
 }

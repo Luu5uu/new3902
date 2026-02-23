@@ -1,6 +1,6 @@
 using Celeste.Character;
 
-using static Celeste.GameConstants;
+using static Celeste.PlayerConstants;
 
 namespace Celeste.MadelineStates
 {
