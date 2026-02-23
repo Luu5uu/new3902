@@ -125,8 +125,7 @@ To maintain clean, consistent task tracking across all sprints:
    - `- [x]` = completed
    - `- [ ]` = pending / in progress
 3. **Responsibility:** Each team member updates their own checklist section before the sprint due date. Henry manages the overall structure and methodology.
-4. **Sprint Reflection:** A brief reflection document lives in `SprintReflection/` (excluded from git; submitted with the zip). Reference: `SprintReflection/Sprint2Reflection.md`.
-5. **Scaling:** For each new sprint, copy the previous sprint's section as a template, clear the checkboxes, update the due dates, and assign new tasks.
+4. **Scaling:** For each new sprint, copy the previous sprint's section as a template, clear the checkboxes, update the due dates, and assign new tasks.
 
 ---
 
