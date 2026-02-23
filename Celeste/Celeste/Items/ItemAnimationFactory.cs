@@ -1,7 +1,7 @@
 using System;
 using Celeste.Animation;
 
-namespace Celeste.CollectableItems
+namespace Celeste.Items
 {
     /// <summary>
     /// Creates item animations from the loaded AnimationCatalog.

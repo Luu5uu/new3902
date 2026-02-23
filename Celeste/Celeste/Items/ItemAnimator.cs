@@ -2,7 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Celeste.Animation;
 
-namespace Celeste.CollectableItems
+namespace Celeste.Items
 {
     /// <summary>
     /// Playback state machine for an AnimationClip.

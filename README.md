@@ -34,6 +34,70 @@ In Class Code Check: Friday, Feb 20
 
 ---
 
+## Celeste file structure
+
+Current layout after the organizational refactor (moves/renames only; no functionality changes):
+
+```
+Celeste/Celeste/
+  Core/
+    GameConstants.cs       # Shared scale/position constants
+    GameLoopInterfaces.cs  # IUpdateable, IDrawable
+  Character/
+    Madeline.cs            # Player entity (sprite, state machine, physics, death)
+    Death/                 # Death sequence (sprite + particles + orbit ring); namespace Celeste.DeathAnimation
+      DeathEffect.cs, DeathSpritePlayer.cs, ClipPlayer.cs, OrbitRingEffect.cs
+      Utils/Easings.cs
+      Particles/ (ProceduralParticleTexture, ParticleSystem, Particle, Emitters/)
+  MadelineStates/          # Player state machine (stand, run, jump, fall, dash, death)
+  Input/
+    PlayerCommand.cs       # Movement/jump/dash/death from keyboard
+    ICommand.cs, GameCommands.cs, IController.cs, KeyboardController.cs, ControllerLoader.cs
+  Animation/               # Catalog, clips, controller, loader, keys
+  Sprites/                 # MaddySprite, BodySprite, HairRenderer, hair/bangs data
+  Items/                   # ItemAnimation, ItemAnimator, ItemAnimationFactory (namespace Celeste.Items)
+  DevTools/ (DebugOverlay.cs)
+  Game1.cs, Program.cs
+```
+
+**Dependency overview:**
+
+```mermaid
+flowchart TB
+  Game1[Game1]
+  Core[Core]
+  Character[Character]
+  Input[Input]
+  MadelineStates[MadelineStates]
+  Animation[Animation]
+  Sprites[Sprites]
+  Death[Character/Death]
+  Items[Items]
+  DevTools[DevTools]
+
+  Game1 --> Core
+  Game1 --> Character
+  Game1 --> Input
+  Game1 --> Animation
+  Game1 --> Items
+  Game1 --> DevTools
+
+  Character --> Core
+  Character --> Input
+  Character --> MadelineStates
+  Character --> Animation
+  Character --> Sprites
+  Character --> Death
+
+  MadelineStates --> Character
+
+  Input --> Game1
+```
+
+**What was consolidated:** Madeline/Character.cs → Character/Madeline.cs; GamePlay (2 files) → Core/GameLoopInterfaces.cs; GameConstants → Core/; Command + Controller + Input → single Input/ folder; DeathAnimation → Character/Death/; CollectableItems → Items/. All moves/renames only; behavior unchanged.
+
+---
+
 ## Tasks assigned to individuals
 
 Aaron: Controller functionality and Command functionality to seperate controls from specific objects.

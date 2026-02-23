@@ -40,7 +40,7 @@ namespace Celeste.DeathAnimation
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            // ✅ origin = Vector2.Zero to match other states' AnimationPlayer.draw
+            // origin = Vector2.Zero to match other states' AnimationPlayer.draw
             _player.Draw(
                 spriteBatch,
                 TopLeft,

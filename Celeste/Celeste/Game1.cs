@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Input;
 
 using Celeste.Animation;
 using Celeste.Character;
-using Celeste.CollectableItems;
+using Celeste.Items;
 using Celeste.DevTools;
 using Celeste.Input;
 
