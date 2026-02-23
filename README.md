@@ -51,9 +51,9 @@ Henry: Flip static hair animations to dynamic (jump, dash, idleA-idleD)
 
 Isaac:  Draw the blocks and animate the moving ones. Swap through different blocks using T & Y keys.
 
-Sihao: 
+Sihao: Finish dashSrate, climbState and related modification.
 
-Zijun: 
+Zijun: Finish Character, standState, jumpState, runState, fallState and dangleState.
 
 
 Sprint 3: Due Mar 14
