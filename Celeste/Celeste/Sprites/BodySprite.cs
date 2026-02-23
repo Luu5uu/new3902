@@ -2,6 +2,8 @@ using Celeste.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using static Celeste.GameConstants;
+
 namespace Celeste.Sprites
 {
     // Wraps AnimationController to satisfy IBodySprite.
@@ -15,7 +17,7 @@ namespace Celeste.Sprites
         public AnimationController<TState> Controller => _controller;
 
         public BodySprite(AnimationController<TState> controller,
-                          int frameWidth = 32, int frameHeight = 32)
+                          int frameWidth = PlayerBodyFrameWidth, int frameHeight = PlayerBodyFrameHeight)
         {
             _controller = controller;
             FrameWidth = frameWidth;
@@ -27,7 +29,7 @@ namespace Celeste.Sprites
         public void Draw(SpriteBatch spriteBatch, Vector2 position, Color color,
                          float scale = 1f, bool faceLeft = false)
         {
-            // Negative X scale for flipping (matches Celeste's Scale.X *= Facing).
+            // Negative X scale for flipping 
             float scaleX = faceLeft ? -scale : scale;
             _controller.Draw(spriteBatch, position, color, new Vector2(scaleX, scale));
         }

@@ -12,7 +12,7 @@ namespace Celeste.Sprites
         private readonly BodySprite<PlayerState> _body;
         private readonly HairRenderer _hair;
 
-        // Hair color constants — values from the official Celeste source (Player.cs)
+        // Hair color constants 
         private static readonly Color NormalHairColor = new Color(0xAC, 0x32, 0x32); // #AC3232 — dash available
         private static readonly Color UsedHairColor   = new Color(0x44, 0xB7, 0xFF); // #44B7FF — dash used
 
@@ -45,7 +45,7 @@ namespace Celeste.Sprites
         public static MaddySprite Build(ContentManager content, AnimationCatalog catalog, GraphicsDevice graphicsDevice = null)
         {
             var controller = new AnimationController<PlayerState>();
-            var origin = new Vector2(16, 32); // center-bottom (feet), matches Celeste Justify=(0.5,1.0).
+            var origin = new Vector2(16, 32); 
 
             RegisterFromClip(controller, catalog, AnimationKeys.PlayerIdle,         PlayerState.Idle,         setAsDefault: true);
             RegisterFromClip(controller, catalog, AnimationKeys.PlayerIdleFidgetA,  PlayerState.IdleFidgetA,  setAsDefault: false);

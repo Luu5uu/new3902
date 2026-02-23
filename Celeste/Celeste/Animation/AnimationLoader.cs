@@ -2,6 +2,8 @@ using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
+using Celeste;
+
 namespace Celeste.Animation
 {
     /// <summary>
@@ -20,28 +22,28 @@ namespace Celeste.Animation
             var catalog = new AnimationCatalog();
 
             // ---- Player ----
-            catalog.Clips[AnimationKeys.PlayerStandard]    = BuildClip(content, "standard",   32, 32,  1f,     true);
-            catalog.Clips[AnimationKeys.PlayerIdle]        = BuildClip(content, "idleD",      32, 32,  6f,     true);
-            catalog.Clips[AnimationKeys.PlayerIdleFidgetA] = BuildClip(content, "idleA",      32, 32,  6f,     false);
-            catalog.Clips[AnimationKeys.PlayerIdleFidgetB] = BuildClip(content, "idleB",      32, 32,  6f,     false);
-            catalog.Clips[AnimationKeys.PlayerIdleFidgetC] = BuildClip(content, "idleC",      32, 32,  6f,     false);
-            catalog.Clips[AnimationKeys.PlayerRun]         = BuildClip(content, "runFast",    32, 32, 12f,     true);
-            catalog.Clips[AnimationKeys.PlayerJumpFast]    = BuildClip(content, "jumpfast",   32, 32,  4f,     false);
-            catalog.Clips[AnimationKeys.PlayerFallSlow]    = BuildClip(content, "fallSlow",   32, 32,  4f,     true);
-            catalog.Clips[AnimationKeys.PlayerDash]        = BuildClip(content, "dash",       32, 32,  8f,     false);
-            catalog.Clips[AnimationKeys.PlayerClimbUp]     = BuildClip(content, "climbup",    32, 32, 12f,     true);
-            catalog.Clips[AnimationKeys.PlayerDangling]    = BuildClip(content, "dangling",   32, 32,  8f,     true);
-            catalog.Clips[AnimationKeys.PlayerDeath]       = BuildClip(content, "death",      32, 32,  8f,     false);
+            catalog.Clips[AnimationKeys.PlayerStandard]    = BuildClip(content, "standard",   GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  1f,     true);
+            catalog.Clips[AnimationKeys.PlayerIdle]        = BuildClip(content, "idleD",      GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  6f,     true);
+            catalog.Clips[AnimationKeys.PlayerIdleFidgetA] = BuildClip(content, "idleA",      GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  6f,     false);
+            catalog.Clips[AnimationKeys.PlayerIdleFidgetB] = BuildClip(content, "idleB",      GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  6f,     false);
+            catalog.Clips[AnimationKeys.PlayerIdleFidgetC] = BuildClip(content, "idleC",      GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  6f,     false);
+            catalog.Clips[AnimationKeys.PlayerRun]         = BuildClip(content, "runFast",   GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight, 12f,     true);
+            catalog.Clips[AnimationKeys.PlayerJumpFast]    = BuildClip(content, "jumpfast",   GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  4f,     false);
+            catalog.Clips[AnimationKeys.PlayerFallSlow]    = BuildClip(content, "fallSlow",   GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  4f,     true);
+            catalog.Clips[AnimationKeys.PlayerDash]        = BuildClip(content, "dash",      GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  8f,     false);
+            catalog.Clips[AnimationKeys.PlayerClimbUp]     = BuildClip(content, "climbup",    GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight, 12f,     true);
+            catalog.Clips[AnimationKeys.PlayerDangling]    = BuildClip(content, "dangling",   GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  8f,     true);
+            catalog.Clips[AnimationKeys.PlayerDeath]       = BuildClip(content, "death",      GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  8f,     false);
 
             // ---- Items ----
-            catalog.Clips[AnimationKeys.ItemNormalStaw] = BuildClip(content, "normalStaw",    32, 32, 12f,     true);
+            catalog.Clips[AnimationKeys.ItemNormalStaw] = BuildClip(content, "normalStaw",    GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight, 12f,     true);
             catalog.Clips[AnimationKeys.ItemFlyStaw]    = BuildClip(content, "flyStaw",       40, 40, 12f,     true);
             catalog.Clips[AnimationKeys.ItemCrystal]    = BuildClip(content, "crystal",       20, 20, 12f,     true);
 
             // ---- Devices ----
             catalog.Clips[AnimationKeys.DevicesSpring]     = BuildClip(content, "spring",     16, 16,  8f,     true);
             catalog.Clips[AnimationKeys.DevicesMoveBlock]  = BuildClip(content, "moveBlock",  24, 24,  1f,     true);
-            catalog.Clips[AnimationKeys.DevicesCrushBlock] = BuildClip(content, "crushBlock", 32, 32,  1f,     true);
+            catalog.Clips[AnimationKeys.DevicesCrushBlock] = BuildClip(content, "crushBlock", GameConstants.PlayerBodyFrameWidth, GameConstants.PlayerBodyFrameHeight,  1f,     true);
 
             return catalog;
         }
