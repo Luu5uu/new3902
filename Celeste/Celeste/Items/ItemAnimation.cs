@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Celeste.Animation;
 
-namespace Celeste.CollectableItems
+namespace Celeste.Items
 {
     // Item animation: clip + animator. IDrawable/IUpdateable; set Position/Scale or use Draw(sb, pos, scale).
     public sealed class ItemAnimation : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable

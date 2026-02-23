@@ -4,8 +4,8 @@ Group name: Strawberry
 Group members: Aaron, Henry, Isaac, Albert, Sihao, Zijun
 
 Sprint 2: Due Feb 21
-Grader Check-In: Monday, Feb 16
-In Class Code Check: (Pushed to Monday, Feb 23rd)
+Grader CheckIn: Monday, Feb 16
+In Class Code Check: Friday, Feb 20
 
 ---
 
@@ -19,18 +19,13 @@ In Class Code Check: (Pushed to Monday, Feb 23rd)
 - **Restart:** R
 - **Cycle Block Forward & Backward:** Y & T
 - **Cycle Item Forward & Backward:** U & I
+- **Block animation:** B toggles animation for the currently displayed block (spring, move block, crush block). When off, blocks are stationary.
+- **Block display:** V toggles whether the current block/obstacle is shown at all (on by default).
 - **Debug overlay (G):** G toggles; P pause, Tab/Backspace cycle animation, arrows step frame, W/S/A/D nudge hair anchor, C crosshair. See `Celeste/Animation/README.md` for full debug keys.
 
 ---
 
-## Known Bugs
-
-C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(7,15): error CS0234: The namespace "Celeste" does not contain a type or namespace named "Debug" (is there a missing assembly reference?)
-C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(26,17): error CS0246: The type or namespace named "DebugOverlay" could not be found (is there a missing using directive or assembly reference?) 
-Generation failed. Please fix the generation error and run again.
-
-General Monogame Content Editor Mac Error:
-Ensure the version of Monogame written in **dotnet-tools.json** matches the version installed on your device.
+## Known bugs
 
 ---
 
@@ -41,20 +36,92 @@ Ensure the version of Monogame written in **dotnet-tools.json** matches the vers
 
 ---
 
-## Tasks Assigned to Individuals
+## Celeste file structure
 
-Aaron: Controller Functionality 
+Current layout after the organizational refactor (moves/renames only; no functionality changes):
 
-Albert: Death Animations and main animation process.
+```
+Celeste/Celeste/
+  Core/
+    Constants/
+      GlobalConstants.cs   # Global scale only
+      PlayerConstants.cs   # Player frame size, movement, physics
+      ItemConstants.cs     # Item display positions
+      BlockConstants.cs    # Block display position
+    GameLoopInterfaces.cs
+  Character/
+    Madeline.cs            # Player entity (sprite, state machine, physics, death)
+    Death/                 # Death sequence (sprite + particles + orbit ring); namespace Celeste.DeathAnimation
+      DeathEffect.cs, DeathSpritePlayer.cs, ClipPlayer.cs, OrbitRingEffect.cs
+      Utils/Easings.cs
+      Particles/ (ProceduralParticleTexture, ParticleSystem, Particle, Emitters/)
+  MadelineStates/          # Player state machine (stand, run, jump, fall, dash, death)
+  Input/
+    PlayerCommand.cs       # Movement/jump/dash/death from keyboard
+    ICommand.cs, GameCommands.cs, IController.cs, KeyboardController.cs, ControllerLoader.cs
+  Animation/               # Catalog, clips, controller, loader, keys
+  Sprites/                 # MaddySprite, BodySprite, HairRenderer, hair/bangs data
+  Items/                   # ItemAnimation, ItemAnimator, ItemAnimationFactory (namespace Celeste.Items)
+  DevTools/ (DebugOverlay.cs)
+  Game1.cs, Program.cs
+```
 
-Henry: Flip static hair animations to dynamic (jump, dash, idleA-idleD)
+**Dependency overview:**
 
-Isaac:  Draw the blocks and animate the moving ones. Swap through different blocks using T & Y keys.
+```mermaid
+flowchart TB
+  Game1[Game1]
+  Core[Core]
+  Character[Character]
+  Input[Input]
+  MadelineStates[MadelineStates]
+  Animation[Animation]
+  Sprites[Sprites]
+  Death[Character/Death]
+  Items[Items]
+  DevTools[DevTools]
 
-Sihao: Finish dashSrate, climbState and related modification.
+  Game1 --> Core
+  Game1 --> Character
+  Game1 --> Input
+  Game1 --> Animation
+  Game1 --> Items
+  Game1 --> DevTools
 
-Zijun: Finish Character, standState, jumpState, runState, fallState and dangleState.
+  Character --> Core
+  Character --> Input
+  Character --> MadelineStates
+  Character --> Animation
+  Character --> Sprites
+  Character --> Death
 
+  MadelineStates --> Character
+
+  Input --> Game1
+```
+
+**What was consolidated:** Madeline/Character.cs → Character/Madeline.cs; GamePlay (2 files) → Core/GameLoopInterfaces.cs; constants → Core/Constants/ (GlobalConstants, PlayerConstants, ItemConstants, BlockConstants); Command + Controller + Input → single Input/ folder; DeathAnimation → Character/Death/; CollectableItems → Items/. All moves/renames only; behavior unchanged.
+
+---
+
+## Tasks assigned to individuals
+
+Aaron: Controller functionality and Command functionality to seperate controls from specific objects.
+
+Albert: Finish the death animation 
+
+Henry: 
+
+Flip static hair animations to dynamic (jump, dash, idleA-idleD)
+
+
+Isaac: 
+
+Draw the blocks and "animate" the moving ones.
+
+Sihao: 
+
+Zijun: 
 
 Sprint 3: Due Mar 14
 Tasks assigned to individuals: TBD

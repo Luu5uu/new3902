@@ -10,7 +10,8 @@ using Celeste.Sprites;
 using Celeste.DeathAnimation;
 using Celeste.DeathAnimation.Particles;
 
-using static Celeste.GameConstants;
+using static Celeste.PlayerConstants;
+using static Celeste.GlobalConstants;
 
 namespace Celeste.Character
 {
@@ -40,14 +41,14 @@ namespace Celeste.Character
         public bool FaceLeft;
         public float ground;
 
-        // Horizontal movement speed 
-        public float velocity = 200f;
+        // Horizontal movement speed
+        public float velocity = PlayerRunSpeed;
 
         // Jump / fall
-        public float airSpeed = 200f;
+        public float airSpeed = PlayerAirSpeed;
         public float velocityY;
-        public float jumpSpeed = 15f;
-        public float gravity = 60f;
+        public float jumpSpeed = PlayerJumpSpeed;
+        public float gravity = PlayerGravity;
         public bool onGround;
 
         // Dash

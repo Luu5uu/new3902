@@ -1,8 +1,8 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Celeste.Animation;
-using Celeste.CollectableItems;
-using System;
+using Celeste.Items;
 
 namespace Celeste.Blocks
 {
@@ -22,39 +22,31 @@ namespace Celeste.Blocks
         public string Type => "moveBlock";
         public float Scale { get; set; } = 2.0f;
 
-        private ItemAnimation _animation;
-        // for movement
-
-        private Vector2 _start;
-        private Vector2 _end;
-        private Vector2 _direction;
-        private float _speed = 60f;
+        private readonly ItemAnimation _animation;
+        private readonly Vector2 _start;
+        private readonly Vector2 _end;
+        private readonly Vector2 _direction;
+        private float _speed;
         private bool _forwardCheck = true;
 
-
-        public MoveBlock(Vector2 start, float distance, float speed, float angleD, AnimationCatalog catalog, float scale = 2.5f)
+        public MoveBlock(Vector2 start, float distance, float speed, float angleDegrees, AnimationCatalog catalog, float scale = 2.5f)
         {
-            AnimationClip clip = catalog.Clips[AnimationKeys.DevicesMoveBlock];
+            var clip = catalog.Clips[AnimationKeys.DevicesMoveBlock];
             _animation = new ItemAnimation(clip);
-            // note: check out mathhelper more
-            float angleR = MathHelper.ToRadians(angleD);
+            float angleRad = MathHelper.ToRadians(angleDegrees);
             _speed = speed;
-            _direction = new Vector2((float)Math.Cos(angleR), (float)Math.Sin(angleR));
-
+            _direction = new Vector2((float)Math.Cos(angleRad), (float)Math.Sin(angleRad));
             _start = start;
             _end = start + _direction * distance;
-
             _animation.Position = _start;
-
             Scale = scale;
-
         }
 
         public void Update(GameTime gameTime)
         {
             _animation.Update(gameTime);
             float step = _speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (_forwardCheck == true)
+            if (_forwardCheck)
             {
                 _animation.Position += _direction * step;
                 if (Vector2.Dot(_end - _animation.Position, _direction) < 0)
@@ -74,9 +66,6 @@ namespace Celeste.Blocks
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            _animation.Draw(spriteBatch, Position, Scale);
-        }
+        public void Draw(SpriteBatch spriteBatch) => _animation.Draw(spriteBatch, Position, Scale);
     }
 }
