@@ -16,6 +16,7 @@
 | `D` / `→` | Move right |
 | `Space` | Jump |
 | `Z` / `N` / `Enter` | Dash |
+| `W` (hold) | Climb (while adjacent to wall) |
 | `E` | Trigger death sequence (test / demo only) |
 
 ### Block / Obstacle Controls
@@ -97,7 +98,7 @@ _(Sihao to fill in completed tasks)_
 
 #### Sprint 2 Tasks — Zijun
 
-_(Zijun to fill in completed tasks)_
+_(Zijun to fill in — example format: `- [x] Task name` for completed, `- [ ] Task name` for in progress)_
 
 ---
 
@@ -161,9 +162,9 @@ Celeste/Celeste/
       DeathEffect.cs, DeathSpritePlayer.cs, ClipPlayer.cs, OrbitRingEffect.cs
       Utils/Easings.cs
       Particles/             # ProceduralParticleTexture, ParticleSystem, Particle, Emitters/
-  MadelineStates/            # Player state machine (stand, run, jump, fall, dash, death)
+  MadelineStates/            # Player state machine (stand, run, jump, fall, dash, climb, dangle, death)
   Input/
-    PlayerCommand.cs         # Movement / jump / dash / death input struct
+    PlayerCommand.cs         # Movement / jump / dash / climb / death input struct
     ICommand.cs, GameCommands.cs, IController.cs, KeyboardController.cs, ControllerLoader.cs
   Animation/                 # Catalog, clips, controller, loader, keys
   Sprites/                   # MaddySprite, BodySprite, HairRenderer, hair/bangs data

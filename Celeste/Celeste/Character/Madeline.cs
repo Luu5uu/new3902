@@ -26,13 +26,18 @@ namespace Celeste.Character
         public IMadelineState jumpState;
         public IMadelineState fallState;
         public IMadelineState dashState;
+        public IMadelineState dangleState;
 
         public IMadelineState deathState;
+
+        //New
+        public IMadelineState climbState;
 
         // Set each frame by input layer via SetMovementCommand; consumed in Update.
         public bool jumpPressed;
         public bool dashPressed;
         public bool deathPressed;
+        public bool climbHeld;
         public float moveX;
 
         // Position & facing
@@ -44,9 +49,15 @@ namespace Celeste.Character
         public float velocityY;
         public bool onGround;
 
+        //Climb
+        public float climbSpeed = 60f;
+        public bool isClimbing;
         // Dash
         public bool isDashing;
         public bool canDash = true;
+        //Dangling
+        public bool isDangle;
+        public float dangleFallSpeed =40f;
 
         private AnimationClip _deathClip;
         private Texture2D _deathDotTex;
@@ -64,8 +75,10 @@ namespace Celeste.Character
             jumpState = new jumpState();
             fallState = new fallState();
             dashState = new dashState();
+            dangleState = new dangleState();
 
             deathState = new DeathState();
+            climbState = new climbState();
 
             _state = new standState();
             _state.SetState(this);
@@ -79,6 +92,7 @@ namespace Celeste.Character
 
         public void changeState(IMadelineState next)
         {
+            _state.Exit(this);
             _state = next;
             _state.SetState(this);
         }
@@ -90,6 +104,7 @@ namespace Celeste.Character
             jumpPressed = cmd.JumpPressed;
             dashPressed = cmd.DashPressed;
             deathPressed = cmd.DeathPressed;
+            climbHeld = cmd.ClimbHeld;
         }
 
         public void Update(GameTime gameTime)
@@ -113,7 +128,7 @@ namespace Celeste.Character
             }
 
             // Gravity & vertical position
-            if (!isDashing)
+            if (!isDashing && !isClimbing && !isDangle)
             {
                 if (!onGround) velocityY += PlayerGravity * dt;
                 position.Y += velocityY;
