@@ -1,5 +1,7 @@
 using Celeste.Character;
 
+using static Celeste.PlayerConstants;
+
 namespace Celeste.MadelineStates
 {
     public class fallState : IMadelineState
@@ -17,7 +19,7 @@ namespace Celeste.MadelineStates
                 return;
             }
 
-            float x = m.moveX * m.airSpeed * dt;
+            float x = m.moveX * PlayerAirSpeed * dt;
             m.position.X += x;
 
             if (x < 0f) m.FaceLeft = true;

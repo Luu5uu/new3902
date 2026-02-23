@@ -1,5 +1,7 @@
 using Celeste.Character;
 
+using static Celeste.PlayerConstants;
+
 namespace Celeste.MadelineStates
 {
     public class runState : IMadelineState
@@ -29,7 +31,7 @@ namespace Celeste.MadelineStates
                 return;
             }
 
-            m.position.X += x * m.velocity * dt;
+            m.position.X += x * PlayerRunSpeed * dt;
             if (x < 0f) m.FaceLeft = true;
             else if (x > 0f) m.FaceLeft = false;
         }

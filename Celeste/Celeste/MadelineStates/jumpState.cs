@@ -1,12 +1,14 @@
 using Celeste.Character;
 
+using static Celeste.PlayerConstants;
+
 namespace Celeste.MadelineStates
 {
     public class jumpState : IMadelineState
     {
         public void SetState(Madeline m)
         {
-            m.velocityY = -m.jumpSpeed;
+            m.velocityY = -PlayerJumpSpeed;
             m.onGround  = false;
             m.Maddy.JumpFast();
         }
@@ -19,7 +21,7 @@ namespace Celeste.MadelineStates
                 return;
             }
 
-            float x = m.moveX * m.airSpeed * dt;
+            float x = m.moveX * PlayerAirSpeed * dt;
             m.position.X += x;
 
             if (m.velocityY > 0) m.changeState(m.fallState);

@@ -12,7 +12,8 @@ namespace Celeste.Input
         {
             var keyboard = new KeyboardController();
 
-            keyboard.RegisterCommand(Keys.Q, new QuitCommand(game));
+            keyboard.RegisterCommand(Keys.Q,      new QuitCommand(game));
+            keyboard.RegisterCommand(Keys.Escape, new QuitCommand(game));
             keyboard.RegisterCommand(Keys.R, new ResetCommand(game));
 
             keyboard.RegisterCommand(Keys.T, new CycleBlockCommand(game, -1));
