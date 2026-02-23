@@ -4,8 +4,8 @@ Group name: Strawberry
 Group members: Aaron, Henry, Isaac, Albert, Sihao, Zijun
 
 Sprint 2: Due Feb 21
-Grader CheckIn: Monday, Feb 16
-In Class Code Check: Friday, Feb 20
+Grader Check-In: Monday, Feb 16
+In Class Code Check: (Pushed to Monday, Feb 23rd)
 
 ---
 
@@ -23,7 +23,14 @@ In Class Code Check: Friday, Feb 20
 
 ---
 
-## Known bugs
+## Known Bugs
+
+C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(7,15): error CS0234: The namespace "Celeste" does not contain a type or namespace named "Debug" (is there a missing assembly reference?)
+C:\Users\yuanc\Desktop\CSE 3902\new3902\new3902\Celeste\Celeste\Game1.cs(26,17): error CS0246: The type or namespace named "DebugOverlay" could not be found (is there a missing using directive or assembly reference?) 
+Generation failed. Please fix the generation error and run again.
+
+General Monogame Content Editor Mac Error:
+Ensure the version of Monogame written in **dotnet-tools.json** matches the version installed on your device.
 
 ---
 
@@ -34,24 +41,20 @@ In Class Code Check: Friday, Feb 20
 
 ---
 
-## Tasks assigned to individuals
+## Tasks Assigned to Individuals
 
-Aaron: Controller functionality and Command functionality to seperate controls from specific objects.
+Aaron: Controller Functionality 
 
-Albert: Finish the death animation 
+Albert: Death Animations and main animation process.
 
-Henry: 
+Henry: Flip static hair animations to dynamic (jump, dash, idleA-idleD)
 
-Flip static hair animations to dynamic (jump, dash, idleA-idleD)
-
-
-Isaac: 
-
-Draw the blocks and "animate" the moving ones.
+Isaac:  Draw the blocks and animate the moving ones. Swap through different blocks using T & Y keys.
 
 Sihao: 
 
 Zijun: 
+
 
 Sprint 3: Due Mar 14
 Tasks assigned to individuals: TBD

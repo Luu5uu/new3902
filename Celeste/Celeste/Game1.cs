@@ -10,6 +10,9 @@ using Celeste.DevTools;
 using Celeste.Input;
 
 using Celeste.DeathAnimation.Particles;
+using Celeste.Blocks;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Celeste
 {
@@ -28,6 +31,10 @@ namespace Celeste
         private KeyboardState _prevKb;
         private Texture2D _pixelTexture;
         private DebugOverlay _debugOverlay;
+
+        private List<IBlocks> _blocks;
+        private int _currentBlock = 0;
+        private KeyboardState _keyboardBlockInput;
 
         // NEW: particle dot texture
         private Texture2D _deathDotTex;
@@ -49,8 +56,38 @@ namespace Celeste
 
         protected override void LoadContent()
         {
+            _blocks = new List<IBlocks>();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _catalog = AnimationLoader.LoadAll(Content);
+
+            BlockFactory.Instance.LoadAllTextures(Content);
+            //non-moving mass blocks
+            _blocks.Add(BlockFactory.Instance.CreateSnowBlock(new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateCementBlock(new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateDirtBlock(new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateGirderBlock(new Vector2(200, 200)));
+
+            //non-moving textures
+            _blocks.Add(BlockFactory.Instance.CreateAnyBlock("4", new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateAnyBlock("7", new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateAnyBlock("top_a00", new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateAnyBlock("top_a01", new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateAnyBlock("top_a02", new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateAnyBlock("top_a03", new Vector2(200, 200)));
+            _blocks.Add(BlockFactory.Instance.CreateAnyBlock("spikeUp", new Vector2(200, 200)));
+            //_blocks.Add(BlockFactory.Instance.CreateAnyBlock("spikeDown", new Vector2(200, 200)));
+            //_blocks.Add(BlockFactory.Instance.CreateAnyBlock("spikeLeft", new Vector2(200, 200)));
+            //_blocks.Add(BlockFactory.Instance.CreateAnyBlock("spikeRight", new Vector2(200, 200)));
+
+            //moving blocks
+            _blocks.Add(new Spring(new Vector2(200, 200), _catalog));
+            _blocks.Add(new CrushBlock(new Vector2(200, 200), _catalog));
+            _blocks.Add(new MoveBlock(new Vector2(200, 400), 100f, 50f, -20f, _catalog));
+
+            //debugging  for sizes of blocks
+            _blocks.Add(new AllBlocks(_blocks.Take(_blocks.Count).ToList(), _catalog));
+
+            _totalBlocks = _blocks.Count;
 
             var startPos = new Vector2(
                 Window.ClientBounds.Width / 2f,
@@ -87,6 +124,7 @@ namespace Celeste
 
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
+            _keyboardBlockInput = Keyboard.GetState();
             _controllerLoader = new ControllerLoader(this);
         }
 
@@ -97,27 +135,72 @@ namespace Celeste
                 Exit();
 
             var kb = Keyboard.GetState();
-            _debugOverlay.HandleInput(kb, _player);
+            // _debugOverlay.HandleInput(kb, _player);
 
             var cmd = PlayerCommand.FromKeyboard(kb, _prevKb);
             _prevKb = kb;
             _player.SetMovementCommand(cmd);
 
+
+
             _controllerLoader.Update();
 
-            if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
+            // for the block switching
+            if (kb.IsKeyDown(Keys.T) && _keyboardBlockInput.IsKeyUp(Keys.T))
             {
-                _player.Maddy.SetPosition(_player.position, scale: GameConstants.DefaultScale, faceLeft: _player.FaceLeft);
-                _player.Maddy.Update(gameTime);
+                // move backwards (T)
+                _currentBlock--;
+                if (_currentBlock < 0)
+                {
+                    _currentBlock = _blocks.Count - 1;
+                }
             }
-            else
+            if (kb.IsKeyDown(Keys.Y) && _keyboardBlockInput.IsKeyUp(Keys.Y))
             {
-                _player.Update(gameTime);
+                // move forwards Y
+                _currentBlock++;
+                if (_currentBlock >= _blocks.Count)
+                {
+                    _currentBlock = 0;
+                }
             }
+            // update state
+            _keyboardBlockInput = kb;
+
+
+            /* if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
+             {
+                 _player.Maddy.SetPosition(_player.position, scale: GameConstants.DefaultScale, faceLeft: _player.FaceLeft);
+                 _player.Maddy.Update(gameTime);
+             }
+             else
+             {
+                 _player.Update(gameTime);
+             } */
+
+            //for debugging
+            _player.Update(gameTime);
 
             _normalStawAnim.Update(gameTime);
             _flyStawAnim.Update(gameTime);
             _crystalAnim.Update(gameTime);
+
+            //  possibly change to switch cases (?)
+            foreach (var block in _blocks)
+            {
+                if (block is Spring spring)
+                {
+                    spring.Update(gameTime);
+                }
+                if (block is CrushBlock crushBlock)
+                {
+                    crushBlock.Update(gameTime);
+                }
+                if (block is MoveBlock moveBlock)
+                {
+                    moveBlock.Update(gameTime);
+                }
+            }
 
             base.Update(gameTime);
         }
@@ -130,6 +213,21 @@ namespace Celeste
             _spriteBatch.Begin(
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
+
+            // BLOCKS
+            if (_blocks != null && _blocks.Count > 0 && _currentBlock >= 0 && _currentBlock < _blocks.Count)
+            {
+                var curBlock = _blocks[_currentBlock];
+                if (curBlock is AllBlocks gallery)
+                {
+                    gallery.Draw(_spriteBatch, GraphicsDevice);
+
+                }
+                else
+                {
+                    curBlock.Draw(_spriteBatch);
+                }
+            }
 
             _player.Draw(_spriteBatch);
 
@@ -146,11 +244,6 @@ namespace Celeste
                     break;
             }
 
-            /* switch (_activeBlockIndex)
-            {
-                // Need block sprites and drawing logic to implement 
-            }
-            */
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);
             else
@@ -164,7 +257,7 @@ namespace Celeste
         {
             _activeItemIndex += direction;
 
-            if (_activeItemIndex < 0) _activeItemIndex = _totalItems -1;
+            if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
             if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
         }
 
@@ -172,7 +265,7 @@ namespace Celeste
         {
             _activeBlockIndex += direction;
 
-            if (_activeBlockIndex < 0) _activeBlockIndex = _totalBlocks -1;
+            if (_activeBlockIndex < 0) _activeBlockIndex = _totalBlocks - 1;
             if (_activeBlockIndex >= _totalBlocks) _activeBlockIndex = 0;
         }
     }
