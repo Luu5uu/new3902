@@ -1,4 +1,4 @@
-# Genshine — Celeste Fan Clone
+# Team Strawberry — Celeste
 
 **Group:** Strawberry
 **Members:** Aaron, Henry, Isaac, Albert, Sihao, Zijun
