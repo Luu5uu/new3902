@@ -7,68 +7,53 @@ namespace Celeste.Blocks
 {
     public class BlockFactory
     {
-        //use singleton method
-        private static BlockFactory instance = new BlockFactory();
-        public static BlockFactory Instance
+        private static readonly BlockFactory Instance = new BlockFactory();
+        public static BlockFactory GetInstance => Instance;
+
+        public Dictionary<string, Texture2D> BlockTextures { get; } = new Dictionary<string, Texture2D>();
+
+        private BlockFactory() { }
+
+        /// <summary>
+        /// Load block textures that exist in Content. Skips missing assets so the game can run without all block art.
+        /// </summary>
+        public void LoadTextures(ContentManager content)
         {
-            get { return instance; }
-        }
-        public Dictionary<string, Texture2D> blockTextures;
-        private BlockFactory()
-        {
-            blockTextures = new Dictionary<string, Texture2D>();
+            TryLoad(content, "snow");
+            TryLoad(content, "cement");
+            TryLoad(content, "dirt");
+            TryLoad(content, "girder");
+            TryLoad(content, "4");
+            TryLoad(content, "7");
+            TryLoad(content, "spikeUp");
+            TryLoad(content, "top_a00");
+            TryLoad(content, "top_a01");
+            TryLoad(content, "top_a02");
+            TryLoad(content, "top_a03");
         }
 
-        public void LoadAllTextures(ContentManager content)
+        private void TryLoad(ContentManager content, string name)
         {
-            // ADD EACH INDIVIDUALLY
-            // mass texture blocks to be split
-            blockTextures["snow"] = content.Load<Texture2D>("snow");
-            blockTextures["cement"] = content.Load<Texture2D>("cement");
-            blockTextures["dirt"] = content.Load<Texture2D>("dirt");
-            blockTextures["girder"] = content.Load<Texture2D>("girder");
-            //mini snows
-            blockTextures["4"] = content.Load<Texture2D>("4");
-            blockTextures["7"] = content.Load<Texture2D>("7");
-            //spikes
-            blockTextures["spikeUp"] = content.Load<Texture2D>("spikeUp");
-            //blockTextures["spikeDown"] = content.Load<Texture2D>("spikeDown");
-            //blockTextures["spikeLeft"] = content.Load<Texture2D>("spikeLeft");
-            //blockTextures["spikeRight"] = content.Load<Texture2D>("spikeRight");
-            // grass blocks (change names)
-            blockTextures["top_a00"] = content.Load<Texture2D>("top_a00");
-            blockTextures["top_a01"] = content.Load<Texture2D>("top_a01");
-            blockTextures["top_a02"] = content.Load<Texture2D>("top_a02");
-            blockTextures["top_a03"] = content.Load<Texture2D>("top_a03");
-
-        }
-        public IBlocks CreateSnowBlock(Vector2 position)
-        {
-            return new Blocks("snow", position, blockTextures["snow"]);
-        }
-        public IBlocks CreateCementBlock(Vector2 position)
-        {
-            return new Blocks("cement", position, blockTextures["cement"]);
-        }
-        public IBlocks CreateDirtBlock(Vector2 position)
-        {
-            return new Blocks("dirt", position, blockTextures["dirt"]);
-        }
-        public IBlocks CreateGirderBlock(Vector2 position)
-        {
-            return new Blocks("girder", position, blockTextures["girder"]);
+            try
+            {
+                BlockTextures[name] = content.Load<Texture2D>(name);
+            }
+            catch
+            {
+                // Texture not in Content; block type will be skipped when building gallery
+            }
         }
 
-        // just for abstraction
-        public IBlocks CreateAnyBlock(string type, Vector2 position)
-        {
-            return new Blocks(type, position, blockTextures[type]);
+        public IBlocks CreateSnowBlock(Vector2 position) => CreateBlock("snow", position);
+        public IBlocks CreateCementBlock(Vector2 position) => CreateBlock("cement", position);
+        public IBlocks CreateDirtBlock(Vector2 position) => CreateBlock("dirt", position);
+        public IBlocks CreateGirderBlock(Vector2 position) => CreateBlock("girder", position);
 
+        public IBlocks CreateBlock(string type, Vector2 position)
+        {
+            return BlockTextures.TryGetValue(type, out var tex)
+                ? new Blocks(type, position, tex)
+                : null;
         }
     }
-
-
 }
-
-
-

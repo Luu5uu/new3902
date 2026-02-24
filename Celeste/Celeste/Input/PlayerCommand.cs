@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Celeste.Input
 {
@@ -8,14 +9,18 @@ namespace Celeste.Input
         public float MoveX { get; }
         public bool JumpPressed { get; }
         public bool DashPressed { get; }
-        public bool DeathPressed { get; }   // NEW
+        public bool DeathPressed { get; }
 
-        public PlayerCommand(float moveX, bool jumpPressed, bool dashPressed, bool deathPressed)
+        public bool ClimbHeld { get; }
+        // NEW
+
+        public PlayerCommand(float moveX, bool jumpPressed, bool dashPressed, bool deathPressed, bool climbHeld)
         {
             MoveX = moveX;
             JumpPressed = jumpPressed;
             DashPressed = dashPressed;
             DeathPressed = deathPressed;
+            ClimbHeld = climbHeld;
         }
 
         // Arrow + WASD move; Space jump; Enter/Z/N dash; T death.
@@ -33,7 +38,9 @@ namespace Celeste.Input
 
             bool deathPressed = current.IsKeyDown(Keys.E) && !previous.IsKeyDown(Keys.E); // NEW
 
-            return new PlayerCommand(moveX, jumpPressed, dashPressed, deathPressed);
+            bool climbHeld = current.IsKeyDown(Keys.W);
+
+            return new PlayerCommand(moveX, jumpPressed, dashPressed, deathPressed, climbHeld);
         }
     }
 }

@@ -1,12 +1,11 @@
 using Celeste.Character;
 
+using static Celeste.PlayerConstants;
+
 namespace Celeste.MadelineStates
 {
     public class dashState : IMadelineState
     {
-        private const float DashDuration = 0.2f;
-        private const float DashSpeedMul = 4f;
-
         private float _timeLeft;
         private float _dashDir;
 
@@ -18,7 +17,7 @@ namespace Celeste.MadelineStates
             m.canDash   = false;
             m.velocityY = 0f;
 
-            _timeLeft = DashDuration;
+            _timeLeft = PlayerDashDuration;
 
             float x = m.moveX;
             if (x < 0f) _dashDir = -1f;
@@ -30,7 +29,7 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
-            m.position.X += _dashDir * m.velocity * DashSpeedMul * dt;
+            m.position.X += _dashDir * PlayerRunSpeed * PlayerDashSpeedMultiplier * dt;
 
             _timeLeft -= dt;
             if (_timeLeft <= 0f)

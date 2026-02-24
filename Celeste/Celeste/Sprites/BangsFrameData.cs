@@ -23,8 +23,10 @@ namespace Celeste.Sprites
         public static int GetFrame(string animationName, int frameIndex)
         {
             string key = animationName.ToLowerInvariant();
+            // new animation doesnt have bang data yet
             if (!Frames.TryGetValue(key, out int[] frames))
                 return 0;
+            // if animation has fewer frames than current idx, clamp by returning last idx
             if (frameIndex >= frames.Length)
                 return frames[frames.Length - 1];
             return frames[frameIndex];

@@ -23,10 +23,7 @@ Window title format: `[animName fN] stored=(x,y) nudge=(x,y) eff=(x,y) anchor=(x
 
 ## Current setup (what we use)
 
-- **Default path (catalog):** Game1 loads the catalog with `AnimationLoader.LoadAll(Content)` and passes it to `MaddySprite.Build(Content, _catalog, GraphicsDevice)`. All body animations and procedural hair use this **data-driven system** (AnimationLoader + AnimationCatalog + AnimationClip + AnimationKeys).
-- **Legacy path (H toggle):** Press **H** to switch to **static hair** — manually drawn strips. Legacy uses the **same catalog**: `PlayerAnimations.Build(_catalog)` registers only clips whose keys end with `*_static_hair` (see `AnimationKeys.PlayerIdleStaticHair`, etc.). If no `*_static_hair` assets are in Content, H still works and the default (Maddy) is drawn.
-
-**Legacy assets:** Rename old manually-drawn-hair strips to `*_static_hair` (e.g. `idle_static_hair.png`, `run_static_hair.png`) and add them to Content. The loader loads them optionally; after this sprint you can remove the `*_static_hair` assets and the legacy path entirely.
+- Game1 loads the catalog with `AnimationLoader.LoadAll(Content)` and passes it to `MaddySprite.Build(Content, _catalog, GraphicsDevice)`. All body animations and procedural hair use this **data-driven system** (AnimationLoader + AnimationCatalog + AnimationClip + AnimationKeys).
 
 ---
 
