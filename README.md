@@ -82,7 +82,10 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 #### Sprint 2 Tasks — Aaron
 
- `- [x] Task name` for completed, `- [ ] Task name` for in progress
+ - [x] Controller and Command functionality - Create Command and Controller interfaces and classes to initialize, assign, and provide functionality to the project.
+ - [ ] Player Control - Need to depreciate and integrate PlayerCommand.cs into my controller stucture
+ - [x] Project Managment - Set up initial READMe, as well and began pushing other members to create branches to complete tasks in and use Git functionality to track progress.
+ - [x] Code Review - Reviewed Henry's Debug system and Isaac's block branch to ensure functionality  
 
 #### Sprint 2 Tasks — Albert
 
