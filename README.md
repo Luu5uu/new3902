@@ -105,7 +105,13 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 #### Sprint 2 Tasks — Zijun
 
- `- [x] Task name` for completed, `- [ ] Task name` for in progress
+  - [x] Character class - Initialize all public characteristics, initialize all states, introduce the simplified physical system, and change the state.
+  - [x] State Interface - IMadelineState
+  - [x] runState - Handles horizontal movement and transitions to stand/jump/dash based on input and ground check.
+  - [x] standState - Initial state. Change to other states base on input.
+  - [x] jumpState - Applies initial upward velocity and switches to fall when vertical velocity becomes positive. Permit change to dash state during jumping.
+  - [x] fallState - Applies gravity-driven descent and returns to stand upon landing. Permit change to dash state during falling.
+  - [x] dangleState - Transitions to climb/jump/fall depending on input and contact.
 
 ---
 
