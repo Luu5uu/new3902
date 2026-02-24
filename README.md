@@ -144,6 +144,15 @@ To maintain clean, consistent task tracking across all sprints:
 
 ---
 
+## Code Review Methodology
+
+Please use Pull Requests to complete the code review requirements.
+
+**You should not be pulling your own code into the main branch** Other team members need to be responsible for reviewing and merging branches.
+**When reviewing code, use the Sprint description to properly fullfill the requirements**
+
+---
+
 ## Known Bugs
 
 Known bugs are tracked in the team Discord server.
