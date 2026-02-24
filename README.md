@@ -93,7 +93,9 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 #### Sprint 2 Tasks — Isaac
 
- `- [x] Task name` for completed, `- [ ] Task name` for in progress
+ - [x] Create classes for drawing static and animated blocks in the game
+ - [x] Add moving functionality for necessary blocks
+ - [x] Add additional keyboard input (T & Y) for displaying all blocks and the "gallery" of blocks
 
 #### Sprint 2 Tasks — Sihao
 
