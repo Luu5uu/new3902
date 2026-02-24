@@ -99,7 +99,9 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 #### Sprint 2 Tasks — Sihao
 
- `- [x] Task name` for completed, `- [ ] Task name` for in progress
+ - [x] Implement dashState, climbState and related player movement behavior 
+ - [x] Debug and refine animation behavior across different player states
+ - [x] Assist with testing player mechanics and ensuring stable gameplay behavior
 
 #### Sprint 2 Tasks — Zijun
 
