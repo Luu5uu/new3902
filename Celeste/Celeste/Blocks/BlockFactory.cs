@@ -35,7 +35,7 @@ namespace Celeste.Blocks
             //blockTextures["spikeDown"] = content.Load<Texture2D>("spikeDown");
             //blockTextures["spikeLeft"] = content.Load<Texture2D>("spikeLeft");
             //blockTextures["spikeRight"] = content.Load<Texture2D>("spikeRight");
-            // grass blocks (change name)
+            // grass blocks (change names)
             blockTextures["top_a00"] = content.Load<Texture2D>("top_a00");
             blockTextures["top_a01"] = content.Load<Texture2D>("top_a01");
             blockTextures["top_a02"] = content.Load<Texture2D>("top_a02");

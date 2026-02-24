@@ -7,7 +7,7 @@ using System.Linq;
 namespace Celeste.Blocks
 {
     /// <summary>
-    /// for debuggin  and getting correct sizes of blocks
+    /// for debugging  and getting correct sizes of blocks
     /// </summary>
     public class AllBlocks : IBlocks
     {
@@ -39,7 +39,7 @@ namespace Celeste.Blocks
         }
         public void Update(GameTime gameTime)
         {
-            // update ALL
+            // update the animated  ones, (not the movingBlock just for this one)
             foreach (var block in _movingBlocks)
             {
                 if (block is Spring spring)
@@ -56,6 +56,8 @@ namespace Celeste.Blocks
                 }
             }
         }
+
+        
         // to make interface happy
         public void Draw(SpriteBatch spriteBatch) { }
         public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
@@ -94,6 +96,7 @@ namespace Celeste.Blocks
                 columnCurrent++;
             }
 
+            // MOVING BLOCKS
             for (int i = 0; i < _movingBlocks.Count; i++)
             {
 

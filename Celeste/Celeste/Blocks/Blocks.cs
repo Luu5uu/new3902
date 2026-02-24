@@ -3,6 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Celeste.Blocks
 {
+    /// <summary>
+    ///  for  static blocks, including tilesets, grass,  spikes, etc.
+    /// </summary>
     public class Blocks : IBlocks
     {
         public Vector2 Position { get; set; }
