@@ -89,7 +89,9 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 #### Sprint 2 Tasks — Albert
 
- `- [x] Task name` for completed, `- [ ] Task name` for in progress
+  - [x] Create classes to control in-game animations
+  - [x] Added death animations for the player
+  - [x] Draw in-game items to cycle through for the sprint
 
 #### Sprint 2 Tasks — Isaac
 
