@@ -1,147 +1,83 @@
+using System;
 using System.Collections.Generic;
+using Celeste.Animation;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace Celeste.Sprites
 {
-    // Per-frame hair anchor deltas from the base head position.
-    // Base head = feetPos + (0, -12 * scale). +X = right, +Y = down.
-    // Caller negates X for left-facing (Celeste: offset.X * Facing).
     public static class HairOffsetData
     {
-        private static readonly Dictionary<string, Vector2[]> Deltas = new()
+        private static Dictionary<string, Vector2[]> _offsets = new(StringComparer.OrdinalIgnoreCase);
+        private static bool _loaded = false;
+
+        /// <summary>
+        /// Load hair per-frame offsets from Content/HairOffsets.xml at runtime.
+        /// </summary>
+        public static void LoadFromXml(ContentManager content, string xmlFileName = "HairOffsets.xml")
         {
-            // idleD: 9 frames, default standing
-            ["idled"] = new[]
-            {
-                new Vector2(0, 0),  // f0
-                new Vector2(0, 0),  // f1
-                new Vector2(0, 0),  // f2
-                new Vector2(0, 0),  // f3
-                new Vector2(0, 1),  // f4 — head dips 1px (breathing bob)
-                new Vector2(0, 1),  // f5
-                new Vector2(0, 1),  // f6
-                new Vector2(0, 1),  // f7
-                new Vector2(0, 1),  // f8
-            },
+            _offsets = HairOffsetConfigLoader.Load(content, xmlFileName);
+            _loaded = true;
 
-            // idleA: 12 frames, head-turn fidget
-            ["idlea"] = new[]
-            {
-                new Vector2( 0, 0),  // f0
-                new Vector2(-1, 0),  // f1
-                new Vector2(-2, 0),  // f2
-                new Vector2(-1, 0),  // f3
-                new Vector2(-1, 0),  // f4
-                new Vector2(-1, 1),  // f5
-                new Vector2(-1, 1),  // f6
-                new Vector2(-1, 1),  // f7
-                new Vector2(-2, 1),  // f8
-                new Vector2(-1, 1),  // f9
-                new Vector2( 0, 1),  // f10
-                new Vector2( 0, 1),  // f11
-            },
-
-            // run: 12 frames. Y tracks body bob (+1 dip, -1 rise)
-            ["run"] = new[]
-            {
-                new Vector2(1, 0),  // f0
-                new Vector2(1, 1),  // f1
-                new Vector2(1, 1),  // f2
-                new Vector2(1, 1),  // f3
-                new Vector2(1,-1),  // f4
-                new Vector2(1, 0),  // f5
-                new Vector2(1, 1),  // f6
-                new Vector2(1, 1),  // f7
-                new Vector2(1, 1),  // f8
-                new Vector2(1, 1),  // f9
-                new Vector2(1,-1),  // f10
-                new Vector2(1, 0),  // f11
-            },
-
-            ["dash"] = new[]
-            {
-                new Vector2(2, 1), new Vector2(2, 1),
-                new Vector2(2, 1), new Vector2(2, 2)
-            },
-
-            // jumpfast: 2 frames
-            ["jumpfast"] = new[] { new Vector2(1, -1), new Vector2(1, -1) },
-
-            // fallslow: 2 frames
-            ["fallslow"] = new[] { new Vector2(1, 0), new Vector2(0, 0) },
-
-            // climbup: 6 frames
-            ["climbup"] = new[]
-            {
-                new Vector2( 0, 0), new Vector2( 0, 0), new Vector2( 0, 0),  // f0–f2
-                new Vector2( 0, 0), new Vector2(-1, 0), new Vector2(-1, 0)   // f3–f5
-            },
-
-            // dangling: 10 frames
-            ["dangling"] = new[]
-            {
-                new Vector2( 0, 0), new Vector2( 0, 0), new Vector2( 0, 0), new Vector2( 0, 0),  // f0–f3
-                new Vector2(-1, 0), new Vector2(-1, 0), new Vector2(-1, 0), new Vector2(-1, 0),  // f4–f7
-                new Vector2(-1, 0), new Vector2(-1, 0)                                           // f8–f9
-            },
-
-            // idleB: 24 frames
-            ["idleb"] = new[]
-            {
-                new Vector2( 0, 0),  // f0
-                new Vector2(-1, 0),  // f1
-                new Vector2(-1, 0),  // f2
-                new Vector2(-1, 0),  // f3
-                new Vector2(-1, 0),  // f4
-                new Vector2(-1, 0),  // f5
-                new Vector2(-1, 0),  // f6
-                new Vector2(-1, 0),  // f7
-                new Vector2(-1, 0),  // f8
-                new Vector2(-2, 0),  // f9
-                new Vector2(-2, 0),  // f10
-                new Vector2(-2, 0),  // f11
-                new Vector2(-2, 0),  // f12
-                new Vector2(-1, 0),  // f13
-                new Vector2(-1, 0),  // f14
-                new Vector2(-1, 0),  // f15
-                new Vector2(-1, 0),  // f16
-                new Vector2( 0, 0),  // f17
-                new Vector2( 0, 0),  // f18
-                new Vector2( 0, 1),  // f19
-                new Vector2( 0, 1),  // f20
-                new Vector2( 0, 1),  // f21
-                new Vector2( 0, 1),  // f22
-                new Vector2( 0, 1),  // f23
-            },
-
-            // idleC: 12 frames
-            ["idlec"] = new[]
-            {
-                new Vector2(-1, 0),  // f0
-                new Vector2(-2, 0),  // f1
-                new Vector2(-2, 0),  // f2
-                new Vector2(-2, 0),  // f3
-                new Vector2(-2, 0),  // f4
-                new Vector2(-2, 0),  // f5
-                new Vector2( 2, 1),  // f6 — head shifts right (look gesture)
-                new Vector2( 3, 2),  // f7
-                new Vector2( 0, 2),  // f8
-                new Vector2(-1, 1),  // f9
-                new Vector2( 0, 1),  // f10
-                new Vector2( 0, 0),  // f11
-            },
-
-            ["standard"] = new[] { new Vector2(0, 0) }
-        };
+            // HARD FAIL: if nothing loaded, you are definitely not reading the XML you think you are.
+            if (_offsets.Count == 0)
+                throw new InvalidOperationException(
+                    $"HairOffsetData: loaded 0 animations from '{xmlFileName}'. " +
+                    "Check XML tag names (<HairOffsets>, <Anim>, <F>) and that the file is copied to bin/.../Content/.");
+        }
 
         public static Vector2 GetOffset(string animationName, int frameIndex)
         {
+            if (string.IsNullOrWhiteSpace(animationName)) return Vector2.Zero;
+
             string key = animationName.ToLowerInvariant();
-            if (!Deltas.TryGetValue(key, out Vector2[] deltas))
+
+            if (!_offsets.TryGetValue(key, out Vector2[] frames) || frames.Length == 0)
                 return Vector2.Zero;
-            if (frameIndex >= deltas.Length)
-                return deltas[deltas.Length - 1];
-            return deltas[frameIndex];
+
+            if (frameIndex < 0) return frames[0];
+            if (frameIndex >= frames.Length) return frames[^1];
+            return frames[frameIndex];
         }
+
+        public static void AssertMatchesClipFrames(AnimationCatalog catalog)
+        {
+            if (catalog == null) throw new ArgumentNullException(nameof(catalog));
+            if (_offsets.Count == 0)
+                throw new InvalidOperationException("HairOffsetData: no offsets loaded. Check Content/HairOffsets.xml copy path and LoadFromXml timing.");
+
+            foreach (var (key, clip) in catalog.Clips)
+            {
+                // Only validate Player clips that use hair offsets (by your naming scheme).
+                // Your _currentAnimName keys are like "idled", "run", etc.
+                // Map AnimationKeys -> animName used by HairOffsetData:
+                string animName = key switch
+                {
+                    AnimationKeys.PlayerIdle         => "idled",
+                    AnimationKeys.PlayerIdleFidgetA  => "idlea",
+                    AnimationKeys.PlayerIdleFidgetB  => "idleb",
+                    AnimationKeys.PlayerIdleFidgetC  => "idlec",
+                    AnimationKeys.PlayerRun          => "run",
+                    AnimationKeys.PlayerDash         => "dash",
+                    AnimationKeys.PlayerJumpFast     => "jumpfast",
+                    AnimationKeys.PlayerFallSlow     => "fallslow",
+                    AnimationKeys.PlayerClimbUp      => "climbup",
+                    AnimationKeys.PlayerDangling     => "dangling",
+                    _ => ""
+                };
+
+                if (string.IsNullOrEmpty(animName))
+                    continue;
+
+                if (!_offsets.TryGetValue(animName, out var frames) || frames.Length == 0)
+                    throw new InvalidOperationException($"HairOffsetData missing animation '{animName}' (from clip key '{key}').");
+
+                if (frames.Length != clip.FrameCount)
+                    throw new InvalidOperationException(
+                        $"HairOffsetData length mismatch for '{animName}': offsets={frames.Length}, clipFrames={clip.FrameCount} (clip key '{key}').");
+            }
+        }
+
+        public static bool IsLoaded => _loaded;
     }
 }
