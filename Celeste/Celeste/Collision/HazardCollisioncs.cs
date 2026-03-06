@@ -38,13 +38,14 @@ namespace Celeste.Collision
 
                 if (playerRect.Intersects(hazardRect))
                 {
-                    
+                    if (CollisionHelper.Overlaps(playerRect, hazardRect))
+                    {
                         // Avoid re-entering DeathState if already playing
                         if (_player._deathEffect == null)
                         {
                             _player.changeState(_player.deathState);
                         }
-                    
+                    }
                     return; 
                 }
             }
