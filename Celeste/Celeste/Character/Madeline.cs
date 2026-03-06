@@ -15,7 +15,7 @@ using static Celeste.GlobalConstants;
 
 namespace Celeste.Character
 {
-    public class Madeline : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable
+    public class Madeline : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable, ICollider
     {
         public MaddySprite Maddy { get; private set; }
 
@@ -45,6 +45,20 @@ namespace Celeste.Character
         public Vector2 position;
         public bool FaceLeft;
         public float ground;
+
+        private const int HitboxW = 16;
+        private const int HitboxH = 32;
+
+        public Rectangle Bounds
+        {
+            get
+            {
+                int left = (int)(position.X - HitboxW / 2f);
+                int top = (int)(position.Y - HitboxH);
+                return new Rectangle(left, top, HitboxW, HitboxH);
+            }
+        }
+
 
         // Horizontal movement speed
         public float velocity = PlayerRunSpeed;

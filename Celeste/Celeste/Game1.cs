@@ -12,6 +12,7 @@ using Celeste.Input;
 
 using Celeste.DeathAnimation.Particles;
 using System.Collections.Generic;
+using Celeste.Utils;
 
 namespace Celeste
 {
@@ -175,6 +176,7 @@ namespace Celeste
                 rasterizerState: RasterizerState.CullNone);
 
             _player.Draw(_spriteBatch);
+            DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
             switch (_activeItemIndex)
             {
@@ -195,6 +197,7 @@ namespace Celeste
                 var block = _blockList[_activeBlockIndex];
                 block.Position = new Vector2(BlockConstants.BlockDisplayX, BlockConstants.BlockDisplayY);
                 block.Draw(_spriteBatch);
+                DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, block.Bounds, Color.Lime);
             }
 
             if (_debugOverlay.ShowDebug)

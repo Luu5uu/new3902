@@ -26,5 +26,24 @@ namespace Celeste.Blocks
                     Texture, Position, null, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
             }
         }
+
+        public Rectangle Bounds
+        {
+            get
+            {
+                if (Texture == null)
+                    return Rectangle.Empty;
+
+                int w = (int)(Texture.Width * Scale);
+                int h = (int)(Texture.Height * Scale);
+
+                return new Rectangle(
+                    (int)Position.X,
+                    (int)Position.Y,
+                    w,
+                    h
+                );
+            }
+        }
     }
 }

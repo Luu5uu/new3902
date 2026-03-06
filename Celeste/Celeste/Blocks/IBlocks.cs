@@ -9,6 +9,7 @@ namespace Celeste.Blocks
         Texture2D Texture { get; set; }
         string Type { get; }
         float Scale { get; set; }
+        Rectangle Bounds { get; }
         void Draw(SpriteBatch spriteBatch);
     }
 }
