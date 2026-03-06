@@ -1,0 +1,46 @@
+<BangsFrames>
+  <Anim name="idled">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="idlea">
+    <F i="0"/><F i="0"/><F i="1"/><F i="2"/><F i="2"/><F i="2"/><F i="2"/><F i="2"/><F i="1"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="idleb">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="idlec">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="run">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="dash">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="jumpfast">
+    <F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="fallslow">
+    <F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="climbup">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="dangling">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+</BangsFrames>
