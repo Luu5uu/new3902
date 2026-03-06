@@ -13,6 +13,7 @@ using Celeste.Input;
 using Celeste.DeathAnimation.Particles;
 using System.Collections.Generic;
 using Celeste.Utils;
+using Celeste.Collision;
 
 namespace Celeste
 {
@@ -48,6 +49,10 @@ namespace Celeste
 
         /// <summary>When true, the current block/obstacle is drawn. Toggle with V.</summary>
         private bool _blocksVisible = true;
+
+        // Test collision and platform
+        List<IBlocks> platform;
+        CollisionSystem _collisionSystem;
 
         public Game1()
         {
@@ -117,6 +122,16 @@ namespace Celeste
             _blockList.Add(new CrushBlock(new Vector2(0, 0), _catalog));
             _totalBlocks = _blockList.Count;
 
+            platform = new List<IBlocks>();
+            platform.Add(factory.CreateSnowBlock(new Vector2(300, 400)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(400, 400)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(600, 400)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(300, 60)));
+
+
+            _collisionSystem = new CollisionSystem(platform, _player);
+
+
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
             _controllerLoader = new ControllerLoader(this);
@@ -136,6 +151,8 @@ namespace Celeste
             _player.SetMovementCommand(cmd);
 
             _controllerLoader.Update();
+            Vector2 prevPos = _player.position;
+
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
             {
@@ -145,6 +162,8 @@ namespace Celeste
             else
             {
                 _player.Update(gameTime);
+                _collisionSystem.ResolveVertical(prevPos);
+
             }
 
             _normalStawAnim.Update(gameTime);
@@ -178,6 +197,11 @@ namespace Celeste
             _player.Draw(_spriteBatch);
             DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
+            foreach(var b in platform)
+            {
+                b.Draw(_spriteBatch);
+            }
+
             switch (_activeItemIndex)
             {
                 case 0:
@@ -192,13 +216,13 @@ namespace Celeste
             }
 
             // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
-            if (_blocksVisible && _totalBlocks > 0)
+            /*if (_blocksVisible && _totalBlocks > 0)
             {
                 var block = _blockList[_activeBlockIndex];
                 block.Position = new Vector2(BlockConstants.BlockDisplayX, BlockConstants.BlockDisplayY);
                 block.Draw(_spriteBatch);
                 DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, block.Bounds, Color.Lime);
-            }
+            }*/
 
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);

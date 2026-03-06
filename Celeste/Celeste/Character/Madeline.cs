@@ -134,6 +134,7 @@ namespace Celeste.Character
             climbHeld = cmd.ClimbHeld;
         }
 
+
         public void Update(GameTime gameTime)
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -170,7 +171,7 @@ namespace Celeste.Character
                 position.Y += velocityY;
             }
 
-            if (position.Y >= ground)
+            /*if (position.Y >= ground)
             {
                 position.Y = ground;
                 onGround = true;
@@ -184,7 +185,7 @@ namespace Celeste.Character
             else
             {
                 onGround = false;
-            }
+            }*/
 
             // consume one-frame inputs
             jumpPressed = false;
