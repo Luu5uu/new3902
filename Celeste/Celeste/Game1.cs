@@ -14,6 +14,7 @@ using Celeste.DeathAnimation.Particles;
 using System.Collections.Generic;
 using Celeste.Utils;
 using Celeste.Collision;
+using System.Linq;
 
 namespace Celeste
 {
@@ -53,6 +54,8 @@ namespace Celeste
         // Test collision and platform
         List<IBlocks> platform;
         CollisionSystem _collisionSystem;
+        List<IHazard> hazards;
+        HazardCollisioncs HazardCollisioncs;
 
         public Game1()
         {
@@ -122,7 +125,14 @@ namespace Celeste
             _blockList.Add(new CrushBlock(new Vector2(0, 0), _catalog));
             _totalBlocks = _blockList.Count;
 
+            hazards = new List<IHazard>();
+            hazards.Add(factory.CreateHazerd("spikeUp", new Vector2(500, 400)));
+            hazards.Add(factory.CreateHazerd("spikeUp", new Vector2(520, 400)));
+
+            HazardCollisioncs = new HazardCollisioncs(hazards.Cast<ICollideable>().ToList(), _player);
+
             platform = new List<IBlocks>();
+
             platform.Add(factory.CreateSnowBlock(new Vector2(300, 400)));
             platform.Add(factory.CreateSnowBlock(new Vector2(400, 400)));
             platform.Add(factory.CreateSnowBlock(new Vector2(600, 400)));
@@ -163,8 +173,8 @@ namespace Celeste
             else
             {
                 _player.Update(gameTime);
-                _collisionSystem.ResolveHorizontal(prevPos);
-                _collisionSystem.ResolveVertical(prevPos);
+                HazardCollisioncs.ResolveHazardCollision();
+                _collisionSystem.ResolveBlockCollision(prevPos);
 
             }
 
@@ -202,6 +212,12 @@ namespace Celeste
             foreach(var b in platform)
             {
                 b.Draw(_spriteBatch);
+            }
+
+
+            foreach(var h in hazards)
+            {
+                h.Draw(_spriteBatch);
             }
 
             switch (_activeItemIndex)

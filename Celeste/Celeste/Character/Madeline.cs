@@ -83,7 +83,7 @@ namespace Celeste.Character
         // ===== DeathAnimation integration (DeathEffect already includes sprite+particles) =====
         private AnimationClip _deathClip;
         private Texture2D _deathDotTex;
-        private DeathEffect _deathEffect;
+        public DeathEffect _deathEffect;
 
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {

@@ -24,6 +24,23 @@ namespace Celeste.Collision
         }
 
 
+
+        public void ResolveBlockCollision(Vector2 prevPos)
+        {
+            ResolveHorizontal(prevPos);
+            ResolveVertical(prevPos);
+
+        }
+
+
+        public void ResolveHorizontal(Vector2 prevPos)
+        {
+            ResolveHitLeftWall(prevPos);
+            ResolveHitRightWall(prevPos);
+        }
+
+
+
         public void ResolveVertical(Vector2 prevPos)
         {
             _player.onGround = false;
@@ -133,11 +150,7 @@ namespace Celeste.Collision
             }
         }
 
-        public void ResolveHorizontal(Vector2 prevPos)
-        {
-            ResolveHitLeftWall(prevPos);
-            ResolveHitRightWall(prevPos);
-        }
+        
 
         private void ResolveHitLeftWall(Vector2 prevPos)
         {
