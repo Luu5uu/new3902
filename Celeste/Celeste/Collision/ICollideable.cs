@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Celeste.Collision
 {
-    internal interface IColliable
+    internal interface ICollideable
     {
         ICollider Collider { get; }
     }

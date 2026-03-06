@@ -127,7 +127,8 @@ namespace Celeste
             platform.Add(factory.CreateSnowBlock(new Vector2(400, 400)));
             platform.Add(factory.CreateSnowBlock(new Vector2(600, 400)));
             platform.Add(factory.CreateSnowBlock(new Vector2(300, 60)));
-
+            platform.Add(factory.CreateSnowBlock(new Vector2(200, 230)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(700, 300)));
 
             _collisionSystem = new CollisionSystem(platform, _player);
 
@@ -162,6 +163,7 @@ namespace Celeste
             else
             {
                 _player.Update(gameTime);
+                _collisionSystem.ResolveHorizontal(prevPos);
                 _collisionSystem.ResolveVertical(prevPos);
 
             }
