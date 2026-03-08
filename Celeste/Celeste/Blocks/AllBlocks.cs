@@ -80,5 +80,7 @@ namespace Celeste.Blocks
                 x += SpaceX;
             }
         }
+
+        public Rectangle Bounds => Rectangle.Empty;
     }
 }

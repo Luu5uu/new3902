@@ -12,6 +12,9 @@ using Celeste.Input;
 
 using Celeste.DeathAnimation.Particles;
 using System.Collections.Generic;
+using Celeste.Utils;
+using Celeste.Collision;
+using System.Linq;
 
 namespace Celeste
 {
@@ -47,6 +50,12 @@ namespace Celeste
 
         /// <summary>When true, the current block/obstacle is drawn. Toggle with V.</summary>
         private bool _blocksVisible = true;
+
+        // Test collision and platform
+        List<IBlocks> platform;
+        CollisionSystem _collisionSystem;
+        List<IHazard> hazards;
+        HazardCollisioncs HazardCollisioncs;
 
         public Game1()
         {
@@ -116,6 +125,24 @@ namespace Celeste
             _blockList.Add(new CrushBlock(new Vector2(0, 0), _catalog));
             _totalBlocks = _blockList.Count;
 
+            hazards = new List<IHazard>();
+            hazards.Add(factory.CreateHazerd("spikeUp", new Vector2(500, 400)));
+            hazards.Add(factory.CreateHazerd("spikeUp", new Vector2(520, 400)));
+
+            HazardCollisioncs = new HazardCollisioncs(hazards.Cast<ICollideable>().ToList(), _player);
+
+            platform = new List<IBlocks>();
+
+            platform.Add(factory.CreateSnowBlock(new Vector2(300, 400)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(400, 400)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(600, 400)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(300, 60)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(200, 230)));
+            platform.Add(factory.CreateSnowBlock(new Vector2(700, 300)));
+
+            _collisionSystem = new CollisionSystem(platform, _player);
+
+
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
             _controllerLoader = new ControllerLoader(this);
@@ -135,6 +162,8 @@ namespace Celeste
             _player.SetMovementCommand(cmd);
 
             _controllerLoader.Update();
+            Vector2 prevPos = _player.position;
+
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
             {
@@ -144,6 +173,9 @@ namespace Celeste
             else
             {
                 _player.Update(gameTime);
+                HazardCollisioncs.ResolveHazardCollision();
+                _collisionSystem.ResolveBlockCollision(prevPos);
+
             }
 
             _normalStawAnim.Update(gameTime);
@@ -175,6 +207,18 @@ namespace Celeste
                 rasterizerState: RasterizerState.CullNone);
 
             _player.Draw(_spriteBatch);
+            DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
+
+            foreach(var b in platform)
+            {
+                b.Draw(_spriteBatch);
+            }
+
+
+            foreach(var h in hazards)
+            {
+                h.Draw(_spriteBatch);
+            }
 
             switch (_activeItemIndex)
             {
@@ -190,12 +234,13 @@ namespace Celeste
             }
 
             // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
-            if (_blocksVisible && _totalBlocks > 0)
+            /*if (_blocksVisible && _totalBlocks > 0)
             {
                 var block = _blockList[_activeBlockIndex];
                 block.Position = new Vector2(BlockConstants.BlockDisplayX, BlockConstants.BlockDisplayY);
                 block.Draw(_spriteBatch);
-            }
+                DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, block.Bounds, Color.Lime);
+            }*/
 
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);
