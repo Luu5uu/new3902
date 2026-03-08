@@ -44,6 +44,7 @@ namespace Celeste.Collision
                         if (_player._deathEffect == null)
                         {
                             _player.changeState(_player.deathState);
+                            _player.position = _player.RespawnPoint;
                         }
                     }
                     return; 

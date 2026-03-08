@@ -35,8 +35,16 @@ namespace Celeste.Collision
 
         public void ResolveHorizontal(Vector2 prevPos)
         {
-            ResolveHitLeftWall(prevPos);
-            ResolveHitRightWall(prevPos);
+            float dx = _player.position.X - prevPos.X;
+
+            if (dx > 0)
+            {
+                ResolveHitLeftWall(prevPos, dx);
+            }
+            else if (dx < 0)
+            {
+                ResolveHitRightWall(prevPos, dx);
+            }
         }
 
 
@@ -150,11 +158,11 @@ namespace Celeste.Collision
             }
         }
 
-        
 
-        private void ResolveHitLeftWall(Vector2 prevPos)
+
+        private void ResolveHitLeftWall(Vector2 prevPos, float dx)
         {
-            if (_player.moveX <= 0) return;
+            if (dx <= 0) return;
 
             Rectangle p = _player.Bounds;
 
@@ -188,12 +196,14 @@ namespace Celeste.Collision
             if (found)
             {
                 _player.position.X = bestLeft - p.Width / 2f;
+
+                _player.moveX = 0;
             }
         }
 
-        private void ResolveHitRightWall(Vector2 prevPos)
+        private void ResolveHitRightWall(Vector2 prevPos, float dx)
         {
-            if (_player.moveX >= 0) return;
+            if (dx >= 0) return;
 
             Rectangle p = _player.Bounds;
 
@@ -227,6 +237,8 @@ namespace Celeste.Collision
             if (found)
             {
                 _player.position.X = bestRight + p.Width / 2f;
+
+                _player.moveX = 0;
             }
         }
     }

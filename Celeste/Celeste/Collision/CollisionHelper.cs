@@ -69,5 +69,27 @@ namespace Celeste.Collision
 
             return new Vector2(0, pushY);
         }
+
+        public static float GetHorizontalPushOut(Rectangle a, Rectangle b)
+        {
+            if (!a.Intersects(b))
+                return 0f;
+
+            int pushLeft = b.Left - a.Right;   
+            int pushRight = b.Right - a.Left;  
+
+            return Math.Abs(pushLeft) < Math.Abs(pushRight) ? pushLeft : pushRight;
+        }
+
+        public static float GetVerticalPushOut(Rectangle a, Rectangle b)
+        {
+            if (!a.Intersects(b))
+                return 0f;
+
+            int pushUp = b.Top - a.Bottom;     
+            int pushDown = b.Bottom - a.Top;    
+
+            return Math.Abs(pushUp) < Math.Abs(pushDown) ? pushUp : pushDown;
+        }
     }
 }

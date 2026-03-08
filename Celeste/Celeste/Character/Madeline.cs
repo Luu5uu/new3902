@@ -45,6 +45,7 @@ namespace Celeste.Character
         public Vector2 position;
         public bool FaceLeft;
         public float ground;
+        public Vector2 RespawnPoint;
 
         private const int HitboxW = 16;
         private const int HitboxH = 32;
@@ -89,6 +90,7 @@ namespace Celeste.Character
         {
             Maddy = MaddySprite.Build(content, catalog);
             position = startPos;
+            RespawnPoint = startPos;
             ground = startPos.Y;
             onGround = true;
 
