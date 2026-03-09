@@ -98,13 +98,34 @@ namespace Celeste.Character
         }
 
         // Called by input layer each frame before Update.
-        public void SetMovementCommand(PlayerCommand cmd)
+        public void Move(float direction)
         {
-            moveX = cmd.MoveX;
-            jumpPressed = cmd.JumpPressed;
-            dashPressed = cmd.DashPressed;
-            deathPressed = cmd.DeathPressed;
-            climbHeld = cmd.ClimbHeld;
+            this.moveX = direction;
+        }
+
+        public void Jump()
+        {
+            this.jumpPressed = true;
+        }
+
+        public void Dash()
+        {
+            this.dashPressed = true;
+        }  
+
+        public void Die()
+        {
+            this.deathPressed = true;
+        }
+
+        public void SetClimb(bool held)
+        {
+            this.climbHeld = held;
+        }
+
+        public void Climb()
+        {
+            this.isClimbing = true;
         }
 
         public void Update(GameTime gameTime)
@@ -153,6 +174,8 @@ namespace Celeste.Character
             jumpPressed = false;
             dashPressed = false;
             deathPressed = false;
+            moveX = 0f;
+            climbHeld = false;
 
             Maddy.SetPosition(position, scale: DefaultScale, faceLeft: FaceLeft);
             Maddy.Update(gameTime);
