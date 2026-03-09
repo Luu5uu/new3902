@@ -15,7 +15,7 @@ using static Celeste.GlobalConstants;
 
 namespace Celeste.Character
 {
-    public class Madeline : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable
+    public class Madeline : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable, ICollider
     {
         public MaddySprite Maddy { get; private set; }
 
@@ -44,6 +44,21 @@ namespace Celeste.Character
         public Vector2 position;
         public bool FaceLeft;
         public float ground;
+        public Vector2 RespawnPoint;
+
+        private const int HitboxW = 16;
+        private const int HitboxH = 32;
+
+        public Rectangle Bounds
+        {
+            get
+            {
+                int left = (int)(position.X - HitboxW / 2f);
+                int top = (int)(position.Y - HitboxH);
+                return new Rectangle(left, top, HitboxW, HitboxH);
+            }
+        }
+
 
         // Physics (runtime state only — speed constants live in PlayerConstants)
         public float velocityY;
@@ -61,12 +76,13 @@ namespace Celeste.Character
 
         private AnimationClip _deathClip;
         private Texture2D _deathDotTex;
-        private DeathEffect _deathEffect;
+        public DeathEffect _deathEffect;
 
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
             Maddy = MaddySprite.Build(content, catalog);
             position = startPos;
+            RespawnPoint = startPos;
             ground = startPos.Y;
             onGround = true;
 
@@ -128,6 +144,7 @@ namespace Celeste.Character
             this.isClimbing = true;
         }
 
+
         public void Update(GameTime gameTime)
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -155,7 +172,7 @@ namespace Celeste.Character
                 position.Y += velocityY;
             }
 
-            if (position.Y >= ground)
+            /*if (position.Y >= ground)
             {
                 position.Y = ground;
                 onGround = true;
@@ -169,7 +186,7 @@ namespace Celeste.Character
             else
             {
                 onGround = false;
-            }
+            }*/
 
             jumpPressed = false;
             dashPressed = false;
