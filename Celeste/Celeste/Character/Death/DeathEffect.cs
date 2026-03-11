@@ -5,6 +5,8 @@ using Celeste.Animation;
 using Celeste.DeathAnimation.Particles;
 using Celeste.DeathAnimation.Particles.Emitters;
 
+using static Celeste.DeathConstants;
+
 namespace Celeste.DeathAnimation
 {
     public sealed class DeathEffect
@@ -37,14 +39,14 @@ namespace Celeste.DeathAnimation
             _burstParticles = new ParticleSystem(_dotTexture);
 
             _burstEmitter = new BurstEmitter(
-                count: 8,
-                minSpeed: 150f * _scale,
-                maxSpeed: 220f * _scale,
-                minLife: 0.12f,
-                maxLife: 0.22f,
-                minSize: 1.0f * _scale,
-                maxSize: 1.8f * _scale,
-                tint: particleColor
+                count:    BurstCount,
+                minSpeed: BurstMinSpeed * _scale,
+                maxSpeed: BurstMaxSpeed * _scale,
+                minLife:  BurstMinLife,
+                maxLife:  BurstMaxLife,
+                minSize:  BurstMinSize * _scale,
+                maxSize:  BurstMaxSize * _scale,
+                tint:     particleColor
             );
         }
 

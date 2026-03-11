@@ -13,6 +13,7 @@ using Celeste.DeathAnimation.Particles;
 
 using static Celeste.PlayerConstants;
 using static Celeste.GlobalConstants;
+using static Celeste.DeathConstants;
 
 namespace Celeste.Character
 {
@@ -224,7 +225,7 @@ namespace Celeste.Character
                 _deathClip.FrameHeight * scale
             );
 
-            Color deathColor = wasDashing ? new Color(44, 183, 255) : new Color(172, 50, 50);
+            Color deathColor = wasDashing ? DashDeathColor : NormalDeathColor;
             _deathEffect = new DeathEffect(_deathClip, _deathDotTex, topLeft, deathColor, scale);
         }
 
