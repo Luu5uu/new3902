@@ -51,6 +51,7 @@ namespace Celeste
         private RoomThree _roomThree;
         private RoomFour _roomFour;
         private RoomFive _roomFive;
+        private int _currentRoom = 0;
 
         private List<IBlocks> _blockList;
 
@@ -168,15 +169,40 @@ namespace Celeste
             _roomFour = new RoomFour(_worldMap, factory);
             _roomFive = new RoomFive(_worldMap, factory);
 
-            BuildTestMap();
+            BuildMap();
         }
 
         // for debugging and figuring out map values
-        private void BuildTestMap()
+        private void BuildMap()
         {
+
+            if (_worldMap == null)
+            {
+                return;
+            }
             _worldMap.ClearBlocks();
 
-            _roomOne.PlaceRoomOneBlocks();
+            switch (_currentRoom)
+            {
+                case 1:
+                    _roomOne.PlaceRoomOneBlocks();
+                    break;
+                case 2:
+                    _roomTwo.PlaceRoomTwoBlocks();
+                    break;
+                case 3:
+                    _roomThree.PlaceRoomThreeBlocks();
+                    break;
+                case 4:
+                    _roomFour.PlaceRoomFourBlocks();
+                    break;
+                case 5:
+                    _roomFive.PlaceRoomFiveBlocks();
+                    break;
+                case 0:
+                default:
+                    break;
+            }
 
 
         }
@@ -189,6 +215,20 @@ namespace Celeste
 
             var kb = Keyboard.GetState();
             _debugOverlay.HandleInput(kb, _player);
+
+            // FOR IN -CLASS CODE REVIEW
+            int previousRoom = _currentRoom;
+            if (kb.IsKeyDown(Keys.D0) && _prevKb.IsKeyUp(Keys.D0) || kb.IsKeyDown(Keys.NumPad0) && _prevKb.IsKeyUp(Keys.NumPad0)) { _currentRoom = 0; }
+            else if (kb.IsKeyDown(Keys.D1) && _prevKb.IsKeyUp(Keys.D1) || kb.IsKeyDown(Keys.NumPad1) && _prevKb.IsKeyUp(Keys.NumPad1)) { _currentRoom = 1; }
+            else if (kb.IsKeyDown(Keys.D2) && _prevKb.IsKeyUp(Keys.D2) || kb.IsKeyDown(Keys.NumPad2) && _prevKb.IsKeyUp(Keys.NumPad2)) { _currentRoom = 2; }
+            else if (kb.IsKeyDown(Keys.D3) && _prevKb.IsKeyUp(Keys.D3) || kb.IsKeyDown(Keys.NumPad3) && _prevKb.IsKeyUp(Keys.NumPad3)) { _currentRoom = 3; }
+            else if (kb.IsKeyDown(Keys.D4) && _prevKb.IsKeyUp(Keys.D4) || kb.IsKeyDown(Keys.NumPad4) && _prevKb.IsKeyUp(Keys.NumPad4)) { _currentRoom = 4; }
+            else if (kb.IsKeyDown(Keys.D5) && _prevKb.IsKeyUp(Keys.D5) || kb.IsKeyDown(Keys.NumPad5) && _prevKb.IsKeyUp(Keys.NumPad5)) { _currentRoom = 5; }
+            if (_currentRoom != previousRoom)
+            {
+                // rebuild room when changed
+                BuildMap();
+            }
 
             var cmd = PlayerCommand.FromKeyboard(kb, _prevKb);
             _prevKb = kb;
@@ -226,6 +266,7 @@ namespace Celeste
                 else if (block is CrushBlock crushBlock)
                     crushBlock.Update(gameTime);
             }
+
 
             base.Update(gameTime);
         }

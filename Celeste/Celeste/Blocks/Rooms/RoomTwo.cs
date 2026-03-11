@@ -136,33 +136,63 @@ namespace Celeste.Blocks.Rooms
 
             // 12 IS PLACEHOLDER
 
-            // ROW 0 < TEMP FOR NOW >
-            for (int x = 0; x <= 32; x++)
-            {
-                _mapBuilder.PlaceBlock("cement", x, 0, 12);
-            }
+            // ROW 0
+
+            _mapBuilder.PlaceBlock("cement", 0, 0, 89);
+            _mapBuilder.PlaceBlock("cement", 1, 0, 89);
+            _mapBuilder.PlaceBlock("cement", 2, 0, 83);
+            _mapBuilder.PlaceBlock("cement", 3, 0, 71);
+            _mapBuilder.PlaceBlock("cement", 4, 0, 41);
+            _mapBuilder.PlaceBlock("cement", 5, 0, 4);
+            _mapBuilder.PlaceBlock("cement", 6, 0, 9);
+            _mapBuilder.PlaceBlock("cement", 7, 0, 7);
+            _mapBuilder.PlaceBlock("cement", 8, 0, 16);
+            _mapBuilder.PlaceBlock("cement", 9, 0, 4);
+            _mapBuilder.PlaceBlock("cement", 10, 0, 7);
+            _mapBuilder.PlaceBlock("cement", 11, 0, 9);
+            _mapBuilder.PlaceBlock("cement", 12, 0, 9);
+            _mapBuilder.PlaceBlock("cement", 13, 0, 7);
+
+            _mapBuilder.PlaceBlock("cement", 15, 0, 8);
+            _mapBuilder.PlaceBlock("cement", 16, 0, 16);
+            _mapBuilder.PlaceBlock("cement", 17, 0, 35);
+            _mapBuilder.PlaceBlock("cement", 18, 0, 71);
+            _mapBuilder.PlaceBlock("cement", 19, 0, 59);
+            _mapBuilder.PlaceBlock("cement", 20, 0, 83);
+            _mapBuilder.PlaceBlock("cement", 21, 0, 83);
+            _mapBuilder.PlaceBlock("cement", 22, 0, 89);
+            _mapBuilder.PlaceBlock("cement", 23, 0, 89);
+            _mapBuilder.PlaceBlock("cement", 24, 0, 83);
+            _mapBuilder.PlaceBlock("cement", 25, 0, 11);
+            _mapBuilder.PlaceBlock("cement", 26, 0, 23);
+            _mapBuilder.PlaceBlock("cement", 27, 0, 83);
+            _mapBuilder.PlaceBlock("cement", 28, 0, 83);
+            _mapBuilder.PlaceBlock("cement", 29, 0, 89);
+            _mapBuilder.PlaceBlock("cement", 30, 0, 89);
+            _mapBuilder.PlaceBlock("cement", 31, 0, 89);
+            _mapBuilder.PlaceBlock("cement", 32, 0, 71);
 
             _mapBuilder.PlaceBlock("cement", 38, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 39, 0, 12);
+            _mapBuilder.PlaceBlock("cement", 39, 0, 71);
 
             // ROW 1
-            _mapBuilder.PlaceBlock("cement", 0, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 1, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 2, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 3, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 4, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 5, 1, 12);
+            _mapBuilder.PlaceBlock("cement", 0, 1, 89);
+            _mapBuilder.PlaceBlock("cement", 1, 1, 83);
+            _mapBuilder.PlaceBlock("cement", 2, 1, 4);
+            _mapBuilder.PlaceBlock("cement", 3, 1, 7);
+            _mapBuilder.PlaceBlock("cement", 4, 1, 7);
+            _mapBuilder.PlaceBlock("cement", 5, 1, 86);
 
-            _mapBuilder.PlaceBlock("cement", 9, 1, 12);
+            _mapBuilder.PlaceBlock("cement", 9, 1, 18);
 
-            _mapBuilder.PlaceBlock("cement", 16, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 17, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 18, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 19, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 20, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 21, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 22, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 23, 1, 12);
+            _mapBuilder.PlaceBlock("cement", 16, 1, 81);
+            _mapBuilder.PlaceBlock("cement", 17, 1, 7);
+            _mapBuilder.PlaceBlock("cement", 18, 1, 7);
+            _mapBuilder.PlaceBlock("cement", 19, 1, 8);
+            _mapBuilder.PlaceBlock("cement", 20, 1, 3);
+            _mapBuilder.PlaceBlock("cement", 21, 1, 7);
+            _mapBuilder.PlaceBlock("cement", 22, 1, 16);
+            _mapBuilder.PlaceBlock("cement", 23, 1, 83);
 
             _mapBuilder.PlaceBlock("cement", 25, 1, 12);
             _mapBuilder.PlaceBlock("cement", 26, 1, 12);
