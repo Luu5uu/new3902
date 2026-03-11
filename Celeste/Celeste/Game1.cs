@@ -129,7 +129,7 @@ namespace Celeste
             if (factory.CreateGirderBlock(pos) is IBlocks b3) _blockList.Add(b3);
             if (factory.CreateBlock("4", pos) is IBlocks b4) _blockList.Add(b4);
             if (factory.CreateBlock("7", pos) is IBlocks b5) _blockList.Add(b5);
-            if (factory.CreateBlock("spikeUp", pos) is IBlocks b6) _blockList.Add(b6);
+            if (factory.CreateBlock("upSpike", pos) is IBlocks b6) _blockList.Add(b6);
             if (factory.CreateBlock("top_a00", pos) is IBlocks b7) _blockList.Add(b7);
             if (factory.CreateBlock("top_a01", pos) is IBlocks b8) _blockList.Add(b8);
             if (factory.CreateBlock("top_a02", pos) is IBlocks b9) _blockList.Add(b9);
@@ -140,8 +140,8 @@ namespace Celeste
             _totalBlocks = _blockList.Count;
 
             hazards = new List<IHazard>();
-            hazards.Add(factory.CreateHazerd("spikeUp", new Vector2(500, 400)));
-            hazards.Add(factory.CreateHazerd("spikeUp", new Vector2(520, 400)));
+            hazards.Add(factory.CreateHazerd("upSpike", new Vector2(500, 400)));
+            hazards.Add(factory.CreateHazerd("upSpike", new Vector2(520, 400)));
 
             HazardCollisioncs = new HazardCollisioncs(hazards.Cast<ICollideable>().ToList(), _player);
 
@@ -243,15 +243,15 @@ namespace Celeste
             _worldMap.Draw(_spriteBatch);
 
             _player.Draw(_spriteBatch);
-            DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
+            DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
-            foreach(var b in platform)
+            foreach (var b in platform)
             {
                 b.Draw(_spriteBatch);
             }
 
 
-            foreach(var h in hazards)
+            foreach (var h in hazards)
             {
                 h.Draw(_spriteBatch);
             }
