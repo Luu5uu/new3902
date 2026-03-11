@@ -28,6 +28,7 @@ namespace Celeste.MadelineStates
             if (m.IsDeathEffectFinished())
             {
                 m.ClearDeathEffect();
+                m.position = m.RespawnPoint;
                 m.changeState(m.standState);
             }
         }
