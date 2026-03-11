@@ -175,7 +175,7 @@ namespace Celeste
                 _player.Update(gameTime);
                 HazardCollisioncs.ResolveHazardCollision();
                 _collisionSystem.ResolveBlockCollision(prevPos);
-
+                _player.UpdateSprite(gameTime);
             }
 
             _normalStawAnim.Update(gameTime);

@@ -217,7 +217,11 @@ namespace Celeste.Character
             jumpPressed = false;
             dashPressed = false;
             deathPressed = false;
+        }
 
+        // Call after collision resolution so the hair anchor matches the final body position.
+        public void UpdateSprite(GameTime gameTime)
+        {
             Maddy.SetPosition(position, scale: DefaultScale, faceLeft: FaceLeft);
             Maddy.Update(gameTime);
         }
