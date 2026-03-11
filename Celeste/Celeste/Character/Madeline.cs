@@ -186,7 +186,7 @@ namespace Celeste.Character
             Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
         }
 
-        internal void StartDeathEffect()
+        internal void StartDeathEffect(bool wasDashing)
         {
             if (_deathClip == null || _deathDotTex == null)
                 return;
@@ -197,7 +197,8 @@ namespace Celeste.Character
                 _deathClip.FrameHeight * scale
             );
 
-            _deathEffect = new DeathEffect(_deathClip, _deathDotTex, topLeft, scale);
+            Color deathColor = wasDashing ? new Color(44, 183, 255) : new Color(172, 50, 50);
+            _deathEffect = new DeathEffect(_deathClip, _deathDotTex, topLeft, deathColor, scale);
         }
 
         internal void UpdateDeathEffect(float dt)
