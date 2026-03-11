@@ -251,6 +251,8 @@ namespace Celeste
             base.Draw(gameTime);
         }
 
+        public void Reset() => _player.Reset();
+
         public void CycleActiveItem(int direction)
         {
             _activeItemIndex += direction;

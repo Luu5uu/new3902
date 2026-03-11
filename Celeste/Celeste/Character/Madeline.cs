@@ -106,6 +106,15 @@ namespace Celeste.Character
             _deathDotTex = dotTexture;
         }
 
+        public void Reset()
+        {
+            ClearDeathEffect();
+            position = RespawnPoint;
+            velocityY = 0f;
+            canDash = true;
+            changeState(standState);
+        }
+
         public void changeState(IMadelineState next)
         {
             _state.Exit(this);
