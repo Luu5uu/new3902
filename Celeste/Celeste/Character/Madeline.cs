@@ -66,14 +66,14 @@ namespace Celeste.Character
         public bool onGround;
 
         //Climb
-        public float climbSpeed = 60f;
+        public float climbSpeed = PlayerClimbSpeed;
         public bool isClimbing;
         // Dash
         public bool isDashing;
         public bool canDash = true;
         //Dangling
         public bool isDangle;
-        public float dangleFallSpeed =40f;
+        public float dangleFallSpeed = PlayerDangleFallSpeed;
 
         private AnimationClip _deathClip;
         private Texture2D _deathDotTex;

@@ -16,5 +16,7 @@ namespace Celeste
         public const float PlayerGravity = 60f;
         public const float PlayerDashDuration = 0.2f;
         public const float PlayerDashSpeedMultiplier = 4f;
+        public const float PlayerClimbSpeed = 60f;
+        public const float PlayerDangleFallSpeed = 40f;
     }
 }
