@@ -21,6 +21,7 @@ namespace Celeste.Blocks.Rooms
 
             // the format: (SOURCE, IN-GAME X COORD, IN-GAME Y COORD, FRAME FROM TILESHEET)
 
+            /* --------------- SNOW BLOCKS ---------------*/
             // ROW 1
             _mapBuilder.PlaceBlock("snow", 0, 0, 83);
             _mapBuilder.PlaceBlock("snow", 1, 0, 77);
@@ -198,7 +199,7 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("snow", 25, 18, 20);
 
             // ROW 21
-            _mapBuilder.PlaceBlock("snow", 1, 19, 29);
+            _mapBuilder.PlaceBlock("snow", 1, 19, 65);
 
             _mapBuilder.PlaceBlock("snow", 15, 19, 1);
             _mapBuilder.PlaceBlock("snow", 16, 19, 0);
@@ -230,187 +231,188 @@ namespace Celeste.Blocks.Rooms
             // the format: (SOURCE, IN-GAME X COORD, IN-GAME Y COORD, FRAME FROM TILESHEET)
 
             // ROW 0
-            _mapBuilder.PlaceBlock("dirt", 14, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 15, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 16, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 17, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 18, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 19, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 20, 0, 0);
+            _mapBuilder.PlaceBlock("dirt", 14, 0, 89);
+            _mapBuilder.PlaceBlock("dirt", 15, 0, 89);
+            _mapBuilder.PlaceBlock("dirt", 16, 0, 83);
+            _mapBuilder.PlaceBlock("dirt", 17, 0, 77);
+            _mapBuilder.PlaceBlock("dirt", 18, 0, 65);
+            _mapBuilder.PlaceBlock("dirt", 19, 0, 35);
+            _mapBuilder.PlaceBlock("dirt", 20, 0, 47);
 
-            _mapBuilder.PlaceBlock("dirt", 22, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 23, 0, 0);
-            _mapBuilder.PlaceBlock("dirt", 24, 0, 0);
+            _mapBuilder.PlaceBlock("dirt", 22, 0, 7);
+            _mapBuilder.PlaceBlock("dirt", 23, 0, 9);
+            _mapBuilder.PlaceBlock("dirt", 24, 0, 8);
 
             // ROW 1
-            _mapBuilder.PlaceBlock("dirt", 15, 1, 0);
-            _mapBuilder.PlaceBlock("dirt", 16, 1, 0);
-            _mapBuilder.PlaceBlock("dirt", 17, 1, 0);
-            _mapBuilder.PlaceBlock("dirt", 18, 1, 0);
-            _mapBuilder.PlaceBlock("dirt", 19, 1, 0);
-            _mapBuilder.PlaceBlock("dirt", 20, 1, 0);
+            _mapBuilder.PlaceBlock("dirt", 15, 1, 77);
+            _mapBuilder.PlaceBlock("dirt", 16, 1, 59);
+            _mapBuilder.PlaceBlock("dirt", 17, 1, 4);
+            _mapBuilder.PlaceBlock("dirt", 18, 1, 9);
+            _mapBuilder.PlaceBlock("dirt", 19, 1, 6);
+            _mapBuilder.PlaceBlock("dirt", 20, 1, 9);
 
             // ROW 2 
-            _mapBuilder.PlaceBlock("dirt", 1, 2, 0);
+            _mapBuilder.PlaceBlock("dirt", 1, 2, 20);
 
-            _mapBuilder.PlaceBlock("dirt", 13, 2, 0);
-            _mapBuilder.PlaceBlock("dirt", 14, 2, 0);
-            _mapBuilder.PlaceBlock("dirt", 15, 2, 0);
-            _mapBuilder.PlaceBlock("dirt", 16, 2, 0);
-            _mapBuilder.PlaceBlock("dirt", 17, 2, 0);
+            _mapBuilder.PlaceBlock("dirt", 13, 2, 12);
+            _mapBuilder.PlaceBlock("dirt", 14, 2, 23);
+            _mapBuilder.PlaceBlock("dirt", 15, 2, 4);
+            _mapBuilder.PlaceBlock("dirt", 16, 2, 9);
+            _mapBuilder.PlaceBlock("dirt", 17, 2, 84);
 
             // ROW 3
-            _mapBuilder.PlaceBlock("dirt", 0, 3, 0);
-            _mapBuilder.PlaceBlock("dirt", 1, 3, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 3, 35);
+            _mapBuilder.PlaceBlock("dirt", 1, 3, 19);
 
-            _mapBuilder.PlaceBlock("dirt", 13, 3, 0);
-            _mapBuilder.PlaceBlock("dirt", 14, 3, 0);
-            _mapBuilder.PlaceBlock("dirt", 15, 3, 0);
+            _mapBuilder.PlaceBlock("dirt", 13, 3, 15);
+            _mapBuilder.PlaceBlock("dirt", 14, 3, 17);
+            _mapBuilder.PlaceBlock("dirt", 15, 3, 21);
 
             // ROW 4
-            _mapBuilder.PlaceBlock("dirt", 0, 4, 0);
-            _mapBuilder.PlaceBlock("dirt", 1, 4, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 4, 5);
+            _mapBuilder.PlaceBlock("dirt", 1, 4, 18);
 
-            _mapBuilder.PlaceBlock("dirt", 13, 4, 0);
-            _mapBuilder.PlaceBlock("dirt", 14, 4, 0);
-            _mapBuilder.PlaceBlock("dirt", 15, 4, 0);
+            _mapBuilder.PlaceBlock("dirt", 13, 4, 12);
+            _mapBuilder.PlaceBlock("dirt", 14, 4, 41);
+            _mapBuilder.PlaceBlock("dirt", 15, 4, 20);
 
             // ROW 5
-            _mapBuilder.PlaceBlock("dirt", 0, 5, 0);
-            _mapBuilder.PlaceBlock("dirt", 1, 5, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 5, 17);
+            _mapBuilder.PlaceBlock("dirt", 1, 5, 18);
 
-            _mapBuilder.PlaceBlock("dirt", 13, 5, 0);
-            _mapBuilder.PlaceBlock("dirt", 14, 5, 0);
-            _mapBuilder.PlaceBlock("dirt", 15, 5, 0);
+            _mapBuilder.PlaceBlock("dirt", 13, 5, 78);
+            _mapBuilder.PlaceBlock("dirt", 14, 5, 8);
+            _mapBuilder.PlaceBlock("dirt", 15, 5, 84);
 
             // ROW 6
-            _mapBuilder.PlaceBlock("dirt", 0, 6, 0);
-            _mapBuilder.PlaceBlock("dirt", 1, 6, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 6, 29);
+            _mapBuilder.PlaceBlock("dirt", 1, 6, 20);
 
             // ROW 7
-            _mapBuilder.PlaceBlock("dirt", 0, 7, 0);
-            _mapBuilder.PlaceBlock("dirt", 1, 7, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 7, 65);
+            _mapBuilder.PlaceBlock("dirt", 1, 7, 18);
 
             // ROW 8  
-            _mapBuilder.PlaceBlock("dirt", 1, 8, 0);
+            _mapBuilder.PlaceBlock("dirt", 1, 8, 84);
 
             // ROW 13
-            _mapBuilder.PlaceBlock("dirt", 37, 13, 0);
-            _mapBuilder.PlaceBlock("dirt", 38, 13, 0);
+            _mapBuilder.PlaceBlock("dirt", 37, 13, 5);
+            _mapBuilder.PlaceBlock("dirt", 38, 13, 83);
+            _mapBuilder.PlaceBlock("dirt", 38, 13, 89);
 
             // ROW 14
-            _mapBuilder.PlaceBlock("dirt", 37, 14, 0);
-            _mapBuilder.PlaceBlock("dirt", 38, 14, 0);
-            _mapBuilder.PlaceBlock("dirt", 39, 14, 0);
+            _mapBuilder.PlaceBlock("dirt", 37, 14, 5);
+            _mapBuilder.PlaceBlock("dirt", 38, 14, 83);
+            _mapBuilder.PlaceBlock("dirt", 39, 14, 89);
 
             // ROW 15
-            _mapBuilder.PlaceBlock("dirt", 36, 15, 0);
-            _mapBuilder.PlaceBlock("dirt", 37, 15, 0);
-            _mapBuilder.PlaceBlock("dirt", 38, 15, 0);
-            _mapBuilder.PlaceBlock("dirt", 39, 15, 0);
+            _mapBuilder.PlaceBlock("dirt", 36, 15, 78);
+            _mapBuilder.PlaceBlock("dirt", 37, 15, 16);
+            _mapBuilder.PlaceBlock("dirt", 38, 15, 77);
+            _mapBuilder.PlaceBlock("dirt", 39, 15, 89);
 
             // ROW 16
-            _mapBuilder.PlaceBlock("dirt", 10, 16, 0);
+            _mapBuilder.PlaceBlock("dirt", 10, 16, 66);
             _mapBuilder.PlaceBlock("dirt", 11, 16, 0);
-            _mapBuilder.PlaceBlock("dirt", 12, 16, 0);
+            _mapBuilder.PlaceBlock("dirt", 12, 16, 72);
 
-            _mapBuilder.PlaceBlock("dirt", 37, 16, 0);
-            _mapBuilder.PlaceBlock("dirt", 38, 16, 0);
-            _mapBuilder.PlaceBlock("dirt", 39, 16, 0);
+            _mapBuilder.PlaceBlock("dirt", 37, 16, 12);
+            _mapBuilder.PlaceBlock("dirt", 38, 16, 5);
+            _mapBuilder.PlaceBlock("dirt", 39, 16, 83);
 
             // ROW 17
-            _mapBuilder.PlaceBlock("dirt", 10, 17, 0);
-            _mapBuilder.PlaceBlock("dirt", 11, 17, 0);
-            _mapBuilder.PlaceBlock("dirt", 12, 17, 0);
+            _mapBuilder.PlaceBlock("dirt", 10, 17, 14);
+            _mapBuilder.PlaceBlock("dirt", 11, 17, 35);
+            _mapBuilder.PlaceBlock("dirt", 12, 17, 25);
 
-            _mapBuilder.PlaceBlock("dirt", 37, 17, 0);
-            _mapBuilder.PlaceBlock("dirt", 38, 17, 0);
-            _mapBuilder.PlaceBlock("dirt", 39, 17, 0);
+            _mapBuilder.PlaceBlock("dirt", 37, 17, 78);
+            _mapBuilder.PlaceBlock("dirt", 38, 17, 16);
+            _mapBuilder.PlaceBlock("dirt", 39, 17, 83);
 
             // ROW 18
-            _mapBuilder.PlaceBlock("dirt", 3, 18, 0);
-            _mapBuilder.PlaceBlock("dirt", 4, 18, 0);
+            _mapBuilder.PlaceBlock("dirt", 3, 18, 2);
+            _mapBuilder.PlaceBlock("dirt", 4, 18, 72);
 
-            _mapBuilder.PlaceBlock("dirt", 10, 18, 0);
-            _mapBuilder.PlaceBlock("dirt", 11, 18, 0);
-            _mapBuilder.PlaceBlock("dirt", 12, 18, 0);
+            _mapBuilder.PlaceBlock("dirt", 10, 18, 12);
+            _mapBuilder.PlaceBlock("dirt", 11, 18, 11);
+            _mapBuilder.PlaceBlock("dirt", 12, 18, 20);
 
-            _mapBuilder.PlaceBlock("dirt", 24, 18, 0);
+            _mapBuilder.PlaceBlock("dirt", 24, 18, 23);
 
-            _mapBuilder.PlaceBlock("dirt", 38, 18, 0);
-            _mapBuilder.PlaceBlock("dirt", 39, 18, 0);
+            _mapBuilder.PlaceBlock("dirt", 38, 18, 78);
+            _mapBuilder.PlaceBlock("dirt", 39, 18, 16);
 
             // ROW 19
-            _mapBuilder.PlaceBlock("dirt", 0, 19, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 19, 89);
 
-            _mapBuilder.PlaceBlock("dirt", 2, 19, 0);
-            _mapBuilder.PlaceBlock("dirt", 3, 19, 0);
-            _mapBuilder.PlaceBlock("dirt", 4, 19, 0);
+            _mapBuilder.PlaceBlock("dirt", 2, 19, 47);
+            _mapBuilder.PlaceBlock("dirt", 3, 19, 23);
+            _mapBuilder.PlaceBlock("dirt", 4, 19, 20);
 
-            _mapBuilder.PlaceBlock("dirt", 10, 19, 0);
-            _mapBuilder.PlaceBlock("dirt", 11, 19, 0);
-            _mapBuilder.PlaceBlock("dirt", 12, 19, 0);
-            _mapBuilder.PlaceBlock("dirt", 13, 19, 0);
-            _mapBuilder.PlaceBlock("dirt", 14, 19, 0);
+            _mapBuilder.PlaceBlock("dirt", 10, 19, 14);
+            _mapBuilder.PlaceBlock("dirt", 11, 19, 11);
+            _mapBuilder.PlaceBlock("dirt", 12, 19, 10);
+            _mapBuilder.PlaceBlock("dirt", 13, 19, 3);
+            _mapBuilder.PlaceBlock("dirt", 14, 19, 1);
 
-            _mapBuilder.PlaceBlock("dirt", 24, 19, 0);
-            _mapBuilder.PlaceBlock("dirt", 25, 19, 0);
+            _mapBuilder.PlaceBlock("dirt", 24, 19, 41);
+            _mapBuilder.PlaceBlock("dirt", 25, 19, 59);
 
-            _mapBuilder.PlaceBlock("dirt", 39, 19, 0);
+            _mapBuilder.PlaceBlock("dirt", 39, 19, 12);
 
             // ROW 20
-            _mapBuilder.PlaceBlock("dirt", 0, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 1, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 2, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 3, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 4, 20, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 20, 89);
+            _mapBuilder.PlaceBlock("dirt", 1, 20, 83);
+            _mapBuilder.PlaceBlock("dirt", 2, 20, 77);
+            _mapBuilder.PlaceBlock("dirt", 3, 20, 17);
+            _mapBuilder.PlaceBlock("dirt", 4, 20, 19);
 
-            _mapBuilder.PlaceBlock("dirt", 10, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 11, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 12, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 13, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 14, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 15, 20, 0);
+            _mapBuilder.PlaceBlock("dirt", 10, 20, 14);
+            _mapBuilder.PlaceBlock("dirt", 11, 20, 29);
+            _mapBuilder.PlaceBlock("dirt", 12, 20, 83);
+            _mapBuilder.PlaceBlock("dirt", 13, 20, 29);
+            _mapBuilder.PlaceBlock("dirt", 14, 20, 17);
+            _mapBuilder.PlaceBlock("dirt", 15, 20, 11);
 
-            _mapBuilder.PlaceBlock("dirt", 22, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 23, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 24, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 25, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 26, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 27, 20, 0);
-            _mapBuilder.PlaceBlock("dirt", 28, 20, 0);
+            _mapBuilder.PlaceBlock("dirt", 22, 20, 89);
+            _mapBuilder.PlaceBlock("dirt", 23, 20, 83);
+            _mapBuilder.PlaceBlock("dirt", 24, 20, 77);
+            _mapBuilder.PlaceBlock("dirt", 25, 20, 10);
+            _mapBuilder.PlaceBlock("dirt", 26, 20, 2);
+            _mapBuilder.PlaceBlock("dirt", 27, 20, 1);
+            _mapBuilder.PlaceBlock("dirt", 28, 20, 72);
 
-            _mapBuilder.PlaceBlock("dirt", 39, 20, 0);
+            _mapBuilder.PlaceBlock("dirt", 39, 20, 13);
 
             // ROW 21
-            _mapBuilder.PlaceBlock("dirt", 0, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 1, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 2, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 3, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 4, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 5, 21, 0);
+            _mapBuilder.PlaceBlock("dirt", 0, 21, 89);
+            _mapBuilder.PlaceBlock("dirt", 1, 21, 89);
+            _mapBuilder.PlaceBlock("dirt", 2, 21, 83);
+            _mapBuilder.PlaceBlock("dirt", 3, 21, 77);
+            _mapBuilder.PlaceBlock("dirt", 4, 21, 10);
+            _mapBuilder.PlaceBlock("dirt", 5, 21, 3);
             _mapBuilder.PlaceBlock("dirt", 6, 21, 0);
             _mapBuilder.PlaceBlock("dirt", 7, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 8, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 9, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 10, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 11, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 12, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 13, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 14, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 15, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 16, 21, 0);
+            _mapBuilder.PlaceBlock("dirt", 8, 21, 2);
+            _mapBuilder.PlaceBlock("dirt", 9, 21, 2);
+            _mapBuilder.PlaceBlock("dirt", 10, 21, 22);
+            _mapBuilder.PlaceBlock("dirt", 11, 21, 77);
+            _mapBuilder.PlaceBlock("dirt", 12, 21, 83);
+            _mapBuilder.PlaceBlock("dirt", 13, 21, 89);
+            _mapBuilder.PlaceBlock("dirt", 14, 21, 89);
+            _mapBuilder.PlaceBlock("dirt", 15, 21, 89);
+            _mapBuilder.PlaceBlock("dirt", 16, 21, 89);
 
 
-            _mapBuilder.PlaceBlock("dirt", 22, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 23, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 24, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 25, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 26, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 27, 21, 0);
-            _mapBuilder.PlaceBlock("dirt", 28, 21, 0);
+            _mapBuilder.PlaceBlock("dirt", 22, 21, 89);
+            _mapBuilder.PlaceBlock("dirt", 23, 21, 89);
+            _mapBuilder.PlaceBlock("dirt", 24, 21, 83);
+            _mapBuilder.PlaceBlock("dirt", 25, 21, 77);
+            _mapBuilder.PlaceBlock("dirt", 26, 21, 17);
+            _mapBuilder.PlaceBlock("dirt", 27, 21, 59);
+            _mapBuilder.PlaceBlock("dirt", 28, 21, 20);
 
-            _mapBuilder.PlaceBlock("dirt", 39, 21, 0);
+            _mapBuilder.PlaceBlock("dirt", 39, 21, 12);
 
             /* --------------- GIRDER BLOCKS ---------------*/
 
@@ -421,86 +423,86 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("girder", 21, 0, 4);
 
             // ROW 1
-            _mapBuilder.PlaceBlock("girder", 4, 1, 4);
-            _mapBuilder.PlaceBlock("girder", 21, 1, 4);
+            _mapBuilder.PlaceBlock("girder", 4, 1, 12);
+            _mapBuilder.PlaceBlock("girder", 21, 1, 12);
 
             // ROW 2
-            _mapBuilder.PlaceBlock("girder", 4, 2, 4);
-            _mapBuilder.PlaceBlock("girder", 8, 2, 4);
+            _mapBuilder.PlaceBlock("girder", 4, 2, 12);
+            _mapBuilder.PlaceBlock("girder", 8, 2, 12);
 
-            _mapBuilder.PlaceBlock("girder", 21, 2, 4);
+            _mapBuilder.PlaceBlock("girder", 21, 2, 12);
 
             // ROW 3
-            _mapBuilder.PlaceBlock("girder", 4, 3, 4);
-            _mapBuilder.PlaceBlock("girder", 5, 3, 4);
-            _mapBuilder.PlaceBlock("girder", 6, 3, 4);
-            _mapBuilder.PlaceBlock("girder", 8, 3, 4);
+            _mapBuilder.PlaceBlock("girder", 4, 3, 12);
+            _mapBuilder.PlaceBlock("girder", 5, 3, 6);
+            _mapBuilder.PlaceBlock("girder", 6, 3, 3);
+            _mapBuilder.PlaceBlock("girder", 8, 3, 12);
             _mapBuilder.PlaceBlock("girder", 21, 3, 4);
 
             // ROW 4
-            _mapBuilder.PlaceBlock("girder", 4, 4, 4);
-            _mapBuilder.PlaceBlock("girder", 8, 4, 4);
+            _mapBuilder.PlaceBlock("girder", 4, 4, 12);
+            _mapBuilder.PlaceBlock("girder", 8, 4, 12);
 
             // ROW 5
-            _mapBuilder.PlaceBlock("girder", 4, 5, 4);
-            _mapBuilder.PlaceBlock("girder", 8, 5, 4);
+            _mapBuilder.PlaceBlock("girder", 4, 5, 12);
+            _mapBuilder.PlaceBlock("girder", 8, 5, 12);
 
             // ROW 6
             _mapBuilder.PlaceBlock("girder", 4, 6, 4);
-            _mapBuilder.PlaceBlock("girder", 5, 6, 4);
-            _mapBuilder.PlaceBlock("girder", 6, 6, 4);
-            _mapBuilder.PlaceBlock("girder", 7, 6, 4);
+            _mapBuilder.PlaceBlock("girder", 5, 6, 9);
+            _mapBuilder.PlaceBlock("girder", 6, 6, 9);
+            _mapBuilder.PlaceBlock("girder", 7, 6, 9);
             _mapBuilder.PlaceBlock("girder", 8, 6, 4);
 
             // ROW 8
             _mapBuilder.PlaceBlock("girder", 0, 8, 4);
 
             // ROW 9
-            _mapBuilder.PlaceBlock("girder", 0, 9, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 9, 12);
 
             // ROW 10
-            _mapBuilder.PlaceBlock("girder", 0, 10, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 10, 12);
 
-            _mapBuilder.PlaceBlock("girder", 18, 10, 4);
-            _mapBuilder.PlaceBlock("girder", 19, 10, 4);
-            _mapBuilder.PlaceBlock("girder", 20, 10, 4);
+            _mapBuilder.PlaceBlock("girder", 18, 10, 67);
+            _mapBuilder.PlaceBlock("girder", 19, 10, 25);
+            _mapBuilder.PlaceBlock("girder", 20, 10, 21);
             _mapBuilder.PlaceBlock("girder", 21, 10, 4);
 
             // ROW 11
-            _mapBuilder.PlaceBlock("girder", 0, 11, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 11, 12);
 
-            _mapBuilder.PlaceBlock("girder", 18, 11, 4);
+            _mapBuilder.PlaceBlock("girder", 18, 11, 12);
 
-            _mapBuilder.PlaceBlock("girder", 21, 11, 4);
+            _mapBuilder.PlaceBlock("girder", 21, 11, 12);
 
             // ROW 12
-            _mapBuilder.PlaceBlock("girder", 0, 12, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 12, 12);
 
-            _mapBuilder.PlaceBlock("girder", 18, 12, 4);
+            _mapBuilder.PlaceBlock("girder", 18, 12, 12);
 
-            _mapBuilder.PlaceBlock("girder", 21, 12, 4);
+            _mapBuilder.PlaceBlock("girder", 21, 12, 12);
 
             // ROW 13
-            _mapBuilder.PlaceBlock("girder", 0, 13, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 13, 12);
 
-            _mapBuilder.PlaceBlock("girder", 18, 13, 4);
-            _mapBuilder.PlaceBlock("girder", 19, 13, 4);
-            _mapBuilder.PlaceBlock("girder", 20, 13, 4);
-            _mapBuilder.PlaceBlock("girder", 21, 13, 4);
+            _mapBuilder.PlaceBlock("girder", 18, 13, 12);
+            _mapBuilder.PlaceBlock("girder", 19, 13, 24);
+            _mapBuilder.PlaceBlock("girder", 20, 13, 0);
+            _mapBuilder.PlaceBlock("girder", 21, 13, 12);
 
             // ROW 14
-            _mapBuilder.PlaceBlock("girder", 0, 14, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 14, 12);
 
-            _mapBuilder.PlaceBlock("girder", 18, 14, 4);
+            _mapBuilder.PlaceBlock("girder", 18, 14, 12);
 
             // ROW 15
-            _mapBuilder.PlaceBlock("girder", 0, 15, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 15, 12);
 
             // ROW 16
-            _mapBuilder.PlaceBlock("girder", 0, 16, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 16, 12);
 
             // ROW 17
-            _mapBuilder.PlaceBlock("girder", 0, 17, 4);
+            _mapBuilder.PlaceBlock("girder", 0, 17, 12);
 
             // ROW 18
             _mapBuilder.PlaceBlock("girder", 0, 18, 4);
@@ -510,21 +512,21 @@ namespace Celeste.Blocks.Rooms
             // 12 IS PLACEHOLDER
 
             // ROW 0
-            _mapBuilder.PlaceBlock("cement", 25, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 26, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 27, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 28, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 29, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 30, 0, 12);
+            _mapBuilder.PlaceBlock("cement", 25, 0, 6);
+            _mapBuilder.PlaceBlock("cement", 26, 0, 7);
+            _mapBuilder.PlaceBlock("cement", 27, 0, 8);
+            _mapBuilder.PlaceBlock("cement", 28, 0, 9);
+            _mapBuilder.PlaceBlock("cement", 29, 0, 6);
+            _mapBuilder.PlaceBlock("cement", 30, 0, 85);
 
-            _mapBuilder.PlaceBlock("cement", 36, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 37, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 38, 0, 12);
-            _mapBuilder.PlaceBlock("cement", 39, 0, 12);
+            _mapBuilder.PlaceBlock("cement", 36, 0, 14);
+            _mapBuilder.PlaceBlock("cement", 37, 0, 53);
+            _mapBuilder.PlaceBlock("cement", 38, 0, 65);
+            _mapBuilder.PlaceBlock("cement", 39, 0, 89);
 
             // ROW 1
-            _mapBuilder.PlaceBlock("cement", 36, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 37, 1, 12);
+            _mapBuilder.PlaceBlock("cement", 36, 1, 14);
+            _mapBuilder.PlaceBlock("cement", 37, 1, 53);
 
             /* --------------- HAZARDS BLOCKS ---------------*/
 

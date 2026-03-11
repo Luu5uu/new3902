@@ -38,6 +38,20 @@ namespace Celeste.Blocks
             TryLoad(content, "top_a02");
             TryLoad(content, "top_a03");
 
+            // new for sprint 3
+            TryLoad(content, "box");
+            TryLoad(content, "boxAndBottle");
+            TryLoad(content, "constructionSign");
+            TryLoad(content, "ladder");
+            TryLoad(content, "paintBuckets");
+            TryLoad(content, "signE");
+            TryLoad(content, "signGreenForward");
+            TryLoad(content, "signNoDash");
+            TryLoad(content, "signNoUp");
+            TryLoad(content, "trafficLight");
+            TryLoad(content, "trafficLightBroken");
+            TryLoad(content, "wood");
+
             CalculateFrames();
         }
 

@@ -176,7 +176,7 @@ namespace Celeste
         {
             _worldMap.ClearBlocks();
 
-            _roomFive.PlaceRoomFiveBlocks();
+            _roomOne.PlaceRoomOneBlocks();
 
 
         }
