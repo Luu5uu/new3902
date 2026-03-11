@@ -7,23 +7,31 @@ namespace Celeste.Blocks.Rooms
     {
         private MapBuilder _mapBuilder;
         private BlockFactory _blockFactory;
+        private RoomLoader _roomLoader;
 
 
         public RoomOne(MapBuilder mapBuilder, BlockFactory blockFactory)
         {
             _mapBuilder = mapBuilder;
             _blockFactory = blockFactory;
+            _roomLoader = new RoomLoader(_mapBuilder, _blockFactory);
         }
 
         public void PlaceRoomOneBlocks()
         {
             _mapBuilder.ClearBlocks();
 
+            // csv version:
+            string filePath = "Content/Rooms/RoomOne.csv";
+            _roomLoader.LoadRoom(filePath);
+
+
+
             // the format: (SOURCE, IN-GAME X COORD, IN-GAME Y COORD, FRAME FROM TILESHEET)
 
             /* --------------- SNOW BLOCKS ---------------*/
             // ROW 1
-            _mapBuilder.PlaceBlock("snow", 0, 0, 83);
+            /* _mapBuilder.PlaceBlock("snow", 0, 0, 83);
             _mapBuilder.PlaceBlock("snow", 1, 0, 77);
             _mapBuilder.PlaceBlock("snow", 2, 0, 47);
             _mapBuilder.PlaceBlock("snow", 3, 0, 41);
@@ -226,7 +234,7 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("snow", 20, 21, 89);
             _mapBuilder.PlaceBlock("snow", 21, 21, 89);
 
-            /* --------------- DIRT BLOCKS ---------------*/
+            / --------------- DIRT BLOCKS ---------------/
 
             // the format: (SOURCE, IN-GAME X COORD, IN-GAME Y COORD, FRAME FROM TILESHEET)
 
@@ -414,7 +422,7 @@ namespace Celeste.Blocks.Rooms
 
             _mapBuilder.PlaceBlock("dirt", 39, 21, 12);
 
-            /* --------------- GIRDER BLOCKS ---------------*/
+            / --------------- GIRDER BLOCKS --------------- /
 
             // 4 IS PLACEHOLDER
 
@@ -507,7 +515,7 @@ namespace Celeste.Blocks.Rooms
             // ROW 18
             _mapBuilder.PlaceBlock("girder", 0, 18, 4);
 
-            /* --------------- CEMENT BLOCKS ---------------*/
+            / --------------- CEMENT BLOCKS --------------- /
 
             // 12 IS PLACEHOLDER
 
@@ -528,7 +536,7 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("cement", 36, 1, 14);
             _mapBuilder.PlaceBlock("cement", 37, 1, 53);
 
-            /* --------------- HAZARDS BLOCKS ---------------*/
+            /  --------------- HAZARDS BLOCKS --------------- /
 
             // SPIKES
             _mapBuilder.PlaceBlock("leftSpike", 33, 10, 0);
@@ -554,7 +562,7 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("upSpike", 6, 20, 0);
             _mapBuilder.PlaceBlock("upSpike", 7, 20, 0);
             _mapBuilder.PlaceBlock("upSpike", 8, 20, 0);
-            _mapBuilder.PlaceBlock("upSpike", 9, 20, 0);
+            _mapBuilder.PlaceBlock("upSpike", 9, 20, 0); */
         }
     }
 }
