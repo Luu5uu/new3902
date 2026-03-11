@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Celeste.Sprites
 {
     // Composite sprite: hairless body + procedural hair, following Celeste's approach.
-    public sealed class MaddySprite : IMaddySprite
+    public sealed partial class MaddySprite : IMaddySprite
     {
         private readonly BodySprite<PlayerState> _body;
         private readonly HairRenderer _hair;
@@ -63,6 +63,10 @@ namespace Celeste.Sprites
             hair.LoadContent(content);
 
             var maddy = new MaddySprite(body, hair);
+
+            // NEW: store content for config loading and run Task-K initialization
+            maddy.SetHairContent(content);
+            maddy.LoadHairConfigAndInit(catalog);
 
             maddy._allAnims.Add((PlayerState.Idle, "idled"));
             maddy._allAnims.Add((PlayerState.IdleFidgetA, "idlea"));

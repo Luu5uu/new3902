@@ -1,0 +1,23 @@
+<Atlas texture="NewContent">
+  <!-- Player -->
+  <Clip key="Player/IdleFidgetA" x="0"   y="0"   w="32" h="32" frames="12" fps="6"  loop="false" framesPerRow="12" />
+  <Clip key="Player/IdleFidgetB" x="0"   y="32"  w="32" h="32" frames="24" fps="6"  loop="false" framesPerRow="24" />
+  <Clip key="Player/IdleFidgetC" x="0"   y="64"  w="32" h="32" frames="12" fps="6"  loop="false" framesPerRow="12" />
+  <Clip key="Player/Idle"       x="0"   y="96"  w="32" h="32" frames="9" fps="6"  loop="true"  framesPerRow="9" />
+  <Clip key="Player/ClimbUp"     x="0"   y="128" w="32" h="32" frames="6" fps="12" loop="true"  framesPerRow="6" />
+  <Clip key="Player/Dangling"    x="0"   y="160" w="32" h="32" frames="10" fps="8"  loop="true"  framesPerRow="10" />
+  <Clip key="Player/Run"         x="0"   y="192" w="32" h="32" frames="12" fps="12" loop="true"  framesPerRow="12" />
+  <Clip key="Player/Dash"        x="0"   y="224" w="32" h="32" frames="4" fps="8"  loop="false" framesPerRow="4" />
+  <Clip key="Player/JumpFast"    x="0"   y="256" w="32" h="32" frames="2" fps="4"  loop="false" framesPerRow="2" />
+  <Clip key="Player/FallSlow"    x="0"   y="288" w="32" h="32" frames="2" fps="4"  loop="true"  framesPerRow="2" />
+  <Clip key="Player/Death"       x="0"   y="320" w="32" h="32" frames="16" fps="8"  loop="false" framesPerRow="16" />
+  <Clip key="Player/Standard"    x="0"   y="352" w="32" h="32" frames="1" fps="1"  loop="true"  framesPerRow="1" />
+  <!-- Item -->
+  <Clip key="Item/NormalStaw"    x="0"   y="384" w="32" h="32" frames="7" fps="8"  loop="true"  framesPerRow="7" />
+  <Clip key="Item/FlyStaw"       x="0"   y="416" w="40" h="40" frames="10" fps="8"  loop="true"  framesPerRow="10" />
+  <Clip key="Item/Crystal"       x="0"   y="456" w="20" h="20" frames="14" fps="8"  loop="true"  framesPerRow="14" />
+  <!-- Devices -->
+  <Clip key="Devices/Spring"     x="0"   y="476" w="16" h="16" frames="7" fps="4"  loop="true"  framesPerRow="7" />
+  <Clip key="Devices/MoveBlock"  x="0"   y="492" w="24" h="24" frames="3" fps="4"  loop="true"  framesPerRow="3" />
+  <Clip key="Devices/CrushBlock" x="0"   y="516" w="32" h="32" frames="3" fps="4"  loop="true"  framesPerRow="3" />
+</Atlas>

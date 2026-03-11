@@ -67,5 +67,24 @@ namespace Celeste.Blocks
         }
 
         public void Draw(SpriteBatch spriteBatch) => _animation.Draw(spriteBatch, Position, Scale);
+
+        public Rectangle Bounds
+        {
+            get
+            {
+                var tex = Texture;
+                if (tex == null) return Rectangle.Empty;
+
+                int w = (int)(tex.Width * Scale);
+                int h = (int)(tex.Height * Scale);
+
+                return new Rectangle(
+                    (int)Position.X,
+                    (int)Position.Y,
+                    w,
+                    h
+                );
+            }
+        }
     }
 }

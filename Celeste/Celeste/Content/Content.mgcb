@@ -61,18 +61,6 @@
 /processorParam:TextureFormat=Color
 /build:cement.png
 
-#begin climbup.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:climbup.png
-
 #begin crushBlock.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -337,7 +325,7 @@
 /processorParam:TextureFormat=Color
 /build:snow.png
 
-#begin spikeUp.png
+#begin upSpike.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -372,6 +360,19 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:standard.png
+
+
+#begin NewContent.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:NewContent.png
 
 #begin top_a00.png
 /importer:TextureImporter

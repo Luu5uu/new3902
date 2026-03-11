@@ -1,7 +1,9 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 
 namespace Celeste.Blocks
 {
@@ -98,6 +100,14 @@ namespace Celeste.Blocks
                 return count;
             }
             return 0;
+        }
+
+
+        public IHazard CreateHazerd(string type, Vector2 position)
+        {
+            return BlockTextures.TryGetValue(type, out var tex)
+                ? new Hazard(type, position, tex)
+                : null;
         }
     }
 }

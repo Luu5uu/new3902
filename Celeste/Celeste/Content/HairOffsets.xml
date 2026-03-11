@@ -1,0 +1,139 @@
+<HairOffsets>
+  <!-- idleD: 9 frames -->
+  <Anim name="idled">
+    <F dx="0" dy="0" />
+    <F dx="0" dy="0" />
+    <F dx="0" dy="0" />
+    <F dx="0" dy="0" />
+    <F dx="0" dy="1" />
+    <F dx="0" dy="1" />
+    <F dx="0" dy="1" />
+    <F dx="0" dy="1" />
+    <F dx="0" dy="1" />
+  </Anim>
+
+  <!-- idleA: 12 frames -->
+  <Anim name="idlea">
+    <F dx="0"  dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="1" />
+    <F dx="-1" dy="1" />
+    <F dx="-1" dy="1" />
+    <F dx="-2" dy="1" />
+    <F dx="-1" dy="1" />
+    <F dx="0"  dy="1" />
+    <F dx="0"  dy="1" />
+  </Anim>
+
+  <!-- run: 12 frames -->
+  <Anim name="run">
+    <F dx="1" dy="0" />
+    <F dx="1" dy="1" />
+    <F dx="1" dy="1" />
+    <F dx="1" dy="1" />
+    <F dx="1" dy="-1" />
+    <F dx="1" dy="0" />
+    <F dx="1" dy="1" />
+    <F dx="1" dy="1" />
+    <F dx="1" dy="1" />
+    <F dx="1" dy="1" />
+    <F dx="1" dy="-1" />
+    <F dx="1" dy="0" />
+  </Anim>
+
+  <!-- dash: 4 frames -->
+  <Anim name="dash">
+    <F dx="2" dy="1" />
+    <F dx="2" dy="1" />
+    <F dx="2" dy="1" />
+    <F dx="2" dy="2" />
+  </Anim>
+
+  <!-- jumpfast: 2 frames -->
+  <Anim name="jumpfast">
+    <F dx="1" dy="-1" />
+    <F dx="1" dy="-1" />
+  </Anim>
+
+  <!-- fallslow: 2 frames -->
+  <Anim name="fallslow">
+    <F dx="1" dy="0" />
+    <F dx="0" dy="0" />
+  </Anim>
+
+  <!-- climbup: 6 frames -->
+  <Anim name="climbup">
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+  </Anim>
+
+  <!-- dangling: 10 frames -->
+  <Anim name="dangling">
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+  </Anim>
+
+  <!-- idleB: 24 frames -->
+  <Anim name="idleb">
+    <F dx="0"  dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="-1" dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="1" />
+    <F dx="0"  dy="1" />
+    <F dx="0"  dy="1" />
+    <F dx="0"  dy="1" />
+    <F dx="0"  dy="1" />
+  </Anim>
+
+  <!-- idleC: 12 frames -->
+  <Anim name="idlec">
+    <F dx="-1" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="-2" dy="0" />
+    <F dx="2"  dy="1" />
+    <F dx="3"  dy="2" />
+    <F dx="0"  dy="2" />
+    <F dx="-1" dy="1" />
+    <F dx="0"  dy="1" />
+    <F dx="0"  dy="0" />
+  </Anim>
+
+  <!-- standard: 1 frame -->
+  <Anim name="standard">
+    <F dx="0" dy="0" />
+  </Anim>
+</HairOffsets>

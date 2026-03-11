@@ -1,47 +1,44 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Celeste.Animation
 {
     /// <summary>
-    /// Pure animation data for a horizontal sprite strip.
-    /// This type contains no playback state (no currentFrame, no timers).
-    /// Gameplay systems can implement their own animator/player using this data.
+    /// Pure animation data for a clip inside a sprite sheet (atlas).
+    /// No playback state.
     /// </summary>
-    /// <author> Albert Liu </author>
     public sealed class AnimationClip
     {
-        /// <summary>The underlying sprite strip texture (frames laid out horizontally).</summary>
         public Texture2D Texture { get; init; } = null!;
 
-        /// <summary>Width of one frame in pixels.</summary>
+        public int StartX { get; init; }
+        public int StartY { get; init; }
+
         public int FrameWidth { get; init; }
-
-        /// <summary>Height of one frame in pixels.</summary>
         public int FrameHeight { get; init; }
-
-        /// <summary>Total frames in the strip.</summary>
         public int FrameCount { get; init; }
 
-        /// <summary>Playback FPS metadata (consumer decides how to use it).</summary>
-        public float Fps { get; init; }
+        public int FramesPerRow { get; init; }  // must be >= 1
 
-        /// <summary>Loop metadata (consumer decides how to use it).</summary>
+        public float Fps { get; init; }
         public bool Loop { get; init; }
 
-        /// <summary>
-        /// Gets the source rectangle for a specific frame index.
-        /// </summary>
         public Rectangle GetSourceRect(int frameIndex)
         {
-            if (FrameCount <= 0)
-                throw new System.InvalidOperationException("FrameCount must be > 0.");
-
-            // Allow consumers to mod/clamp externally; here we just validate range.
+            if (FrameCount <= 0) throw new InvalidOperationException("FrameCount must be > 0.");
             if (frameIndex < 0 || frameIndex >= FrameCount)
-                throw new System.ArgumentOutOfRangeException(nameof(frameIndex), $"frameIndex {frameIndex} out of range [0, {FrameCount - 1}].");
+                throw new ArgumentOutOfRangeException(nameof(frameIndex));
 
-            return new Rectangle(frameIndex * FrameWidth, 0, FrameWidth, FrameHeight);
+            int fpr = FramesPerRow > 0 ? FramesPerRow : FrameCount;
+
+            int col = frameIndex % fpr;
+            int row = frameIndex / fpr;
+
+            int x = StartX + col * FrameWidth;
+            int y = StartY + row * FrameHeight;
+
+            return new Rectangle(x, y, FrameWidth, FrameHeight);
         }
     }
 }
