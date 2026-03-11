@@ -7,6 +7,7 @@ using Celeste.Animation;
 using Celeste.Character;
 using Celeste.Items;
 using Celeste.Blocks;
+using Celeste.Blocks.Rooms;
 using Celeste.DevTools;
 using Celeste.Input;
 
@@ -40,6 +41,14 @@ namespace Celeste
         private int _totalItems = 3;
         private int _totalBlocks;            // Set from _blockList.Count after load
 
+        // new additions
+        private MapBuilder _worldMap;
+        private RoomOne _roomOne;
+        private RoomTwo _roomTwo;
+        private RoomThree _roomThree;
+        private RoomFour _roomFour;
+        private RoomFive _roomFive;
+
         private List<IBlocks> _blockList;
 
         /// <summary>When true, the currently displayed block (if animated) is updated each frame.</summary>
@@ -51,6 +60,11 @@ namespace Celeste
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
+
+            // TODO: update  sprites/blocks scale later
+            //_graphics.PreferredBackBufferWidth = 1280;
+            //_graphics.PreferredBackBufferHeight = 720;
+
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -119,6 +133,25 @@ namespace Celeste
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
             _controllerLoader = new ControllerLoader(this);
+
+            _worldMap = new MapBuilder(factory, 50, 30);
+            _roomOne = new RoomOne(_worldMap, factory);
+            _roomTwo = new RoomTwo(_worldMap, factory);
+            _roomThree = new RoomThree(_worldMap, factory);
+            _roomFour = new RoomFour(_worldMap, factory);
+            _roomFive = new RoomFive(_worldMap, factory);
+
+            BuildTestMap();
+        }
+
+        // for debugging and figuring out map values
+        private void BuildTestMap()
+        {
+            _worldMap.ClearBlocks();
+
+            _roomFive.PlaceRoomFiveBlocks();
+
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -169,10 +202,13 @@ namespace Celeste
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+
             // CullNone needed: BodySprite flips via negative X scale.
             _spriteBatch.Begin(
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
+
+            _worldMap.Draw(_spriteBatch);
 
             _player.Draw(_spriteBatch);
 
@@ -200,7 +236,9 @@ namespace Celeste
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);
             else
-                Window.Title = "Celeste";
+
+                // to get resolution
+                Window.Title = $"Celeste - {Window.ClientBounds.Width}x{Window.ClientBounds.Height}";
 
             _spriteBatch.End();
             base.Draw(gameTime);
@@ -210,7 +248,7 @@ namespace Celeste
         {
             _activeItemIndex += direction;
 
-            if (_activeItemIndex < 0) _activeItemIndex = _totalItems -1;
+            if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
             if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
         }
 
@@ -218,7 +256,7 @@ namespace Celeste
         {
             _activeBlockIndex += direction;
 
-            if (_activeBlockIndex < 0) _activeBlockIndex = _totalBlocks -1;
+            if (_activeBlockIndex < 0) _activeBlockIndex = _totalBlocks - 1;
             if (_activeBlockIndex >= _totalBlocks) _activeBlockIndex = 0;
         }
 
