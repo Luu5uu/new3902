@@ -82,6 +82,8 @@ namespace Celeste.Character
 
         private struct GhostFrame { public Vector2 Position; public bool FaceLeft; public float Alpha; }
         private readonly List<GhostFrame> _ghosts = new();
+        private Texture2D _ghostBodyTex;
+
         public void AddGhost(Vector2 pos, bool faceLeft) =>
             _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
 
@@ -111,6 +113,26 @@ namespace Celeste.Character
         {
             _deathClip = deathClip;
             _deathDotTex = dotTexture;
+            BuildGhostTexture();
+        }
+
+        private void BuildGhostTexture()
+        {
+            Texture2D source = Maddy.BodyAtlasTexture;
+
+            Color[] pixels = new Color[source.Width * source.Height];
+            source.GetData(pixels);
+
+            // Replace every non-transparent pixel with premultiplied white
+            // so the ghost can be tinted to any solid color
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                byte a = pixels[i].A;
+                pixels[i] = new Color(a, a, a, a);
+            }
+
+            _ghostBodyTex = new Texture2D(source.GraphicsDevice, source.Width, source.Height);
+            _ghostBodyTex.SetData(pixels);
         }
 
         public void Reset()
@@ -208,8 +230,17 @@ namespace Celeste.Character
                 return;
             }
 
-            foreach (var g in _ghosts)
-                Maddy.Body.Draw(spriteBatch, g.Position, Color.White * g.Alpha, DefaultScale, g.FaceLeft);
+            if (_ghostBodyTex != null && _ghosts.Count > 0)
+            {
+                var (src, origin) = Maddy.BodyCurrentFrame;
+                var ghostColor = new Color(44, 183, 255);
+                foreach (var g in _ghosts)
+                {
+                    float scaleX = g.FaceLeft ? -DefaultScale : DefaultScale;
+                    spriteBatch.Draw(_ghostBodyTex, g.Position, src, ghostColor * g.Alpha,
+                        0f, origin, new Vector2(scaleX, DefaultScale), SpriteEffects.None, 0f);
+                }
+            }
 
             Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
         }
