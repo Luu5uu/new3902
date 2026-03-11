@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -78,6 +79,11 @@ namespace Celeste.Character
         private Texture2D _deathDotTex;
         public DeathEffect _deathEffect;
 
+        private struct GhostFrame { public Vector2 Position; public bool FaceLeft; public float Alpha; }
+        private readonly List<GhostFrame> _ghosts = new();
+        public void AddGhost(Vector2 pos, bool faceLeft) =>
+            _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
+
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
             Maddy = MaddySprite.Build(content, catalog);
@@ -137,6 +143,15 @@ namespace Celeste.Character
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            // Decay ghost trail alphas
+            for (int i = _ghosts.Count - 1; i >= 0; i--)
+            {
+                var g = _ghosts[i];
+                g.Alpha -= dt * 4f;
+                if (g.Alpha <= 0f) { _ghosts.RemoveAt(i); continue; }
+                _ghosts[i] = g;
+            }
+
             if (deathPressed && _deathClip != null && _deathDotTex != null && _deathEffect == null)
             {
                 changeState(deathState);
@@ -191,6 +206,9 @@ namespace Celeste.Character
                 _deathEffect.Draw(spriteBatch);
                 return;
             }
+
+            foreach (var g in _ghosts)
+                Maddy.Body.Draw(spriteBatch, g.Position, Color.White * g.Alpha, DefaultScale, g.FaceLeft);
 
             Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
         }
