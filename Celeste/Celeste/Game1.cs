@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using Celeste.Utils;
 using Celeste.Collision;
 using System.Linq;
+using System.Globalization;
 
 namespace Celeste
 {
@@ -57,6 +58,10 @@ namespace Celeste
         List<IHazard> hazards;
         HazardCollisioncs HazardCollisioncs;
 
+        //worldBound
+
+        Rectangle worldBound;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -75,6 +80,7 @@ namespace Celeste
                 Window.ClientBounds.Width / 2f,
                 Window.ClientBounds.Height / 2f);
 
+            worldBound = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
             _player = new Madeline(Content, _catalog, startPos);
 
             // ===== Inject DeathAnimation resources (no constructor change) =====
