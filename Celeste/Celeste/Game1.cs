@@ -183,6 +183,8 @@ namespace Celeste
             {
                 case 1:
                     _roomOne.PlaceRoomOneBlocks();
+                    _player.position = new Vector2(250, 2000);
+                    _player.RespawnPoint = new Vector2(250, 200);
                     break;
                 case 2:
                     _roomTwo.PlaceRoomTwoBlocks();
