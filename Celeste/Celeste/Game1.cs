@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -39,9 +39,11 @@ namespace Celeste
         private Texture2D _deathDotTex;
 
         private ControllerLoader _controllerLoader;
-        private int _activeItemIndex = 0;
+
+        private List<string> _scenes = new List<string> { "Scene1", "Scene2", "Scene3" };
+        private int _activeSceneIndex = 0;
+        private int _activeItemIndex = 0;   // 0 = normal staw, 1 = fly staw, 2 = crystal
         private int _activeBlockIndex = 0;  // T = previous, Y = next; only this block is drawn
-        private int _totalItems = 3;
         private int _totalBlocks;            // Set from _blockList.Count after load
 
         // new additions
@@ -58,8 +60,6 @@ namespace Celeste
         /// <summary>When true, the currently displayed block (if animated) is updated each frame.</summary>
         private bool _blockAnimateEnabled;
 
-        /// <summary>When true, the current block/obstacle is drawn. Toggle with V.</summary>
-        private bool _blocksVisible = true;
 
         // Test collision and platform
         List<IBlocks> platform;
@@ -160,7 +160,7 @@ namespace Celeste
 
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
-            _controllerLoader = new ControllerLoader(this);
+            _controllerLoader = new ControllerLoader(this, _player);
 
             _worldMap = new MapBuilder(factory, 50, 30);
             _roomOne = new RoomOne(_worldMap, factory);
@@ -211,7 +211,7 @@ namespace Celeste
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+                Exit(); // dont think we need this since we have a QuitCommand already handled in keyboard controller.
 
             var kb = Keyboard.GetState();
             _debugOverlay.HandleInput(kb, _player);
@@ -229,10 +229,6 @@ namespace Celeste
                 // rebuild room when changed
                 BuildMap();
             }
-
-            var cmd = PlayerCommand.FromKeyboard(kb, _prevKb);
-            _prevKb = kb;
-            _player.SetMovementCommand(cmd);
 
             _controllerLoader.Update();
             Vector2 prevPos = _player.position;
@@ -330,14 +326,18 @@ namespace Celeste
             base.Draw(gameTime);
         }
 
+        public void CycleGameScene(int direction)
+        {
+            _activeSceneIndex += direction;
+        }
         public void Reset() => _player.Reset();
 
         public void CycleActiveItem(int direction)
         {
             _activeItemIndex += direction;
 
-            if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
-            if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
+           // if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
+            //if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
         }
 
         public void CycleActiveBlock(int direction)
@@ -352,6 +352,8 @@ namespace Celeste
         public void ToggleBlockAnimation() => _blockAnimateEnabled = !_blockAnimateEnabled;
 
         /// <summary>Toggles whether the current block/obstacle is drawn at all. Bound to V.</summary>
-        public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
+        //public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
     }
+
+    
 }
