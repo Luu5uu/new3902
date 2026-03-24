@@ -28,6 +28,17 @@ namespace Celeste.Sprites
         public IBodySprite Body => _body;
         public IHairSprite Hair => _hair;
 
+        // Helpers for ghost trail rendering
+        public Texture2D BodyAtlasTexture => _body.Controller.Get(_body.Controller.CurrentState).Texture;
+        public (Rectangle Src, Vector2 Origin) BodyCurrentFrame
+        {
+            get
+            {
+                var anim = _body.Controller.Get(_body.Controller.CurrentState);
+                return (anim.CurrentSourceRect, anim.Origin);
+            }
+        }
+
         private MaddySprite(BodySprite<PlayerState> body, HairRenderer hair)
         {
             _body = body;

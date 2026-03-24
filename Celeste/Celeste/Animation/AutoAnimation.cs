@@ -35,6 +35,7 @@ namespace Celeste.Animation
 
         public bool IsPlaying { get; private set; }
         public int CurrentFrame { get; private set; }
+        public Rectangle CurrentSourceRect => _clip.GetSourceRect(CurrentFrame);
 
         public Vector2 Origin { get; set; } = Vector2.Zero;
 

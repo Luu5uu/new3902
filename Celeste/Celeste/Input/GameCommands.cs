@@ -14,10 +14,7 @@ namespace Celeste.Input
     {
         private readonly Game1 _game;
         public ResetCommand(Game1 game) => _game = game;
-        public void Execute()
-        {
-            
-        }
+        public void Execute() => _game.Reset();
     }
     public class CycleGameSceneCommand : ICommand
     {

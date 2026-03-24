@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,6 +13,7 @@ using Celeste.DeathAnimation.Particles;
 
 using static Celeste.PlayerConstants;
 using static Celeste.GlobalConstants;
+using static Celeste.DeathConstants;
 
 namespace Celeste.Character
 {
@@ -65,18 +67,25 @@ namespace Celeste.Character
         public bool onGround;
 
         //Climb
-        public float climbSpeed = 60f;
+        public float climbSpeed = PlayerClimbSpeed;
         public bool isClimbing;
         // Dash
         public bool isDashing;
         public bool canDash = true;
         //Dangling
         public bool isDangle;
-        public float dangleFallSpeed =40f;
+        public float dangleFallSpeed = PlayerDangleFallSpeed;
 
         private AnimationClip _deathClip;
         private Texture2D _deathDotTex;
         public DeathEffect _deathEffect;
+
+        private struct GhostFrame { public Vector2 Position; public bool FaceLeft; public float Alpha; }
+        private readonly List<GhostFrame> _ghosts = new();
+        private Texture2D _ghostBodyTex;
+
+        public void AddGhost(Vector2 pos, bool faceLeft) =>
+            _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
 
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
@@ -104,6 +113,35 @@ namespace Celeste.Character
         {
             _deathClip = deathClip;
             _deathDotTex = dotTexture;
+            BuildGhostTexture();
+        }
+
+        private void BuildGhostTexture()
+        {
+            Texture2D source = Maddy.BodyAtlasTexture;
+
+            Color[] pixels = new Color[source.Width * source.Height];
+            source.GetData(pixels);
+
+            // Replace every non-transparent pixel with premultiplied white
+            // so the ghost can be tinted to any solid color
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                byte a = pixels[i].A;
+                pixels[i] = new Color(a, a, a, a);
+            }
+
+            _ghostBodyTex = new Texture2D(source.GraphicsDevice, source.Width, source.Height);
+            _ghostBodyTex.SetData(pixels);
+        }
+
+        public void Reset()
+        {
+            ClearDeathEffect();
+            position = RespawnPoint;
+            velocityY = 0f;
+            canDash = true;
+            changeState(standState);
         }
 
         public void changeState(IMadelineState next)
@@ -149,6 +187,15 @@ namespace Celeste.Character
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            // Decay ghost trail alphas
+            for (int i = _ghosts.Count - 1; i >= 0; i--)
+            {
+                var g = _ghosts[i];
+                g.Alpha -= dt * 4f;
+                if (g.Alpha <= 0f) { _ghosts.RemoveAt(i); continue; }
+                _ghosts[i] = g;
+            }
+
             if (deathPressed && _deathClip != null && _deathDotTex != null && _deathEffect == null)
             {
                 changeState(deathState);
@@ -193,7 +240,11 @@ namespace Celeste.Character
             deathPressed = false;
             moveX = 0f;
             climbHeld = false;
+        }
 
+        // Call after collision resolution so the hair anchor matches the final body position.
+        public void UpdateSprite(GameTime gameTime)
+        {
             Maddy.SetPosition(position, scale: DefaultScale, faceLeft: FaceLeft);
             Maddy.Update(gameTime);
         }
@@ -206,10 +257,22 @@ namespace Celeste.Character
                 return;
             }
 
+            if (_ghostBodyTex != null && _ghosts.Count > 0)
+            {
+                var (src, origin) = Maddy.BodyCurrentFrame;
+                var ghostColor = new Color(44, 183, 255);
+                foreach (var g in _ghosts)
+                {
+                    float scaleX = g.FaceLeft ? -DefaultScale : DefaultScale;
+                    spriteBatch.Draw(_ghostBodyTex, g.Position, src, ghostColor * g.Alpha,
+                        0f, origin, new Vector2(scaleX, DefaultScale), SpriteEffects.None, 0f);
+                }
+            }
+
             Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
         }
 
-        internal void StartDeathEffect()
+        internal void StartDeathEffect(bool wasDashing)
         {
             if (_deathClip == null || _deathDotTex == null)
                 return;
@@ -220,7 +283,8 @@ namespace Celeste.Character
                 _deathClip.FrameHeight * scale
             );
 
-            _deathEffect = new DeathEffect(_deathClip, _deathDotTex, topLeft, scale);
+            Color deathColor = wasDashing ? DashDeathColor : NormalDeathColor;
+            _deathEffect = new DeathEffect(_deathClip, _deathDotTex, topLeft, deathColor, scale);
         }
 
         internal void UpdateDeathEffect(float dt)
