@@ -6,7 +6,8 @@ namespace Celeste.Blocks
 {
     public class MapBuilder
     {
-        private List<IBlocks> _blocks = new List<IBlocks>();
+        public List<IBlocks> _blocks = new List<IBlocks>();
+        public List<IHazard> _hazards = new List<IHazard>();
         private BlockFactory _blockFactory;
         // size * scale
         private float blockSize = 8 * 2.5f;
@@ -28,13 +29,24 @@ namespace Celeste.Blocks
             if (gridX < 0 || gridX >= w || gridY < 0 || gridY >= h) { return; }
 
             Vector2 position = new Vector2(gridX * blockSize, gridY * blockSize);
-            IBlocks block = _blockFactory.CreateBlock(type, position, frameNum);
-
-            if (block != null)
+            if (type == "upSpike")
             {
-                RemoveBlock(gridX, gridY);
-                _blocks.Add(block);
-                grid[gridX, gridY] = block;
+                IHazard hazard = _blockFactory.CreateHazard(type, position);
+                if (hazard != null)
+                {
+                    RemoveBlock(gridX, gridY);
+                    _hazards.Add(hazard);
+                }
+            }
+            else
+            {
+                IBlocks block = _blockFactory.CreateBlock(type, position, frameNum);
+                if (block != null)
+                {
+                    RemoveBlock(gridX, gridY);
+                    _blocks.Add(block);
+                    grid[gridX, gridY] = block;
+                }
             }
         }
 
@@ -64,6 +76,11 @@ namespace Celeste.Blocks
             foreach (var block in _blocks)
             {
                 block.Draw(spriteBatch);
+            }
+
+            foreach (var hazard in _hazards)
+            {
+                hazard.Draw(spriteBatch);
             }
         }
 

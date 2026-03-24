@@ -198,21 +198,7 @@ namespace Celeste.Character
                 position.Y += velocityY;
             }
 
-            /*if (position.Y >= ground)
-            {
-                position.Y = ground;
-                onGround = true;
-                velocityY = 0f;
-                if (!isDashing)
-                {
-                    Maddy.OnDashRefill();
-                    canDash = true;
-                }
-            }
-            else
-            {
-                onGround = false;
-            }*/
+          
 
             jumpPressed = false;
             dashPressed = false;

@@ -117,7 +117,7 @@ namespace Celeste.Blocks
         }
 
 
-        public IHazard CreateHazerd(string type, Vector2 position)
+        public IHazard CreateHazard(string type, Vector2 position)
         {
             return BlockTextures.TryGetValue(type, out var tex)
                 ? new Hazard(type, position, tex)
