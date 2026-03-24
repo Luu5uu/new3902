@@ -12,6 +12,7 @@ namespace Celeste.Blocks
         // size * scale
         private float blockSize = 8 * 2.5f;
         private IBlocks[,] grid;
+        private IHazard[,] hazard_grid;
         private int w, h;
 
         public int Width => w;
@@ -23,6 +24,7 @@ namespace Celeste.Blocks
             this.w = width;
             this.h = height;
             grid = new IBlocks[width, height];
+            hazard_grid = new IHazard[width, height];
         }
         public void PlaceBlock(string type, int gridX, int gridY, int frameNum = 0)
         {
@@ -34,8 +36,9 @@ namespace Celeste.Blocks
                 IHazard hazard = _blockFactory.CreateHazard(type, position);
                 if (hazard != null)
                 {
-                    RemoveBlock(gridX, gridY);
+                     RemoveHazard(gridX, gridY);
                     _hazards.Add(hazard);
+                    hazard_grid[gridX, gridY] = hazard;
                 }
             }
             else
@@ -59,14 +62,25 @@ namespace Celeste.Blocks
             }
         }
 
+        public void RemoveHazard(int gridX, int gridY)
+        {
+            if (hazard_grid[gridX, gridY] != null)
+            {
+                _hazards.Remove(hazard_grid[gridX, gridY]);
+                hazard_grid[gridX, gridY] = null;
+            }
+        }
+
         public void ClearBlocks()
         {
             _blocks.Clear();
+            _hazards.Clear();
             for (int x = 0; x < w; x++)
             {
                 for (int y = 0; y < h; y++)
                 {
                     grid[x, y] = null;
+                    hazard_grid[x, y] = null;
                 }
             }
         }
