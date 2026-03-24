@@ -16,6 +16,8 @@ using System.Collections.Generic;
 using Celeste.Utils;
 using Celeste.Collision;
 using System.Linq;
+using System.Globalization;
+using System.Reflection;
 
 namespace Celeste
 {
@@ -61,11 +63,15 @@ namespace Celeste
         private bool _blockAnimateEnabled;
 
 
-        // Test collision and platform
-        List<IBlocks> platform;
+        // Collasion systems
         CollisionSystem _collisionSystem;
-        List<IHazard> hazards;
         HazardCollisioncs HazardCollisioncs;
+
+        //worldBound
+
+        Rectangle worldBound;
+
+        Vector2 room3Pos;
 
         public Game1()
         {
@@ -90,6 +96,9 @@ namespace Celeste
                 Window.ClientBounds.Width / 2f,
                 Window.ClientBounds.Height / 2f);
 
+            room3Pos = startPos;
+
+            worldBound = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
             _player = new Madeline(Content, _catalog, startPos);
 
             // ===== Inject DeathAnimation resources (no constructor change) =====
@@ -140,22 +149,7 @@ namespace Celeste
             _blockList.Add(new CrushBlock(new Vector2(0, 0), _catalog));
             _totalBlocks = _blockList.Count;
 
-            hazards = new List<IHazard>();
-            hazards.Add(factory.CreateHazerd("upSpike", new Vector2(500, 400)));
-            hazards.Add(factory.CreateHazerd("upSpike", new Vector2(520, 400)));
-
-            HazardCollisioncs = new HazardCollisioncs(hazards.Cast<ICollideable>().ToList(), _player);
-
-            platform = new List<IBlocks>();
-
-            platform.Add(factory.CreateSnowBlock(new Vector2(300, 400)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(400, 400)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(600, 400)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(300, 60)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(200, 230)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(700, 300)));
-
-            _collisionSystem = new CollisionSystem(platform, _player);
+         
 
 
             _debugOverlay = new DebugOverlay();
@@ -170,6 +164,9 @@ namespace Celeste
             _roomFive = new RoomFive(_worldMap, factory);
 
             BuildMap();
+
+            _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
+            HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
         }
 
         // for debugging and figuring out map values
@@ -186,21 +183,32 @@ namespace Celeste
             {
                 case 1:
                     _roomOne.PlaceRoomOneBlocks();
+                    _player.position = new Vector2(250, 2000);
+                    _player.RespawnPoint = new Vector2(250, 200);
                     break;
                 case 2:
                     _roomTwo.PlaceRoomTwoBlocks();
+                    _player.position = new Vector2(150, 300);
+                    _player.RespawnPoint = new Vector2(150, 300);
                     break;
                 case 3:
                     _roomThree.PlaceRoomThreeBlocks();
+                    _player.position = new Vector2(200, 150);
+                    _player.RespawnPoint = new Vector2(200, 150);
                     break;
                 case 4:
                     _roomFour.PlaceRoomFourBlocks();
+                    _player.position = new Vector2(250, 150);
+                    _player.RespawnPoint = new Vector2(250, 150);
                     break;
                 case 5:
                     _roomFive.PlaceRoomFiveBlocks();
+                    _player.position = new Vector2(175, 150);
+                    _player.RespawnPoint = new Vector2(175, 150);
                     break;
                 case 0:
                 default:
+                    _roomThree.PlaceRoomThreeBlocks();
                     break;
             }
 
@@ -228,6 +236,9 @@ namespace Celeste
             {
                 // rebuild room when changed
                 BuildMap();
+                _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
+                HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
+
             }
 
             _controllerLoader.Update();
@@ -263,6 +274,12 @@ namespace Celeste
                     crushBlock.Update(gameTime);
             }
 
+            if(_player.Bounds.Bottom> worldBound.Bottom)
+            {
+                _player.Reset();
+                
+            }
+
 
             base.Update(gameTime);
         }
@@ -282,16 +299,7 @@ namespace Celeste
             _player.Draw(_spriteBatch);
             DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
-            foreach (var b in platform)
-            {
-                b.Draw(_spriteBatch);
-            }
-
-
-            foreach (var h in hazards)
-            {
-                h.Draw(_spriteBatch);
-            }
+           
 
             switch (_activeItemIndex)
             {

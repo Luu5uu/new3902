@@ -6,11 +6,13 @@ namespace Celeste.Blocks
 {
     public class MapBuilder
     {
-        private List<IBlocks> _blocks = new List<IBlocks>();
+        public List<IBlocks> _blocks = new List<IBlocks>();
+        public List<IHazard> _hazards = new List<IHazard>();
         private BlockFactory _blockFactory;
         // size * scale
         private float blockSize = 8 * 2.5f;
         private IBlocks[,] grid;
+        private IHazard[,] hazard_grid;
         private int w, h;
 
         public int Width => w;
@@ -22,19 +24,32 @@ namespace Celeste.Blocks
             this.w = width;
             this.h = height;
             grid = new IBlocks[width, height];
+            hazard_grid = new IHazard[width, height];
         }
         public void PlaceBlock(string type, int gridX, int gridY, int frameNum = 0)
         {
             if (gridX < 0 || gridX >= w || gridY < 0 || gridY >= h) { return; }
 
             Vector2 position = new Vector2(gridX * blockSize, gridY * blockSize);
-            IBlocks block = _blockFactory.CreateBlock(type, position, frameNum);
-
-            if (block != null)
+            if (type == "upSpike")
             {
-                RemoveBlock(gridX, gridY);
-                _blocks.Add(block);
-                grid[gridX, gridY] = block;
+                IHazard hazard = _blockFactory.CreateHazard(type, position);
+                if (hazard != null)
+                {
+                     RemoveHazard(gridX, gridY);
+                    _hazards.Add(hazard);
+                    hazard_grid[gridX, gridY] = hazard;
+                }
+            }
+            else
+            {
+                IBlocks block = _blockFactory.CreateBlock(type, position, frameNum);
+                if (block != null)
+                {
+                    RemoveBlock(gridX, gridY);
+                    _blocks.Add(block);
+                    grid[gridX, gridY] = block;
+                }
             }
         }
 
@@ -47,14 +62,25 @@ namespace Celeste.Blocks
             }
         }
 
+        public void RemoveHazard(int gridX, int gridY)
+        {
+            if (hazard_grid[gridX, gridY] != null)
+            {
+                _hazards.Remove(hazard_grid[gridX, gridY]);
+                hazard_grid[gridX, gridY] = null;
+            }
+        }
+
         public void ClearBlocks()
         {
             _blocks.Clear();
+            _hazards.Clear();
             for (int x = 0; x < w; x++)
             {
                 for (int y = 0; y < h; y++)
                 {
                     grid[x, y] = null;
+                    hazard_grid[x, y] = null;
                 }
             }
         }
@@ -64,6 +90,11 @@ namespace Celeste.Blocks
             foreach (var block in _blocks)
             {
                 block.Draw(spriteBatch);
+            }
+
+            foreach (var hazard in _hazards)
+            {
+                hazard.Draw(spriteBatch);
             }
         }
 
