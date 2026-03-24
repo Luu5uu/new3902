@@ -161,7 +161,6 @@ namespace Celeste
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
             _controllerLoader = new ControllerLoader(this, _player);
-            _controllerLoader = new ControllerLoader(this);
 
             _worldMap = new MapBuilder(factory, 50, 30);
             _roomOne = new RoomOne(_worldMap, factory);
@@ -230,10 +229,6 @@ namespace Celeste
                 // rebuild room when changed
                 BuildMap();
             }
-
-            var cmd = PlayerCommand.FromKeyboard(kb, _prevKb);
-            _prevKb = kb;
-            _player.SetMovementCommand(cmd);
 
             _controllerLoader.Update();
             Vector2 prevPos = _player.position;
@@ -332,14 +327,17 @@ namespace Celeste
         }
 
         public void CycleGameScene(int direction)
+        {
+            _activeSceneIndex += direction;
+        }
         public void Reset() => _player.Reset();
 
         public void CycleActiveItem(int direction)
         {
-            _activeSceneIndex += direction;
+            _activeItemIndex += direction;
 
-            if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
-            if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
+           // if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
+            //if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
         }
 
         public void CycleActiveBlock(int direction)
@@ -354,7 +352,7 @@ namespace Celeste
         public void ToggleBlockAnimation() => _blockAnimateEnabled = !_blockAnimateEnabled;
 
         /// <summary>Toggles whether the current block/obstacle is drawn at all. Bound to V.</summary>
-        public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
+        //public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
     }
 
     
