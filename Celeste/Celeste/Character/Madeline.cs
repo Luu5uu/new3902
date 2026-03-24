@@ -69,6 +69,9 @@ namespace Celeste.Character
         //Climb
         public float climbSpeed = PlayerClimbSpeed;
         public bool isClimbing;
+        public bool touchingLeftWall;
+        public bool touchingRightWall;
+        public bool IsTouchingWall => touchingLeftWall || touchingRightWall;
         // Dash
         public bool isDashing;
         public bool canDash = true;

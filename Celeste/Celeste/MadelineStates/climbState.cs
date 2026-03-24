@@ -1,4 +1,5 @@
 ﻿using Celeste.Character;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Celeste.MadelineStates
 {
@@ -30,14 +31,19 @@ namespace Celeste.MadelineStates
                 m.changeState(m.dangleState);
                 return;
             }
+            if (!m.IsTouchingWall) 
+            {
+                m.changeState(m.fallState);
+                return; 
+            }
 
-                m.position.Y -= m.climbSpeed * dt;
+
+            m.position.Y -= m.climbSpeed * dt;
 
         }
 
         public void Exit(Madeline m) {
             m.isClimbing = false;
-
         }
     }
 }

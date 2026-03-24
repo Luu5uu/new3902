@@ -25,6 +25,7 @@ namespace Celeste.Input
             keyboard.RegisterCommand(Keys.Z, new PlayerDashCommand(player));
             keyboard.RegisterCommand(Keys.N, new PlayerDashCommand(player));
             keyboard.RegisterCommand(Keys.E, new PlayerDeathCommand(player));
+            keyboard.RegisterCommand(Keys.W, new PlayerClimbCommand(player), continuous: true);
 
             //mouse commands registration
             mouse.RegisterCommand(MouseButton.Left , new CycleGameSceneCommand(game, -1));

@@ -23,7 +23,11 @@ namespace Celeste.MadelineStates
                 m.changeState(m.dashState);
                 return;
             }
-
+            if (m.climbHeld && m.IsTouchingWall)
+            {
+                m.changeState(m.climbState);
+                return;
+            }
             float x = m.moveX;
             if (x == 0f)
             {

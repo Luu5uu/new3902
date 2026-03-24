@@ -18,7 +18,11 @@ namespace Celeste.MadelineStates
                 m.changeState(m.dashState);
                 return;
             }
-
+            if (m.climbHeld && m.IsTouchingWall)
+            {
+                m.changeState(m.climbState);
+                return;
+            }
             float x = m.moveX * PlayerAirSpeed * dt;
             m.position.X += x;
 

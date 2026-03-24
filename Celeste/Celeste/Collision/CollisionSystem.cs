@@ -29,12 +29,53 @@ namespace Celeste.Collision
         {
             ResolveHorizontal(prevPos);
             ResolveVertical(prevPos);
+            UpdateWallContacts();
 
         }
+        private void UpdateWallContacts()
+        {
+            _player.touchingLeftWall = false;
+            _player.touchingRightWall = false;
 
+            Rectangle p = _player.Bounds;
+
+            Rectangle leftProbe = new Rectangle(
+                p.Left - 1,
+                p.Top + 1,
+                1,
+                p.Height - 2
+            );
+
+            Rectangle rightProbe = new Rectangle(
+                p.Right,
+                p.Top + 1,
+                1,
+                p.Height - 2
+            );
+
+            for (int i = 0; i < _worldBlocks.Count; i++)
+            {
+                var blk = _worldBlocks[i];
+                if (blk == null) continue;
+
+                Rectangle r = blk.Bounds;
+                if (r == Rectangle.Empty) continue;
+
+                if (leftProbe.Intersects(r))
+                    _player.touchingLeftWall = true;
+
+                if (rightProbe.Intersects(r))
+                    _player.touchingRightWall = true;
+
+                if (_player.touchingLeftWall && _player.touchingRightWall)
+                    break;
+            }
+        }
 
         public void ResolveHorizontal(Vector2 prevPos)
         {
+            _player.touchingLeftWall = false;
+            _player.touchingRightWall = false;
             float dx = _player.position.X - prevPos.X;
 
             if (dx > 0)
@@ -198,6 +239,7 @@ namespace Celeste.Collision
                 _player.position.X = bestLeft - p.Width / 2f;
 
                 _player.moveX = 0;
+                _player.touchingLeftWall = true;
             }
         }
 
@@ -239,6 +281,7 @@ namespace Celeste.Collision
                 _player.position.X = bestRight + p.Width / 2f;
 
                 _player.moveX = 0;
+                _player.touchingRightWall = true;
             }
         }
     }

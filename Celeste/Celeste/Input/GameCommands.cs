@@ -73,7 +73,7 @@ namespace Celeste.Input
 
         public PlayerClimbCommand(Character.Madeline player) => _player = player;
 
-        public void Execute() => _player.Climb();
+        public void Execute() => _player.SetClimb(true);
     }
 
     
