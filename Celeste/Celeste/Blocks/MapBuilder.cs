@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System;
 
 namespace Celeste.Blocks
 {
@@ -31,7 +32,7 @@ namespace Celeste.Blocks
             if (gridX < 0 || gridX >= w || gridY < 0 || gridY >= h) { return; }
 
             Vector2 position = new Vector2(gridX * blockSize, gridY * blockSize);
-            if (type == "upSpike")
+            if (IsHazardType(type))
             {
                 IHazard hazard = _blockFactory.CreateHazard(type, position);
                 if (hazard != null)
@@ -51,6 +52,14 @@ namespace Celeste.Blocks
                     grid[gridX, gridY] = block;
                 }
             }
+        }
+
+        private static bool IsHazardType(string type)
+        {
+            return type == "upSpike"
+                || type == "downSpike"
+                || type == "leftSpike"
+                || type == "rightSpike";
         }
 
         public void RemoveBlock(int gridX, int gridY)
