@@ -41,6 +41,7 @@ namespace Celeste.Character
         public bool deathPressed;
         public bool climbHeld;
         public float moveX;
+        public float moveY;
 
         // Position & facing
         public Vector2 position;
@@ -142,9 +143,53 @@ namespace Celeste.Character
         {
             ClearDeathEffect();
             position = RespawnPoint;
-            velocityY = 0f;
+            ClearMotionState();
             canDash = true;
             changeState(standState);
+        }
+
+        private void ClearMotionState()
+        {
+            jumpPressed = false;
+            dashPressed = false;
+            deathPressed = false;
+            climbHeld = false;
+            moveX = 0f;
+            moveY = 0f;
+
+            velocityY = 0f;
+            onGround = false;
+
+            isClimbing = false;
+            isDashing = false;
+            isDangle = false;
+
+            touchingLeftWall = false;
+            touchingRightWall = false;
+        }
+
+        public Vector2 GetDashDirection()
+        {
+            float x = moveX;
+            float y = moveY;
+
+            if (y == 0f && climbHeld)
+            {
+                y = -1f;
+            }
+
+            if (x == 0f && y == 0f)
+            {
+                x = FaceLeft ? -1f : 1f;
+            }
+
+            var dash = new Vector2(x, y);
+            if (dash != Vector2.Zero)
+            {
+                dash.Normalize();
+            }
+
+            return dash;
         }
 
         public void changeState(IMadelineState next)
@@ -158,6 +203,11 @@ namespace Celeste.Character
         public void Move(float direction)
         {
             this.moveX = direction;
+        }
+
+        public void AimVertical(float direction)
+        {
+            this.moveY = direction;
         }
 
         public void Jump()
@@ -209,9 +259,7 @@ namespace Celeste.Character
 
             if (_deathEffect != null)
             {
-                jumpPressed = false;
-                dashPressed = false;
-                deathPressed = false;
+                ClearTransientInput();
                 return;
             }
 
@@ -223,11 +271,16 @@ namespace Celeste.Character
             }
 
           
+            ClearTransientInput();
+        }
 
+        private void ClearTransientInput()
+        {
             jumpPressed = false;
             dashPressed = false;
             deathPressed = false;
             moveX = 0f;
+            moveY = 0f;
             climbHeld = false;
         }
 

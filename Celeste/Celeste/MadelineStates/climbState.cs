@@ -1,5 +1,4 @@
 ﻿using Celeste.Character;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Celeste.MadelineStates
 {
@@ -9,15 +8,17 @@ namespace Celeste.MadelineStates
         {
             m.Maddy.ClimbUp();
             m.isClimbing = true;
+            m.isDangle = false;
+            m.onGround = false;
             m.velocityY = 0f;
         }
 
         public void Update(Madeline m, float dt)
         {
-
-            if(m.moveX != 0)
+            if (m.moveX != 0f)
             {
                 m.changeState(m.fallState);
+                return;
             }
 
             if (m.jumpPressed)
@@ -27,16 +28,16 @@ namespace Celeste.MadelineStates
             }
             
             if (!m.climbHeld)
-            {                   
+            {
                 m.changeState(m.dangleState);
                 return;
             }
-            if (!m.IsTouchingWall) 
+
+            if (!m.IsTouchingWall)
             {
                 m.changeState(m.fallState);
-                return; 
+                return;
             }
-
 
             m.position.Y -= m.climbSpeed * dt;
 

@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using Celeste.Character;
 
 using static Celeste.PlayerConstants;
@@ -7,7 +8,7 @@ namespace Celeste.MadelineStates
     public class dashState : IMadelineState
     {
         private float _timeLeft;
-        private float _dashDir;
+        private Vector2 _dashVelocity;
         private float _ghostTimer;
 
         public void SetState(Madeline m)
@@ -16,17 +17,19 @@ namespace Celeste.MadelineStates
             m.Maddy.OnDashUsed();
             m.isDashing = true;
             m.canDash   = false;
+            m.isClimbing = false;
+            m.isDangle = false;
             m.velocityY = 0f;
 
             _timeLeft = PlayerDashDuration;
             _ghostTimer = 0f;
+            Vector2 dashDir = m.GetDashDirection();
+            _dashVelocity = dashDir;
 
-            float x = m.moveX;
-            if (x < 0f) _dashDir = -1f;
-            else if (x > 0f) _dashDir = 1f;
-            else _dashDir = m.FaceLeft ? -1f : 1f;
-
-            m.FaceLeft = _dashDir < 0f;
+            if (_dashVelocity != Vector2.Zero)
+            {
+                m.FaceLeft = _dashVelocity.X < 0f;
+            }
         }
 
         public void Update(Madeline m, float dt)
@@ -38,13 +41,14 @@ namespace Celeste.MadelineStates
                 _ghostTimer = 0.04f;
             }
 
-            m.position.X += _dashDir * PlayerRunSpeed * PlayerDashSpeedMultiplier * dt;
+            m.position += _dashVelocity * PlayerRunSpeed * PlayerDashSpeedMultiplier * dt;
 
             _timeLeft -= dt;
             if (_timeLeft <= 0f)
             {
                 m.isDashing = false;
-                if (!m.onGround) m.changeState(m.fallState);
+                if (m.climbHeld && m.IsTouchingWall) m.changeState(m.climbState);
+                else if (!m.onGround) m.changeState(m.fallState);
                 else if (m.moveX == 0f) m.changeState(m.standState);
                 else m.changeState(m.runState);
             }

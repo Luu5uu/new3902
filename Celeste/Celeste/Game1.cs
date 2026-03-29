@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Input;
 
 using Celeste.Animation;
 using Celeste.Character;
-using Celeste.Items;
 using Celeste.Blocks;
 using Celeste.Blocks.Rooms;
 using Celeste.DevTools;
@@ -16,8 +15,6 @@ using System.Collections.Generic;
 using Celeste.Utils;
 using Celeste.Collision;
 using System.Linq;
-using System.Globalization;
-using System.Reflection;
 
 namespace Celeste
 {
@@ -29,10 +26,6 @@ namespace Celeste
         private AnimationCatalog _catalog;
         private Madeline _player;
 
-        private ItemAnimation _normalStawAnim;
-        private ItemAnimation _flyStawAnim;
-        private ItemAnimation _crystalAnim;
-
         private KeyboardState _prevKb;
         private Texture2D _pixelTexture;
         private DebugOverlay _debugOverlay;
@@ -41,10 +34,6 @@ namespace Celeste
         private Texture2D _deathDotTex;
 
         private ControllerLoader _controllerLoader;
-
-        private List<string> _scenes = new List<string> { "Scene1", "Scene2", "Scene3" };
-        private int _activeSceneIndex = 0;
-        private int _activeItemIndex = 0;   // 0 = normal staw, 1 = fly staw, 2 = crystal
         private int _activeBlockIndex = 0;  // T = previous, Y = next; only this block is drawn
         private int _totalBlocks;            // Set from _blockList.Count after load
 
@@ -71,8 +60,6 @@ namespace Celeste
 
         Rectangle worldBound;
 
-        Vector2 room3Pos;
-
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -96,8 +83,6 @@ namespace Celeste
                 Window.ClientBounds.Width / 2f,
                 Window.ClientBounds.Height / 2f);
 
-            room3Pos = startPos;
-
             worldBound = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
             _player = new Madeline(Content, _catalog, startPos);
 
@@ -113,17 +98,6 @@ namespace Celeste
                     $"Available keys: {string.Join(", ", _catalog.Clips.Keys)}");
 
             _player.ConfigureDeathAnimation(deathClip, _deathDotTex);
-
-            // ===== Items =====
-            _normalStawAnim = ItemAnimationFactory.CreateNormalStaw(_catalog);
-            _flyStawAnim = ItemAnimationFactory.CreateFlyStaw(_catalog);
-            _crystalAnim = ItemAnimationFactory.CreateCrystal(_catalog);
-            _normalStawAnim.Position = new Vector2(ItemConstants.ItemNormalStawX, ItemConstants.ItemRowY);
-            _normalStawAnim.Scale = GlobalConstants.DefaultScale;
-            _flyStawAnim.Position = new Vector2(ItemConstants.ItemFlyStawX, ItemConstants.ItemRowY);
-            _flyStawAnim.Scale = GlobalConstants.DefaultScale;
-            _crystalAnim.Position = new Vector2(ItemConstants.ItemCrystalX, ItemConstants.ItemRowY);
-            _crystalAnim.Scale = GlobalConstants.DefaultScale;
 
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
@@ -163,10 +137,7 @@ namespace Celeste
             _roomFour = new RoomFour(_worldMap, factory);
             _roomFive = new RoomFive(_worldMap, factory);
 
-            BuildMap();
-
-            _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
-            HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
+            RebuildCurrentRoom(resetPlayer: false);
         }
 
         // for debugging and figuring out map values
@@ -183,28 +154,18 @@ namespace Celeste
             {
                 case 1:
                     _roomOne.PlaceRoomOneBlocks();
-                    _player.position = new Vector2(250, 2000);
-                    _player.RespawnPoint = new Vector2(250, 200);
                     break;
                 case 2:
                     _roomTwo.PlaceRoomTwoBlocks();
-                    _player.position = new Vector2(150, 300);
-                    _player.RespawnPoint = new Vector2(150, 300);
                     break;
                 case 3:
                     _roomThree.PlaceRoomThreeBlocks();
-                    _player.position = new Vector2(200, 150);
-                    _player.RespawnPoint = new Vector2(200, 150);
                     break;
                 case 4:
                     _roomFour.PlaceRoomFourBlocks();
-                    _player.position = new Vector2(250, 150);
-                    _player.RespawnPoint = new Vector2(250, 150);
                     break;
                 case 5:
                     _roomFive.PlaceRoomFiveBlocks();
-                    _player.position = new Vector2(175, 150);
-                    _player.RespawnPoint = new Vector2(175, 150);
                     break;
                 case 0:
                 default:
@@ -212,7 +173,9 @@ namespace Celeste
                     break;
             }
 
-
+            Vector2 checkpointSpawn = GetRespawnPointForRoom(_currentRoom);
+            _player.position = checkpointSpawn;
+            _player.RespawnPoint = checkpointSpawn;
         }
 
         protected override void Update(GameTime gameTime)
@@ -223,23 +186,7 @@ namespace Celeste
 
             var kb = Keyboard.GetState();
             _debugOverlay.HandleInput(kb, _player);
-
-            // FOR IN -CLASS CODE REVIEW
-            int previousRoom = _currentRoom;
-            if (kb.IsKeyDown(Keys.D0) && _prevKb.IsKeyUp(Keys.D0) || kb.IsKeyDown(Keys.NumPad0) && _prevKb.IsKeyUp(Keys.NumPad0)) { _currentRoom = 0; }
-            else if (kb.IsKeyDown(Keys.D1) && _prevKb.IsKeyUp(Keys.D1) || kb.IsKeyDown(Keys.NumPad1) && _prevKb.IsKeyUp(Keys.NumPad1)) { _currentRoom = 1; }
-            else if (kb.IsKeyDown(Keys.D2) && _prevKb.IsKeyUp(Keys.D2) || kb.IsKeyDown(Keys.NumPad2) && _prevKb.IsKeyUp(Keys.NumPad2)) { _currentRoom = 2; }
-            else if (kb.IsKeyDown(Keys.D3) && _prevKb.IsKeyUp(Keys.D3) || kb.IsKeyDown(Keys.NumPad3) && _prevKb.IsKeyUp(Keys.NumPad3)) { _currentRoom = 3; }
-            else if (kb.IsKeyDown(Keys.D4) && _prevKb.IsKeyUp(Keys.D4) || kb.IsKeyDown(Keys.NumPad4) && _prevKb.IsKeyUp(Keys.NumPad4)) { _currentRoom = 4; }
-            else if (kb.IsKeyDown(Keys.D5) && _prevKb.IsKeyUp(Keys.D5) || kb.IsKeyDown(Keys.NumPad5) && _prevKb.IsKeyUp(Keys.NumPad5)) { _currentRoom = 5; }
-            if (_currentRoom != previousRoom)
-            {
-                // rebuild room when changed
-                BuildMap();
-                _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
-                HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
-
-            }
+            HandleRoomHotkeys(kb);
 
             _controllerLoader.Update();
             Vector2 prevPos = _player.position;
@@ -257,10 +204,6 @@ namespace Celeste
                 _collisionSystem.ResolveBlockCollision(prevPos);
                 _player.UpdateSprite(gameTime);
             }
-
-            _normalStawAnim.Update(gameTime);
-            _flyStawAnim.Update(gameTime);
-            _crystalAnim.Update(gameTime);
 
             // When animation toggle is on, update the current block if it's an animated type (spring, move, crush).
             if (_blockAnimateEnabled && _totalBlocks > 0)
@@ -280,6 +223,7 @@ namespace Celeste
                 
             }
 
+            _prevKb = kb;
 
             base.Update(gameTime);
         }
@@ -295,24 +239,8 @@ namespace Celeste
                 rasterizerState: RasterizerState.CullNone);
 
             _worldMap.Draw(_spriteBatch);
-
             _player.Draw(_spriteBatch);
             DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
-
-           
-
-            switch (_activeItemIndex)
-            {
-                case 0:
-                    _normalStawAnim.Draw(_spriteBatch);
-                    break;
-                case 1:
-                    _flyStawAnim.Draw(_spriteBatch);
-                    break;
-                case 2:
-                    _crystalAnim.Draw(_spriteBatch);
-                    break;
-            }
 
             // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
             /*if (_blocksVisible && _totalBlocks > 0)
@@ -336,17 +264,32 @@ namespace Celeste
 
         public void CycleGameScene(int direction)
         {
-            _activeSceneIndex += direction;
-        }
-        public void Reset() => _player.Reset();
+            const int firstRoom = 1;
+            const int lastRoom = 5;
 
-        public void CycleActiveItem(int direction)
-        {
-            _activeItemIndex += direction;
+            int nextRoom = _currentRoom;
+            if (nextRoom < firstRoom || nextRoom > lastRoom)
+            {
+                nextRoom = 3;
+            }
 
-           // if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
-            //if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
+            nextRoom += direction;
+            if (nextRoom < firstRoom)
+            {
+                nextRoom = lastRoom;
+            }
+            else if (nextRoom > lastRoom)
+            {
+                nextRoom = firstRoom;
+            }
+
+            if (nextRoom != _currentRoom)
+            {
+                _currentRoom = nextRoom;
+                RebuildCurrentRoom(resetPlayer: false);
+            }
         }
+        public void Reset() => RebuildCurrentRoom(resetPlayer: true);
 
         public void CycleActiveBlock(int direction)
         {
@@ -361,6 +304,54 @@ namespace Celeste
 
         /// <summary>Toggles whether the current block/obstacle is drawn at all. Bound to V.</summary>
         //public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
+
+        private void HandleRoomHotkeys(KeyboardState kb)
+        {
+            int requestedRoom = _currentRoom;
+
+            if ((kb.IsKeyDown(Keys.D0) && _prevKb.IsKeyUp(Keys.D0)) || (kb.IsKeyDown(Keys.NumPad0) && _prevKb.IsKeyUp(Keys.NumPad0))) { requestedRoom = 0; }
+            else if ((kb.IsKeyDown(Keys.D1) && _prevKb.IsKeyUp(Keys.D1)) || (kb.IsKeyDown(Keys.NumPad1) && _prevKb.IsKeyUp(Keys.NumPad1))) { requestedRoom = 1; }
+            else if ((kb.IsKeyDown(Keys.D2) && _prevKb.IsKeyUp(Keys.D2)) || (kb.IsKeyDown(Keys.NumPad2) && _prevKb.IsKeyUp(Keys.NumPad2))) { requestedRoom = 2; }
+            else if ((kb.IsKeyDown(Keys.D3) && _prevKb.IsKeyUp(Keys.D3)) || (kb.IsKeyDown(Keys.NumPad3) && _prevKb.IsKeyUp(Keys.NumPad3))) { requestedRoom = 3; }
+            else if ((kb.IsKeyDown(Keys.D4) && _prevKb.IsKeyUp(Keys.D4)) || (kb.IsKeyDown(Keys.NumPad4) && _prevKb.IsKeyUp(Keys.NumPad4))) { requestedRoom = 4; }
+            else if ((kb.IsKeyDown(Keys.D5) && _prevKb.IsKeyUp(Keys.D5)) || (kb.IsKeyDown(Keys.NumPad5) && _prevKb.IsKeyUp(Keys.NumPad5))) { requestedRoom = 5; }
+
+            if (requestedRoom != _currentRoom)
+            {
+                _currentRoom = requestedRoom;
+                RebuildCurrentRoom(resetPlayer: false);
+            }
+        }
+
+        private void RebuildCurrentRoom(bool resetPlayer)
+        {
+            BuildMap();
+            RebuildCollisionSystems();
+
+            if (resetPlayer)
+            {
+                _player.Reset();
+            }
+        }
+
+        private void RebuildCollisionSystems()
+        {
+            _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
+            HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
+        }
+
+        private Vector2 GetRespawnPointForRoom(int room)
+        {
+            return room switch
+            {
+                1 => new Vector2(250f, 200f),
+                2 => new Vector2(150f, 300f),
+                3 => new Vector2(200f, 150f),
+                4 => new Vector2(250f, 150f),
+                5 => new Vector2(175f, 150f),
+                _ => new Vector2(200f, 150f),
+            };
+        }
     }
 
     
