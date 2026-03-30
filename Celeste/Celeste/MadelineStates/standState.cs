@@ -51,9 +51,9 @@ namespace Celeste.MadelineStates
             }
 
             // --- State transitions ---
-            if (m.onGround && m.jumpPressed)      { m.changeState(m.jumpState); return; }
-            if (m.dashPressed && m.canDash)        { m.changeState(m.dashState); return; }
-            if (m.climbHeld && m.IsTouchingWall) { m.changeState(m.climbState); return; }
+            if (m.CanUseJumpGrace() && m.ConsumeJumpPress()) { m.changeState(m.jumpState); return; }
+            if (m.canDash && m.ConsumeDashPress())           { m.changeState(m.dashState); return; }
+            if (m.CanGrabWall())                 { m.changeState(m.climbState); return; }
             if (m.moveX != 0f)                     { m.changeState(m.runState);  return; }
 
         }

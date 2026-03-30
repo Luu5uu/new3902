@@ -22,15 +22,14 @@ namespace Celeste.Input
             keyboard.RegisterCommand(Keys.D, new PlayerMoveCommand(player, 1f), continuous: true);
             keyboard.RegisterCommand(Keys.Left, new PlayerMoveCommand(player, -1f), continuous: true);
             keyboard.RegisterCommand(Keys.Right, new PlayerMoveCommand(player, 1f), continuous: true);
+            keyboard.RegisterCommand(Keys.W, new PlayerAimVerticalCommand(player, -1f), continuous: true);
             keyboard.RegisterCommand(Keys.Up, new PlayerAimVerticalCommand(player, -1f), continuous: true);
             keyboard.RegisterCommand(Keys.Down, new PlayerAimVerticalCommand(player, 1f), continuous: true);
             keyboard.RegisterCommand(Keys.S, new PlayerAimVerticalCommand(player, 1f), continuous: true);
-            keyboard.RegisterCommand(Keys.Space, new PlayerJumpCommand(player));
-            keyboard.RegisterCommand(Keys.Enter, new PlayerDashCommand(player));
-            keyboard.RegisterCommand(Keys.Z, new PlayerDashCommand(player));
-            keyboard.RegisterCommand(Keys.N, new PlayerDashCommand(player));
+            keyboard.RegisterCommand(Keys.C, new PlayerJumpCommand(player));
+            keyboard.RegisterCommand(Keys.X, new PlayerDashCommand(player));
+            keyboard.RegisterCommand(Keys.Z, new PlayerGrabCommand(player), continuous: true);
             keyboard.RegisterCommand(Keys.E, new PlayerDeathCommand(player));
-            keyboard.RegisterCommand(Keys.W, new PlayerClimbCommand(player), continuous: true);
 
             //mouse commands registration
             mouse.RegisterCommand(MouseButton.Left , new CycleGameSceneCommand(game, -1));
@@ -45,6 +44,7 @@ namespace Celeste.Input
             gamepad.RegisterCommand(Buttons.DPadDown, new PlayerAimVerticalCommand(player, 1f), continuous: true);
             gamepad.RegisterCommand(Buttons.A, new PlayerJumpCommand(player));
             gamepad.RegisterCommand(Buttons.B, new PlayerDashCommand(player));
+            gamepad.RegisterCommand(Buttons.RightShoulder, new PlayerGrabCommand(player), continuous: true);
             
             _controllers.Add(keyboard);
             _controllers.Add(mouse);

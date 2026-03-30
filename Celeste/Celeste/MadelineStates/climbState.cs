@@ -1,4 +1,7 @@
-﻿using Celeste.Character;
+﻿using System;
+using Celeste.Character;
+
+using static Celeste.PlayerConstants;
 
 namespace Celeste.MadelineStates
 {
@@ -6,7 +9,8 @@ namespace Celeste.MadelineStates
     {
         public void SetState(Madeline m)
         {
-            m.Maddy.ClimbUp();
+            m.FaceTowardWall();
+            m.Maddy.Dangling();
             m.isClimbing = true;
             m.isDangle = false;
             m.onGround = false;
@@ -15,13 +19,7 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
-            if (m.moveX != 0f)
-            {
-                m.changeState(m.fallState);
-                return;
-            }
-
-            if (m.jumpPressed)
+            if (m.ConsumeJumpPress())
             {
                 m.changeState(m.jumpState);
                 return;
@@ -29,7 +27,7 @@ namespace Celeste.MadelineStates
             
             if (!m.climbHeld)
             {
-                m.changeState(m.dangleState);
+                m.changeState(m.fallState);
                 return;
             }
 
@@ -39,7 +37,39 @@ namespace Celeste.MadelineStates
                 return;
             }
 
-            m.position.Y -= m.climbSpeed * dt;
+            m.FaceTowardWall();
+
+            if (m.climbStamina <= 0f)
+            {
+                m.changeState(m.fallState);
+                return;
+            }
+
+            if (m.onGround && m.moveY >= 0f)
+            {
+                m.changeState(m.standState);
+                return;
+            }
+
+            if (m.moveY < 0f)
+            {
+                m.Maddy.ClimbUp();
+                m.position.Y -= PlayerClimbUpSpeed * dt;
+                m.climbStamina = Math.Max(0f, m.climbStamina - PlayerClimbUpCostPerSecond * dt);
+            }
+            else if (m.moveY > 0f)
+            {
+                m.Maddy.Dangling();
+                m.position.Y += PlayerClimbDownSpeed * dt;
+            }
+            else
+            {
+                m.Maddy.Dangling();
+                if (!m.onGround)
+                {
+                    m.climbStamina = Math.Max(0f, m.climbStamina - PlayerClimbStillCostPerSecond * dt);
+                }
+            }
 
         }
 

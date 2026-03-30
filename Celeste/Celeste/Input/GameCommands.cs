@@ -81,11 +81,11 @@ namespace Celeste.Input
         public void Execute() => _player.Die();
     }
 
-    public class PlayerClimbCommand : ICommand
+    public class PlayerGrabCommand : ICommand
     {
         private readonly Character.Madeline _player;
 
-        public PlayerClimbCommand(Character.Madeline player) => _player = player;
+        public PlayerGrabCommand(Character.Madeline player) => _player = player;
 
         public void Execute() => _player.SetClimb(true);
     }

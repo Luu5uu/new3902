@@ -8,6 +8,7 @@ namespace Celeste.MadelineStates
     {
         public void SetState(Madeline m)
         {
+            m.ConsumeJumpGrace();
             m.velocityY = -PlayerJumpSpeed;
             m.onGround  = false;
             m.Maddy.JumpFast();
@@ -15,7 +16,7 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
-            if (m.dashPressed && m.canDash)
+            if (m.canDash && m.ConsumeDashPress())
             {
                 m.changeState(m.dashState);
                 return;
