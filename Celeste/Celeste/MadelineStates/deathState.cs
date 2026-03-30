@@ -36,16 +36,7 @@ namespace Celeste.MadelineStates
             if (m.IsDeathEffectFinished())
             {
                 m.ClearDeathEffect();
-                m.position = m.RespawnPoint;
-                m.velocityY = 0f;
-                m.onGround = false;
-                m.canDash = true;
-                m.isClimbing = false;
-                m.isDashing = false;
-                m.isDangle = false;
-                m.touchingLeftWall = false;
-                m.touchingRightWall = false;
-                m.changeState(m.standState);
+                m.RequestLevelReset();
             }
         }
 

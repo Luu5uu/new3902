@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 
 using Celeste.Animation;
 using Celeste.Character;
+using Celeste.Items;
 using Celeste.Blocks;
 using Celeste.Blocks.Rooms;
 using Celeste.DevTools;
@@ -47,6 +48,7 @@ namespace Celeste
         private int _currentRoom = 0;
 
         private List<IBlocks> _blockList;
+        private readonly List<CollectibleItem> _collectibles = new();
 
         /// <summary>When true, the currently displayed block (if animated) is updated each frame.</summary>
         private bool _blockAnimateEnabled;
@@ -200,9 +202,18 @@ namespace Celeste
             else
             {
                 _player.Update(gameTime);
-                HazardCollisioncs.ResolveHazardCollision();
-                _collisionSystem.ResolveBlockCollision(prevPos);
-                _player.UpdateSprite(gameTime);
+
+                if (_player.ConsumeLevelResetRequest())
+                {
+                    RebuildCurrentRoom(resetPlayer: true);
+                }
+                else
+                {
+                    HazardCollisioncs.ResolveHazardCollision();
+                    _collisionSystem.ResolveBlockCollision(prevPos);
+                    UpdateCollectibles(gameTime);
+                    _player.UpdateSprite(gameTime);
+                }
             }
 
             // When animation toggle is on, update the current block if it's an animated type (spring, move, crush).
@@ -239,6 +250,7 @@ namespace Celeste
                 rasterizerState: RasterizerState.CullNone);
 
             _worldMap.Draw(_spriteBatch);
+            DrawCollectibles(_spriteBatch);
             _player.Draw(_spriteBatch);
             DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
@@ -327,6 +339,7 @@ namespace Celeste
         {
             BuildMap();
             RebuildCollisionSystems();
+            RebuildCollectibles();
 
             if (resetPlayer)
             {
@@ -338,6 +351,56 @@ namespace Celeste
         {
             _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
             HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
+        }
+
+        private void RebuildCollectibles()
+        {
+            _collectibles.Clear();
+
+            Vector2 spawn = _player.RespawnPoint;
+            if (_currentRoom == 0)
+            {
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(-80f, -40f)));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateFlyStaw(_catalog), spawn + new Vector2(0f, -60f)));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(90f, -20f)));
+                return;
+            }
+
+            _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(72f, -40f)));
+
+            if (_currentRoom == 2 || _currentRoom == 5)
+            {
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(120f, -56f)));
+            }
+        }
+
+        private static CollectibleItem CreateCollectible(ItemAnimation animation, Vector2 position)
+        {
+            animation.Position = position;
+            animation.Scale = GlobalConstants.DefaultScale;
+            return new CollectibleItem(animation);
+        }
+
+        private void UpdateCollectibles(GameTime gameTime)
+        {
+            foreach (var collectible in _collectibles)
+            {
+                collectible.Update(gameTime);
+
+                if (collectible.TryCollect(_player.Bounds))
+                {
+                    _player.canDash = true;
+                    _player.Maddy.OnDashRefill();
+                }
+            }
+        }
+
+        private void DrawCollectibles(SpriteBatch spriteBatch)
+        {
+            foreach (var collectible in _collectibles)
+            {
+                collectible.Draw(spriteBatch);
+            }
         }
 
         private Vector2 GetRespawnPointForRoom(int room)
