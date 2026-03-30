@@ -12,35 +12,28 @@
 
 | Key(s) | Action |
 |--------|--------|
-| `A` / `←` | Move left |
-| `D` / `→` | Move right |
-| `Space` | Jump |
-| `Z` / `N` / `Enter` | Dash |
-| `W` (hold) | Climb |
+| `←` / `→` | Move left / right |
+| `↑` / `↓` | Aim dash vertically / climb up or down while grabbing |
+| `Z` (hold) | Grab / climb |
+| `X` | Dash |
+| `C` | Jump |
+| `W` / `A` / `S` / `D` | Testing fallback for directional input |
 | `E` | Trigger death sequence (test / demo only) |
 
-### Block / Obstacle Controls
+### Room / Testing Controls
 
-| Key | Action |
-|-----|--------|
-| `Y` | Cycle to next block |
-| `T` | Cycle to previous block |
-| `B` | Toggle block animation on / off |
-| `V` | Toggle block visibility on / off |
-
-### Item Controls
-
-| Key | Action |
-|-----|--------|
-| `I` | Cycle to next item |
-| `U` | Cycle to previous item |
+| Input | Action |
+|-------|--------|
+| Left mouse | Previous playable room |
+| Right mouse | Next playable room |
+| `0`-`5` | Jump directly to a room for testing |
 
 ### Other Controls
 
 | Key(s) | Action |
 |--------|--------|
 | `Q` / `Escape` | Quit |
-| `R` | Reset to initial state |
+| `R` | Reset the current room |
 
 ### Debug Mode Controls
 
@@ -83,7 +76,7 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 #### Sprint 2 Tasks — Aaron
 
  - [x] Controller and Command functionality - Create Command and Controller interfaces and classes to initialize, assign, and provide functionality to the project.
- - [ ] Player Control - Need to depreciate and integrate PlayerCommand.cs into my controller stucture
+ - [ ] Player Control - Needed to consolidate player control handling into the controller structure
  - [x] Project Managment - Set up initial READMe, as well and began pushing other members to create branches to complete tasks in and use Git functionality to track progress.
  - [x] Code Review - Reviewed Henry's Debug system and Isaac's block branch to ensure functionality  
 
@@ -117,13 +110,51 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 ---
 
-### Sprint 3 — (Due Mar 14, 2025)
+### Sprint 3 — Level Loading, Segmentation, and Collision Handling
 
-Tasks assigned to individuals: TBD
+**Due:** Mar 14, 2026
 
-### Sprint 4 — (TBD)
+**Sprint 3 carry-over into Sprint 4**
 
-Tasks assigned to individuals: TBD
+- Complete documentation for planning, code reviews, and sprint reflection before submission.
+- Ensure room loading is consistently file-driven where intended, not partially hard-coded.
+- Add collectible collision so item pickups are functional instead of display-only.
+- Fix remaining movement edge cases: wall-slide fallthrough, unsafe respawn points, and climb-through-block behavior.
+- Continue reducing oversized responsibilities in `Game1.cs`, especially input and flow control.
+
+### Sprint 4 — Completed First Level
+
+**Start:** Mar 29, 2026 | **Due:** Apr 11, 2026
+
+**Sprint 4 backlog**
+
+- Complete the first playable level with reliable room-to-room progression.
+- Keep room teleport/testing controls for fast grading and debugging.
+- Add sound effects, background music, and a mute toggle for testing.
+- Reset the level cleanly on death.
+- Add the HUD and core game flow screens: item/menu selection flow, pause, game over, and win state.
+- Continue migrating level data and gameplay constants toward cleaner, more maintainable structures.
+- Finish documentation, code reviews, analyzer/code-quality notes, and sprint reflection before submission.
+
+**Internal targets**
+
+- **Apr 4, 2026:** core functionality in place
+- **Apr 8, 2026:** code reviews + refactor pass complete
+- **Apr 10, 2026:** submission-ready verification and documentation lock
+
+#### Sprint 4 Tasks — Henry
+
+- [ ] Sprint planning leadership, README/sprint documentation, submission checklist, and final sprint integration
+- [ ] Refactor core game flow out of `Game1.cs` where practical this sprint
+- [ ] Own room transition flow, level reset flow, and high-impact gameplay polish
+- [ ] Implement and verify the most score-critical fixes from Sprint 3 feedback
+- [ ] Final verification pass on gameplay feel, build health, and grading requirements
+
+#### Sprint 4 Coordination Notes
+
+- Detailed task claiming and day-to-day delegation are managed in team Discord so the README stays submission-friendly.
+- Code review evidence is tracked through pull requests and can be supplemented with screenshots in the submission materials when needed.
+- Submission-bound work should be merged to `main` by **Friday, Apr 10, 2026** so packaging and documentation checks can be completed before turn-in.
 
 ### Sprint 5 — (TBD)
 
@@ -135,12 +166,10 @@ Tasks assigned to individuals: TBD
 
 To maintain clean, consistent task tracking across all sprints:
 
-1. **Each sprint gets its own section** in this README (see above), with a header, due date, and grader check-in date.
-2. **Each team member has a checklist** using GitHub-flavored Markdown task syntax:
-   - `- [x]` = completed
-   - `- [ ]` = pending / in progress
-3. **Responsibility:** Each team member updates their own checklist section before the sprint due date. Henry manages the overall structure and methodology.
-4. **Scaling:** For each new sprint, copy the previous sprint's section as a template, clear the checkboxes, update the due dates, and assign new tasks.
+1. **Each sprint gets its own section** in this README with dates, scope, and submission-facing notes.
+2. **Detailed claiming and day-to-day task movement** are tracked outside the README in the team Discord/task board so this file stays concise.
+3. **Responsibility:** Henry maintains the README structure and final submission checklist, while each team member is responsible for keeping their claimed work current in the team workflow tools.
+4. **Evidence:** task tracking, code reviews, and related project-management evidence should be preserved through PRs, screenshots, and any submitted supporting documents.
 
 ---
 
@@ -149,7 +178,8 @@ To maintain clean, consistent task tracking across all sprints:
 Please use Pull Requests to complete the code review requirements.
 
 **You should not be pulling your own code into the main branch** Other team members need to be responsible for reviewing and merging branches.
-**When reviewing code, use the Sprint description to properly fullfill the requirements**
+**When reviewing code, use the Sprint description to properly fulfill the requirements**
+**If screenshots or exported review evidence are needed for submission, capture them before the sprint is turned in**
 
 ---
 
@@ -187,11 +217,11 @@ Celeste/Celeste/
       Particles/             # ProceduralParticleTexture, ParticleSystem, Particle, Emitters/
   MadelineStates/            # Player state machine (stand, run, jump, fall, dash, climb, dangle, death)
   Input/
-    PlayerCommand.cs         # Movement / jump / dash / climb / death input struct
-    ICommand.cs, GameCommands.cs, IController.cs, KeyboardController.cs, ControllerLoader.cs
+    Controller.cs            # Keyboard, mouse, and gamepad controller implementations
+    ICommand.cs, GameCommands.cs, IController.cs, ControllerLoader.cs
   Animation/                 # Catalog, clips, controller, loader, keys
   Sprites/                   # MaddySprite, BodySprite, HairRenderer, hair/bangs data
-  Items/                     # ItemAnimation, ItemAnimator, ItemAnimationFactory
+  Items/                     # ItemAnimation, ItemAnimator, ItemAnimationFactory, CollectibleItem
   Blocks/                    # IBlocks, Blocks, CrushBlock, MoveBlock, Spring, BlockFactory, AllBlocks
   DevTools/                  # DebugOverlay.cs
   Game1.cs, Program.cs
