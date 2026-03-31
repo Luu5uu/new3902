@@ -30,7 +30,11 @@ namespace Celeste.Collision
             ResolveHorizontal(prevPos);
             ResolveVertical(prevPos);
 
+            
+
         }
+
+       
 
 
         public void ResolveHorizontal(Vector2 prevPos)
