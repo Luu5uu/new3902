@@ -14,6 +14,7 @@ namespace Celeste.MadelineStates
             m.isClimbing = true;
             m.isDangle = false;
             m.onGround = false;
+            m.velocityX = 0f;
             m.velocityY = 0f;
         }
 
@@ -22,6 +23,12 @@ namespace Celeste.MadelineStates
             if (m.ConsumeJumpPress())
             {
                 m.changeState(m.jumpState);
+                return;
+            }
+
+            if (m.canDash && m.ConsumeDashPress())
+            {
+                m.changeState(m.dashState);
                 return;
             }
             
@@ -54,17 +61,18 @@ namespace Celeste.MadelineStates
             if (m.moveY < 0f)
             {
                 m.Maddy.ClimbUp();
-                m.position.Y -= PlayerClimbUpSpeed * dt;
+                m.velocityY = -PlayerClimbUpSpeed;
                 m.climbStamina = Math.Max(0f, m.climbStamina - PlayerClimbUpCostPerSecond * dt);
             }
             else if (m.moveY > 0f)
             {
                 m.Maddy.Dangling();
-                m.position.Y += PlayerClimbDownSpeed * dt;
+                m.velocityY = PlayerClimbDownSpeed;
             }
             else
             {
                 m.Maddy.Dangling();
+                m.velocityY = 0f;
                 if (!m.onGround)
                 {
                     m.climbStamina = Math.Max(0f, m.climbStamina - PlayerClimbStillCostPerSecond * dt);

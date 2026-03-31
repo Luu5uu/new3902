@@ -9,6 +9,8 @@ namespace Celeste.MadelineStates
             m.isDangle = true;
             m.isClimbing = false;
             m.onGround = false;
+            m.velocityX = 0f;
+            m.velocityY = m.dangleFallSpeed;
             m.Maddy.Dangling();
         }
 
@@ -17,6 +19,12 @@ namespace Celeste.MadelineStates
             if (m.ConsumeJumpPress())
             {
                 m.changeState(m.jumpState);
+                return;
+            }
+
+            if (m.canDash && m.ConsumeDashPress())
+            {
+                m.changeState(m.dashState);
                 return;
             }
 
@@ -34,11 +42,12 @@ namespace Celeste.MadelineStates
 
             if (!m.onGround)
             {
-                m.position.Y += m.dangleFallSpeed * dt;
+                m.velocityY = m.dangleFallSpeed;
             }
             else if (m.onGround)
             {
                 m.isClimbing = false;
+                m.velocityY = 0f;
                 m.changeState(m.standState);
                 return;
             }
