@@ -23,11 +23,8 @@ namespace Celeste.MadelineStates
                 m.changeState(m.climbState);
                 return;
             }
-            float x = m.moveX * PlayerAirSpeed * dt;
-            m.position.X += x;
 
-            if (x < 0f) m.FaceLeft = true;
-            else if (x > 0f) m.FaceLeft = false;
+            m.RefreshFacingFromInput();
 
             if (m.onGround) m.changeState(m.standState);
         }

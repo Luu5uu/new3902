@@ -63,6 +63,14 @@ namespace Celeste.Input
         public void Execute() => _player.Jump();
     }
 
+    public class PlayerJumpHoldCommand : ICommand
+    {
+        private readonly Character.Madeline _player;
+
+        public PlayerJumpHoldCommand(Character.Madeline player) => _player = player;
+        public void Execute() => _player.SetJumpHeld(true);
+    }
+
     public class PlayerDashCommand : ICommand
     {
         private readonly Character.Madeline _player;

@@ -32,18 +32,18 @@ namespace Celeste.Input
         public void Update()
         {
             KeyboardState currentState = Keyboard.GetState();
-        
-            foreach (var mapping in _pressedMappings)
+
+            foreach (var mapping in _heldMappings)
             {
-                if (currentState.IsKeyDown(mapping.Key) && !_previousState.IsKeyDown(mapping.Key))
+                if (currentState.IsKeyDown(mapping.Key))
                 {
                     mapping.Value.Execute();
                 }
             }
-            
-            foreach (var mapping in _heldMappings)
+
+            foreach (var mapping in _pressedMappings)
             {
-                if (currentState.IsKeyDown(mapping.Key))
+                if (currentState.IsKeyDown(mapping.Key) && !_previousState.IsKeyDown(mapping.Key))
                 {
                     mapping.Value.Execute();
                 }
@@ -121,17 +121,17 @@ namespace Celeste.Input
             GamePadState currentState = GamePad.GetState(Microsoft.Xna.Framework.PlayerIndex.One);
             if (!currentState.IsConnected) return;
 
-            foreach (var mapping in _pressedMappings)
+            foreach (var mapping in _heldMappings)
             {
-                if (currentState.IsButtonDown(mapping.Key) && !_previousState.IsButtonDown(mapping.Key))
+                if (currentState.IsButtonDown(mapping.Key))
                 {
                     mapping.Value.Execute();
                 }
             }
 
-            foreach (var mapping in _heldMappings)
+            foreach (var mapping in _pressedMappings)
             {
-                if (currentState.IsButtonDown(mapping.Key))
+                if (currentState.IsButtonDown(mapping.Key) && !_previousState.IsButtonDown(mapping.Key))
                 {
                     mapping.Value.Execute();
                 }

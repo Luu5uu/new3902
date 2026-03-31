@@ -9,7 +9,9 @@ namespace Celeste.MadelineStates
         public void SetState(Madeline m)
         {
             m.ConsumeJumpGrace();
+            m.velocityX += PlayerJumpHorizontalBoost * m.moveX;
             m.velocityY = -PlayerJumpSpeed;
+            m.BeginVariableJump();
             m.onGround  = false;
             m.Maddy.JumpFast();
         }
@@ -22,13 +24,9 @@ namespace Celeste.MadelineStates
                 return;
             }
 
-            float x = m.moveX * PlayerAirSpeed * dt;
-            m.position.X += x;
-
             if (m.velocityY > 0) m.changeState(m.fallState);
 
-            if (x < 0f) m.FaceLeft = true;
-            else if (x > 0f) m.FaceLeft = false;
+            m.RefreshFacingFromInput();
         }
 
         public void Exit(Madeline m) { }
