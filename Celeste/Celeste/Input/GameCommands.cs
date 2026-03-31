@@ -41,6 +41,20 @@ namespace Celeste.Input
         public void Execute() => _player.Move(_direction);
     }
 
+    public class PlayerAimVerticalCommand : ICommand
+    {
+        private readonly Character.Madeline _player;
+        private readonly float _direction;
+
+        public PlayerAimVerticalCommand(Character.Madeline player, float direction)
+        {
+            _player = player;
+            _direction = direction;
+        }
+
+        public void Execute() => _player.AimVertical(_direction);
+    }
+
     public class PlayerJumpCommand : ICommand
     {
         private readonly Character.Madeline _player;
@@ -67,13 +81,13 @@ namespace Celeste.Input
         public void Execute() => _player.Die();
     }
 
-    public class PlayerClimbCommand : ICommand
+    public class PlayerGrabCommand : ICommand
     {
         private readonly Character.Madeline _player;
 
-        public PlayerClimbCommand(Character.Madeline player) => _player = player;
+        public PlayerGrabCommand(Character.Madeline player) => _player = player;
 
-        public void Execute() => _player.Climb();
+        public void Execute() => _player.SetClimb(true);
     }
 
     

@@ -11,6 +11,7 @@ using Celeste.Sprites;
 using Celeste.DeathAnimation;
 using Celeste.DeathAnimation.Particles;
 
+using System;
 using static Celeste.PlayerConstants;
 using static Celeste.GlobalConstants;
 using static Celeste.DeathConstants;
@@ -41,6 +42,10 @@ namespace Celeste.Character
         public bool deathPressed;
         public bool climbHeld;
         public float moveX;
+        public float moveY;
+        private float _jumpBufferTimer;
+        private float _dashBufferTimer;
+        private float _jumpGraceTimer;
 
         // Position & facing
         public Vector2 position;
@@ -63,12 +68,18 @@ namespace Celeste.Character
 
 
         // Physics (runtime state only — speed constants live in PlayerConstants)
+        public float velocityX;
         public float velocityY;
         public bool onGround;
+        public bool hitCeiling;
 
         //Climb
-        public float climbSpeed = PlayerClimbSpeed;
         public bool isClimbing;
+        public bool touchingLeftWall;
+        public bool touchingRightWall;
+        public bool IsTouchingWall => touchingLeftWall || touchingRightWall;
+        public float climbStamina = PlayerClimbMaxStamina;
+        public bool IsTired => climbStamina <= PlayerClimbTiredThreshold;
         // Dash
         public bool isDashing;
         public bool canDash = true;
@@ -79,6 +90,7 @@ namespace Celeste.Character
         private AnimationClip _deathClip;
         private Texture2D _deathDotTex;
         public DeathEffect _deathEffect;
+        private bool _levelResetRequested;
 
         private struct GhostFrame { public Vector2 Position; public bool FaceLeft; public float Alpha; }
         private readonly List<GhostFrame> _ghosts = new();
@@ -138,10 +150,79 @@ namespace Celeste.Character
         public void Reset()
         {
             ClearDeathEffect();
+            _levelResetRequested = false;
             position = RespawnPoint;
-            velocityY = 0f;
+            ClearMotionState();
             canDash = true;
+            climbStamina = PlayerClimbMaxStamina;
             changeState(standState);
+        }
+
+        public void RequestLevelReset()
+        {
+            _levelResetRequested = true;
+        }
+
+        public bool ConsumeLevelResetRequest()
+        {
+            bool requested = _levelResetRequested;
+            _levelResetRequested = false;
+            return requested;
+        }
+
+        private void ClearMotionState()
+        {
+            jumpPressed = false;
+            dashPressed = false;
+            deathPressed = false;
+            climbHeld = false;
+            moveX = 0f;
+            moveY = 0f;
+            _jumpBufferTimer = 0f;
+            _dashBufferTimer = 0f;
+            _jumpGraceTimer = 0f;
+
+            velocityY = 0f;
+            velocityX = 0f;
+            onGround = false;
+            hitCeiling = false;
+
+            isClimbing = false;
+            isDashing = false;
+            isDangle = false;
+
+            touchingLeftWall = false;
+            touchingRightWall = false;
+        }
+
+        public Vector2 GetDashDirection()
+        {
+            float x = moveX;
+            float y = moveY;
+
+            if (x == 0f && y == 0f)
+            {
+                x = FaceLeft ? -1f : 1f;
+            }
+
+            var dash = new Vector2(x, y);
+            if (dash != Vector2.Zero)
+            {
+                dash.Normalize();
+            }
+
+            return dash;
+        }
+
+        public float GetCurrentHorizontalSpeed()
+        {
+            float inputSpeed = moveX * (onGround ? PlayerRunSpeed : PlayerAirSpeed);
+            if (Math.Abs(inputSpeed) > Math.Abs(velocityX))
+            {
+                return inputSpeed;
+            }
+
+            return velocityX;
         }
 
         public void changeState(IMadelineState next)
@@ -157,14 +238,21 @@ namespace Celeste.Character
             this.moveX = direction;
         }
 
+        public void AimVertical(float direction)
+        {
+            this.moveY = direction;
+        }
+
         public void Jump()
         {
-            this.jumpPressed = true;
+            jumpPressed = true;
+            _jumpBufferTimer = PlayerJumpBufferTime;
         }
 
         public void Dash()
         {
-            this.dashPressed = true;
+            dashPressed = true;
+            _dashBufferTimer = PlayerDashBufferTime;
         }  
 
         public void Die()
@@ -206,10 +294,34 @@ namespace Celeste.Character
 
             if (_deathEffect != null)
             {
-                jumpPressed = false;
-                dashPressed = false;
-                deathPressed = false;
+                ClearTransientInput();
                 return;
+            }
+
+            if (onGround)
+            {
+                climbStamina = PlayerClimbMaxStamina;
+                _jumpGraceTimer = PlayerJumpGraceTime;
+            }
+            else if (_jumpGraceTimer > 0f)
+            {
+                _jumpGraceTimer = Math.Max(0f, _jumpGraceTimer - dt);
+            }
+
+            if (_jumpBufferTimer > 0f)
+            {
+                _jumpBufferTimer = Math.Max(0f, _jumpBufferTimer - dt);
+            }
+
+            if (_dashBufferTimer > 0f)
+            {
+                _dashBufferTimer = Math.Max(0f, _dashBufferTimer - dt);
+            }
+
+            if (!isDashing)
+            {
+                position.X += velocityX * dt;
+                velocityX = Approach(velocityX, 0f, PlayerDashCarryDeceleration * dt);
             }
 
             // Gravity & vertical position
@@ -220,11 +332,16 @@ namespace Celeste.Character
             }
 
           
+            ClearTransientInput();
+        }
 
+        private void ClearTransientInput()
+        {
             jumpPressed = false;
             dashPressed = false;
             deathPressed = false;
             moveX = 0f;
+            moveY = 0f;
             climbHeld = false;
         }
 
@@ -286,6 +403,68 @@ namespace Celeste.Character
         internal void ClearDeathEffect()
         {
             _deathEffect = null;
+        }
+
+        public bool CanGrabWall()
+        {
+            return climbHeld && IsTouchingWall && !IsTired;
+        }
+
+        public void FaceTowardWall()
+        {
+            if (touchingLeftWall && !touchingRightWall)
+            {
+                FaceLeft = true;
+            }
+            else if (touchingRightWall && !touchingLeftWall)
+            {
+                FaceLeft = false;
+            }
+        }
+
+        private static float Approach(float value, float target, float maxDelta)
+        {
+            if (value < target)
+            {
+                return Math.Min(value + maxDelta, target);
+            }
+
+            return Math.Max(value - maxDelta, target);
+        }
+
+        public bool ConsumeJumpPress()
+        {
+            if (_jumpBufferTimer <= 0f)
+            {
+                return false;
+            }
+
+            _jumpBufferTimer = 0f;
+            jumpPressed = false;
+            return true;
+        }
+
+        public bool ConsumeDashPress()
+        {
+            if (_dashBufferTimer <= 0f)
+            {
+                return false;
+            }
+
+            _dashBufferTimer = 0f;
+            dashPressed = false;
+            return true;
+        }
+
+        public bool CanUseJumpGrace()
+        {
+            return onGround || _jumpGraceTimer > 0f;
+        }
+
+        public void ConsumeJumpGrace()
+        {
+            onGround = false;
+            _jumpGraceTimer = 0f;
         }
     }
 }

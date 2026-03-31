@@ -17,8 +17,13 @@ namespace Celeste.MadelineStates
 
             // Freeze character (conservative: disable dash/jump movement)
             m.isDashing = false;
+            m.isClimbing = false;
+            m.isDangle = false;
             m.velocityY = 0f;
             m.moveX = 0f;
+            m.onGround = false;
+            m.touchingLeftWall = false;
+            m.touchingRightWall = false;
 
             // Spawn the integrated death animation (sprite -> particles).
             m.StartDeathEffect(wasDashing);
@@ -31,8 +36,7 @@ namespace Celeste.MadelineStates
             if (m.IsDeathEffectFinished())
             {
                 m.ClearDeathEffect();
-                m.position = m.RespawnPoint;
-                m.changeState(m.standState);
+                m.RequestLevelReset();
             }
         }
 

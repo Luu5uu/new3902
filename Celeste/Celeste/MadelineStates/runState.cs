@@ -13,17 +13,21 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
-            if (m.onGround && m.jumpPressed)
+            if (m.CanUseJumpGrace() && m.ConsumeJumpPress())
             {
                 m.changeState(m.jumpState);
                 return;
             }
-            if (m.dashPressed && m.canDash)
+            if (m.canDash && m.ConsumeDashPress())
             {
                 m.changeState(m.dashState);
                 return;
             }
-
+            if (m.CanGrabWall())
+            {
+                m.changeState(m.climbState);
+                return;
+            }
             float x = m.moveX;
             if (x == 0f)
             {

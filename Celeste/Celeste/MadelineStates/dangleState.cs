@@ -1,8 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Celeste.Character;
 
 namespace Celeste.MadelineStates
@@ -12,33 +7,40 @@ namespace Celeste.MadelineStates
         public void SetState(Madeline m)
         {
             m.isDangle = true;
+            m.isClimbing = false;
+            m.onGround = false;
             m.Maddy.Dangling();
         }
 
         public void Update(Madeline m, float dt)
         {
-
-            if (m.jumpPressed)
+            if (m.ConsumeJumpPress())
             {
                 m.changeState(m.jumpState);
+                return;
             }
-            if (m.climbHeld) { m.changeState(m.climbState); return; }
 
+            if (m.CanGrabWall())
+            {
+                m.changeState(m.climbState);
+                return;
+            }
 
-            if (m.moveX != 0)
+            if (!m.IsTouchingWall)
             {
                 m.changeState(m.fallState);
+                return;
             }
 
             if (!m.onGround)
             {
-                
-                m.position.Y += m.dangleFallSpeed*dt;
+                m.position.Y += m.dangleFallSpeed * dt;
             }
             else if (m.onGround)
             {
                 m.isClimbing = false;
                 m.changeState(m.standState);
+                return;
             }
         }
 
@@ -47,4 +49,3 @@ namespace Celeste.MadelineStates
         }
     }
 }
-
