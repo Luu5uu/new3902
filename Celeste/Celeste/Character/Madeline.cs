@@ -38,6 +38,7 @@ namespace Celeste.Character
 
         // Set each frame by input layer via SetMovementCommand; consumed in Update.
         public bool jumpPressed;
+        public bool jumpHeld;
         public bool dashPressed;
         public bool deathPressed;
         public bool climbHeld;
@@ -46,6 +47,13 @@ namespace Celeste.Character
         private float _jumpBufferTimer;
         private float _dashBufferTimer;
         private float _jumpGraceTimer;
+        private float _variableJumpTimer;
+        private float _variableJumpSpeed;
+        private Vector2 _lastAim = Vector2.UnitX;
+        private bool _dashRecoveryQueued;
+        private Vector2 _dashRecoveryDirection;
+        private bool _ledgeTopOutQueued;
+        private Vector2 _ledgeTopOutPosition;
 
         // Position & facing
         public Vector2 position;
@@ -173,6 +181,7 @@ namespace Celeste.Character
         private void ClearMotionState()
         {
             jumpPressed = false;
+            jumpHeld = false;
             dashPressed = false;
             deathPressed = false;
             climbHeld = false;
@@ -181,6 +190,13 @@ namespace Celeste.Character
             _jumpBufferTimer = 0f;
             _dashBufferTimer = 0f;
             _jumpGraceTimer = 0f;
+            _variableJumpTimer = 0f;
+            _variableJumpSpeed = 0f;
+            _lastAim = FaceLeft ? new Vector2(-1f, 0f) : Vector2.UnitX;
+            _dashRecoveryQueued = false;
+            _dashRecoveryDirection = Vector2.Zero;
+            _ledgeTopOutQueued = false;
+            _ledgeTopOutPosition = position;
 
             velocityY = 0f;
             velocityX = 0f;
@@ -197,21 +213,12 @@ namespace Celeste.Character
 
         public Vector2 GetDashDirection()
         {
-            float x = moveX;
-            float y = moveY;
+            return _lastAim;
+        }
 
-            if (x == 0f && y == 0f)
-            {
-                x = FaceLeft ? -1f : 1f;
-            }
-
-            var dash = new Vector2(x, y);
-            if (dash != Vector2.Zero)
-            {
-                dash.Normalize();
-            }
-
-            return dash;
+        public Vector2 ConsumeDashDirection()
+        {
+            return GetDashDirection();
         }
 
         public float GetCurrentHorizontalSpeed()
@@ -223,6 +230,18 @@ namespace Celeste.Character
             }
 
             return velocityX;
+        }
+
+        public void RefreshFacingFromInput()
+        {
+            if (moveX < 0f)
+            {
+                FaceLeft = true;
+            }
+            else if (moveX > 0f)
+            {
+                FaceLeft = false;
+            }
         }
 
         public void changeState(IMadelineState next)
@@ -247,6 +266,11 @@ namespace Celeste.Character
         {
             jumpPressed = true;
             _jumpBufferTimer = PlayerJumpBufferTime;
+        }
+
+        public void SetJumpHeld(bool held)
+        {
+            jumpHeld = held;
         }
 
         public void Dash()
@@ -289,6 +313,10 @@ namespace Celeste.Character
                 changeState(deathState);
             }
 
+            RefreshLastAim();
+            ApplyQueuedTopOut();
+            ApplyQueuedDashRecovery();
+
             // State logic
             _state.Update(this, dt);
 
@@ -318,18 +346,57 @@ namespace Celeste.Character
                 _dashBufferTimer = Math.Max(0f, _dashBufferTimer - dt);
             }
 
-            if (!isDashing)
+            if (_variableJumpTimer > 0f)
             {
-                position.X += velocityX * dt;
+                _variableJumpTimer = Math.Max(0f, _variableJumpTimer - dt);
+            }
+
+            if (!isDashing && !isClimbing && !isDangle)
+            {
+                UpdateHorizontalVelocity(dt);
+            }
+            else if (!isDashing)
+            {
                 velocityX = Approach(velocityX, 0f, PlayerDashCarryDeceleration * dt);
             }
 
-            // Gravity & vertical position
             if (!isDashing && !isClimbing && !isDangle)
             {
-                if (!onGround) velocityY += PlayerGravity * dt;
-                position.Y += velocityY;
+                if (!onGround)
+                {
+                    float gravity = PlayerGravity;
+                    if (_variableJumpTimer > 0f && jumpHeld && Math.Abs(velocityY) < PlayerHalfGravityThreshold)
+                    {
+                        gravity *= PlayerJumpHoldGravityMultiplier;
+                    }
+                    else if (!jumpHeld || velocityY >= 0f)
+                    {
+                        _variableJumpTimer = 0f;
+                    }
+
+                    velocityY += gravity * dt;
+                    velocityY = Math.Min(velocityY, PlayerMaxFallSpeed);
+                }
+                else if (velocityY > 0f)
+                {
+                    velocityY = 0f;
+                }
+
+                if (_variableJumpTimer > 0f)
+                {
+                    if (jumpHeld)
+                    {
+                        velocityY = Math.Min(velocityY, _variableJumpSpeed);
+                    }
+                    else
+                    {
+                        _variableJumpTimer = 0f;
+                    }
+                }
             }
+
+            position.X += velocityX * dt;
+            position.Y += velocityY * dt;
 
           
             ClearTransientInput();
@@ -338,6 +405,7 @@ namespace Celeste.Character
         private void ClearTransientInput()
         {
             jumpPressed = false;
+            jumpHeld = false;
             dashPressed = false;
             deathPressed = false;
             moveX = 0f;
@@ -432,6 +500,28 @@ namespace Celeste.Character
             return Math.Max(value - maxDelta, target);
         }
 
+        private void UpdateHorizontalVelocity(float dt)
+        {
+            float targetSpeed = moveX * PlayerRunSpeed;
+            float accel = PlayerRunAcceleration * (onGround ? 1f : PlayerAirAccelerationMultiplier);
+            float decel = PlayerRunDeceleration * (onGround ? 1f : PlayerAirAccelerationMultiplier);
+
+            if (moveX != 0f)
+            {
+                velocityX = Approach(velocityX, targetSpeed, accel * dt);
+                RefreshFacingFromInput();
+            }
+            else
+            {
+                velocityX = Approach(velocityX, 0f, decel * dt);
+            }
+
+            if (!onGround && Math.Abs(velocityX) > PlayerAirSpeed)
+            {
+                velocityX = Approach(velocityX, Math.Sign(velocityX) * PlayerAirSpeed, decel * dt);
+            }
+        }
+
         public bool ConsumeJumpPress()
         {
             if (_jumpBufferTimer <= 0f)
@@ -465,6 +555,98 @@ namespace Celeste.Character
         {
             onGround = false;
             _jumpGraceTimer = 0f;
+        }
+
+        public void BeginVariableJump()
+        {
+            _variableJumpTimer = PlayerVariableJumpTime;
+            _variableJumpSpeed = velocityY;
+        }
+
+        public void QueueDashRecovery(Vector2 dashDirection)
+        {
+            _dashRecoveryQueued = true;
+            _dashRecoveryDirection = dashDirection;
+        }
+
+        public void QueueLedgeTopOut(Vector2 targetPosition)
+        {
+            _ledgeTopOutQueued = true;
+            _ledgeTopOutPosition = targetPosition;
+            position = targetPosition;
+            velocityY = 0f;
+            onGround = true;
+            hitCeiling = false;
+            touchingLeftWall = false;
+            touchingRightWall = false;
+        }
+
+        private void ApplyQueuedTopOut()
+        {
+            if (!_ledgeTopOutQueued)
+            {
+                return;
+            }
+
+            _ledgeTopOutQueued = false;
+            isClimbing = false;
+            isDangle = false;
+            climbStamina = PlayerClimbMaxStamina;
+            canDash = true;
+            Maddy.OnDashRefill();
+            changeState(moveX == 0f ? standState : runState);
+        }
+
+        private void ApplyQueuedDashRecovery()
+        {
+            if (!_dashRecoveryQueued)
+            {
+                return;
+            }
+
+            _dashRecoveryQueued = false;
+            isDashing = false;
+
+            if (_dashRecoveryDirection.Y <= 0f)
+            {
+                velocityX = _dashRecoveryDirection.X * PlayerDashEndSpeed;
+                velocityY = hitCeiling ? 0f : _dashRecoveryDirection.Y * PlayerDashEndSpeed;
+
+                if (velocityY < 0f)
+                {
+                    velocityY *= PlayerDashEndUpMultiplier;
+                }
+            }
+
+            if (CanGrabWall())
+            {
+                changeState(climbState);
+            }
+            else if (onGround)
+            {
+                changeState(moveX == 0f ? standState : runState);
+            }
+            else
+            {
+                changeState(fallState);
+            }
+        }
+
+        private void RefreshLastAim()
+        {
+            _lastAim = ResolveAimFromInput();
+        }
+
+        private Vector2 ResolveAimFromInput()
+        {
+            Vector2 aim = new Vector2(moveX, moveY);
+            if (aim == Vector2.Zero)
+            {
+                return FaceLeft ? new Vector2(-1f, 0f) : Vector2.UnitX;
+            }
+
+            aim.Normalize();
+            return aim;
         }
     }
 }

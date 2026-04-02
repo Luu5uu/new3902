@@ -11,6 +11,9 @@ namespace Celeste.MadelineStates
         private float _ghostTimer;
         private Vector2 _dashDirection;
         private bool _startedOnGround;
+        private float _horizontalSpeedBeforeDash;
+        private bool _dashStarted;
+        private bool _waitingForAimFrame;
 
         public void SetState(Madeline m)
         {
@@ -24,20 +27,27 @@ namespace Celeste.MadelineStates
             _timeLeft = PlayerDashDuration;
             _ghostTimer = 0f;
             _startedOnGround = m.onGround;
-            _dashDirection = m.GetDashDirection();
+            _horizontalSpeedBeforeDash = m.GetCurrentHorizontalSpeed();
+            _dashStarted = false;
+            _waitingForAimFrame = true;
+            _dashDirection = Vector2.Zero;
+            m.velocityX = 0f;
+            m.velocityY = 0f;
+        }
 
+        private void BeginDash(Madeline m)
+        {
+            _dashDirection = m.ConsumeDashDirection();
             if (_dashDirection == Vector2.Zero)
             {
                 _dashDirection = m.FaceLeft ? new Vector2(-1f, 0f) : new Vector2(1f, 0f);
             }
 
             Vector2 dashVelocity = _dashDirection * PlayerDashSpeed;
-
-            float horizontalSpeedBeforeDash = m.GetCurrentHorizontalSpeed();
-            if (System.Math.Sign(horizontalSpeedBeforeDash) == System.Math.Sign(dashVelocity.X)
-                && System.Math.Abs(horizontalSpeedBeforeDash) > System.Math.Abs(dashVelocity.X))
+            if (System.Math.Sign(_horizontalSpeedBeforeDash) == System.Math.Sign(dashVelocity.X)
+                && System.Math.Abs(_horizontalSpeedBeforeDash) > System.Math.Abs(dashVelocity.X))
             {
-                dashVelocity.X = horizontalSpeedBeforeDash;
+                dashVelocity.X = _horizontalSpeedBeforeDash;
             }
 
             if (_startedOnGround && _dashDirection.X != 0f && _dashDirection.Y > 0f && dashVelocity.Y > 0f)
@@ -54,10 +64,23 @@ namespace Celeste.MadelineStates
             {
                 m.FaceLeft = _dashDirection.X < 0f;
             }
+
+            _dashStarted = true;
         }
 
         public void Update(Madeline m, float dt)
         {
+            if (_waitingForAimFrame)
+            {
+                _waitingForAimFrame = false;
+                return;
+            }
+
+            if (!_dashStarted)
+            {
+                BeginDash(m);
+            }
+
             _ghostTimer -= dt;
             if (_ghostTimer <= 0f)
             {
@@ -65,28 +88,11 @@ namespace Celeste.MadelineStates
                 _ghostTimer = 0.04f;
             }
 
-            m.position.X += m.velocityX * dt;
-            m.position.Y += m.velocityY * dt;
-
             _timeLeft -= dt;
             if (_timeLeft <= 0f)
             {
-                m.isDashing = false;
-                if (_dashDirection.Y <= 0f)
-                {
-                    m.velocityX = _dashDirection.X * PlayerDashEndSpeed;
-                    m.velocityY = m.hitCeiling ? 0f : _dashDirection.Y * PlayerDashEndSpeed;
-
-                    if (m.velocityY < 0f)
-                    {
-                        m.velocityY *= PlayerDashEndUpMultiplier;
-                    }
-                }
-
-                if (m.CanGrabWall()) m.changeState(m.climbState);
-                else if (!m.onGround) m.changeState(m.fallState);
-                else if (m.moveX == 0f) m.changeState(m.standState);
-                else m.changeState(m.runState);
+                _timeLeft = 0f;
+                m.QueueDashRecovery(_dashDirection);
             }
         }
 

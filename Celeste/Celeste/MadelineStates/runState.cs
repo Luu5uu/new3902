@@ -13,14 +13,14 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
-            if (m.CanUseJumpGrace() && m.ConsumeJumpPress())
-            {
-                m.changeState(m.jumpState);
-                return;
-            }
             if (m.canDash && m.ConsumeDashPress())
             {
                 m.changeState(m.dashState);
+                return;
+            }
+            if (m.CanUseJumpGrace() && m.ConsumeJumpPress())
+            {
+                m.changeState(m.jumpState);
                 return;
             }
             if (m.CanGrabWall())
@@ -35,9 +35,7 @@ namespace Celeste.MadelineStates
                 return;
             }
 
-            m.position.X += x * PlayerRunSpeed * dt;
-            if (x < 0f) m.FaceLeft = true;
-            else if (x > 0f) m.FaceLeft = false;
+            m.RefreshFacingFromInput();
         }
 
         public void Exit(Madeline m) { }
