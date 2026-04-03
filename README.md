@@ -13,10 +13,11 @@
 | Key(s) | Action |
 |--------|--------|
 | `←` / `→` | Move left / right |
-| `↑` / `↓` | Aim dash vertically / climb up or down while grabbing |
+| `↑` / `↓` | Aim dash vertically / climb up or down while grabbing / crouch while grounded |
 | `Z` (hold) | Grab / climb |
 | `X` | Dash |
 | `C` | Jump |
+| `C` while sliding on wall | Wall jump / kick off the wall |
 | `W` / `A` / `S` / `D` | Testing fallback for directional input |
 | `E` | Trigger death sequence (test / demo only) |
 
