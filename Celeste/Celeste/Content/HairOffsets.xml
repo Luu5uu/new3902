@@ -88,6 +88,37 @@
     <F dx="-1" dy="0" />
   </Anim>
 
+  <!-- wallslide: 1 frame -->
+  <Anim name="wallslide">
+    <F dx="0" dy="0" />
+  </Anim>
+
+  <!-- tired: 4 frames -->
+  <Anim name="tired">
+    <F dx="0"  dy="1" />
+    <F dx="-1" dy="1" />
+    <F dx="-1" dy="2" />
+    <F dx="0"  dy="2" />
+  </Anim>
+
+  <!-- tiredstill: 1 frame -->
+  <Anim name="tiredstill">
+    <F dx="0" dy="2" />
+  </Anim>
+
+  <!-- climbpull: 4 frames -->
+  <Anim name="climbpull">
+    <F dx="0"  dy="0" />
+    <F dx="0"  dy="1" />
+    <F dx="-1" dy="1" />
+    <F dx="-1" dy="0" />
+  </Anim>
+
+  <!-- duck: 1 frame -->
+  <Anim name="duck">
+    <F dx="0" dy="6" />
+  </Anim>
+
   <!-- idleB: 24 frames -->
   <Anim name="idleb">
     <F dx="0"  dy="0" />
