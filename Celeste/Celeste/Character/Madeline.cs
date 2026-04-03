@@ -7,9 +7,11 @@ using Celeste.Animation;
 using Celeste.Input;
 using Celeste.MadelineStates;
 using Celeste.Sprites;
+using Celeste.Blocks;
 
 using Celeste.DeathAnimation;
 using Celeste.DeathAnimation.Particles;
+using Celeste.DeathAnimation.Particles.Emitters;
 
 using System;
 using static Celeste.PlayerConstants;
@@ -35,6 +37,7 @@ namespace Celeste.Character
 
         //New
         public IMadelineState climbState;
+        public IMadelineState crouchState;
 
         // Set each frame by input layer via SetMovementCommand; consumed in Update.
         public bool jumpPressed;
@@ -54,6 +57,8 @@ namespace Celeste.Character
         private Vector2 _dashRecoveryDirection;
         private bool _ledgeTopOutQueued;
         private Vector2 _ledgeTopOutPosition;
+        private float _ledgeTopOutTimer;
+        private readonly List<IBlocks> _worldBlocks = new();
 
         // Position & facing
         public Vector2 position;
@@ -61,17 +66,20 @@ namespace Celeste.Character
         public float ground;
         public Vector2 RespawnPoint;
 
-        private const int HitboxW = 16;
-        private const int HitboxH = 32;
-
         public Rectangle Bounds
         {
             get
             {
-                int left = (int)(position.X - HitboxW / 2f);
-                int top = (int)(position.Y - HitboxH);
-                return new Rectangle(left, top, HitboxW, HitboxH);
+                return GetBoundsAt(position, isCrouching);
             }
+        }
+
+        public Rectangle GetBoundsAt(Vector2 targetPosition, bool crouching)
+        {
+            int height = crouching ? PlayerDuckHitboxHeight : PlayerNormalHitboxHeight;
+            int left = (int)(targetPosition.X - PlayerHitboxWidth / 2f);
+            int top = (int)(targetPosition.Y - height);
+            return new Rectangle(left, top, PlayerHitboxWidth, height);
         }
 
 
@@ -88,6 +96,7 @@ namespace Celeste.Character
         public bool IsTouchingWall => touchingLeftWall || touchingRightWall;
         public float climbStamina = PlayerClimbMaxStamina;
         public bool IsTired => climbStamina <= PlayerClimbTiredThreshold;
+        public bool isCrouching;
         // Dash
         public bool isDashing;
         public bool canDash = true;
@@ -95,7 +104,9 @@ namespace Celeste.Character
         public bool isDangle;
         public float dangleFallSpeed = PlayerDangleFallSpeed;
 
-        private AnimationClip _deathClip;
+        private AnimationClip _deathSideClip;
+        private AnimationClip _deathUpClip;
+        private AnimationClip _deathDownClip;
         private Texture2D _deathDotTex;
         public DeathEffect _deathEffect;
         private bool _levelResetRequested;
@@ -103,6 +114,9 @@ namespace Celeste.Character
         private struct GhostFrame { public Vector2 Position; public bool FaceLeft; public float Alpha; }
         private readonly List<GhostFrame> _ghosts = new();
         private Texture2D _ghostBodyTex;
+        private ParticleSystem _dashParticles;
+        private BurstEmitter _dashBurstEmitter;
+        private OrbitRingEffect _dashRingEffect;
 
         public void AddGhost(Vector2 pos, bool faceLeft) =>
             _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
@@ -124,16 +138,40 @@ namespace Celeste.Character
 
             deathState = new DeathState();
             climbState = new climbState();
+            crouchState = new crouchState();
 
-            _state = new standState();
+            _state = standState;
             _state.SetState(this);
         }
 
-        public void ConfigureDeathAnimation(AnimationClip deathClip, Texture2D dotTexture)
+        public void ConfigureDeathAnimation(AnimationClip deathSideClip, AnimationClip deathUpClip, AnimationClip deathDownClip, Texture2D dotTexture)
         {
-            _deathClip = deathClip;
+            _deathSideClip = deathSideClip;
+            _deathUpClip = deathUpClip;
+            _deathDownClip = deathDownClip;
             _deathDotTex = dotTexture;
+            _dashParticles = new ParticleSystem(dotTexture);
+            _dashBurstEmitter = new BurstEmitter(
+                count: 8,
+                minSpeed: 90f * DefaultScale,
+                maxSpeed: 170f * DefaultScale,
+                minLife: 0.08f,
+                maxLife: 0.18f,
+                minSize: 0.12f * DefaultScale,
+                maxSize: 0.18f * DefaultScale,
+                tint: DashDeathColor);
             BuildGhostTexture();
+        }
+
+        public void SetWorldBlocks(IEnumerable<IBlocks> worldBlocks)
+        {
+            _worldBlocks.Clear();
+            if (worldBlocks == null)
+            {
+                return;
+            }
+
+            _worldBlocks.AddRange(worldBlocks);
         }
 
         private void BuildGhostTexture()
@@ -197,6 +235,9 @@ namespace Celeste.Character
             _dashRecoveryDirection = Vector2.Zero;
             _ledgeTopOutQueued = false;
             _ledgeTopOutPosition = position;
+            _ledgeTopOutTimer = 0f;
+            _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
+            _dashRingEffect = null;
 
             velocityY = 0f;
             velocityX = 0f;
@@ -206,6 +247,7 @@ namespace Celeste.Character
             isClimbing = false;
             isDashing = false;
             isDangle = false;
+            isCrouching = false;
 
             touchingLeftWall = false;
             touchingRightWall = false;
@@ -308,13 +350,27 @@ namespace Celeste.Character
                 _ghosts[i] = g;
             }
 
-            if (deathPressed && _deathClip != null && _deathDotTex != null && _deathEffect == null)
+            _dashParticles?.Update(dt);
+            if (_dashRingEffect != null)
+            {
+                _dashRingEffect.Update(dt);
+                if (_dashRingEffect.IsFinished)
+                {
+                    _dashRingEffect = null;
+                }
+            }
+
+            if (deathPressed && _deathSideClip != null && _deathUpClip != null && _deathDownClip != null && _deathDotTex != null && _deathEffect == null)
             {
                 changeState(deathState);
             }
 
             RefreshLastAim();
-            ApplyQueuedTopOut();
+            if (ApplyQueuedTopOut(dt))
+            {
+                ClearTransientInput();
+                return;
+            }
             ApplyQueuedDashRecovery();
 
             // State logic
@@ -440,22 +496,92 @@ namespace Celeste.Character
                 }
             }
 
+            _dashRingEffect?.Draw(spriteBatch);
+            _dashParticles?.Draw(spriteBatch);
             Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
         }
 
-        internal void StartDeathEffect(bool wasDashing)
+        internal void TriggerDashVisual(Vector2 dashDirection)
         {
-            if (_deathClip == null || _deathDotTex == null)
+            if (_deathDotTex == null || _dashParticles == null || _dashBurstEmitter == null)
+            {
                 return;
+            }
+
+            Vector2 center = position + new Vector2(0f, -PlayerNormalHitboxHeight * 0.5f);
+            _dashBurstEmitter.Emit(_dashParticles, center);
+
+            float initialAngle = dashDirection == Vector2.Zero
+                ? 0f
+                : (float)Math.Atan2(dashDirection.Y, dashDirection.X);
+            _dashRingEffect = new OrbitRingEffect(
+                _deathDotTex,
+                center,
+                count: 8,
+                radius: 7f * DefaultScale,
+                angularSpeed: 18f,
+                lifetime: 0.10f,
+                dotScale: 0.14f * DefaultScale,
+                color: DashDeathColor,
+                initialAngle: initialAngle);
+        }
+
+        internal Vector2 GetDeathDirection()
+        {
+            if (isDashing)
+            {
+                return GetDashDirection();
+            }
+
+            Vector2 direction = new Vector2(velocityX, velocityY);
+            if (direction == Vector2.Zero)
+            {
+                direction = FaceLeft ? new Vector2(-1f, 0f) : Vector2.UnitX;
+            }
+
+            if (direction != Vector2.Zero)
+            {
+                direction.Normalize();
+            }
+
+            return direction;
+        }
+
+        internal void StartDeathEffect(bool wasDashing, Vector2 direction)
+        {
+            if (_deathSideClip == null || _deathUpClip == null || _deathDownClip == null || _deathDotTex == null)
+                return;
+
+            AnimationClip clip = ResolveDeathClip(direction);
 
             float scale = DefaultScale;
             Vector2 topLeft = position - new Vector2(
-                _deathClip.FrameWidth * scale * 0.5f,
-                _deathClip.FrameHeight * scale
+                clip.FrameWidth * scale * 0.5f,
+                clip.FrameHeight * scale
             );
 
-            Color deathColor = wasDashing ? DashDeathColor : NormalDeathColor;
-            _deathEffect = new DeathEffect(_deathClip, _deathDotTex, topLeft, deathColor, scale);
+            Color deathColor = Maddy.Hair.HairColor;
+            if (deathColor == default)
+            {
+                deathColor = wasDashing ? DashDeathColor : NormalDeathColor;
+            }
+            bool faceLeft = direction.X < 0f;
+            _deathEffect = new DeathEffect(clip, _deathDotTex, topLeft, deathColor, faceLeft, scale);
+        }
+
+        private AnimationClip ResolveDeathClip(Vector2 direction)
+        {
+            if (direction.Y < -0.5f)
+            {
+                return _deathUpClip;
+            }
+
+            if (direction.Y > 0.5f)
+            {
+                return _deathDownClip;
+            }
+
+            return _deathSideClip;
         }
 
         internal void UpdateDeathEffect(float dt)
@@ -473,9 +599,84 @@ namespace Celeste.Character
             _deathEffect = null;
         }
 
+        public void SetCrouching(bool crouching)
+        {
+            if (!crouching && !CanStandUp())
+            {
+                return;
+            }
+
+            isCrouching = crouching;
+        }
+
+        public bool WantsToCrouch()
+        {
+            return onGround && moveY > 0f && !isClimbing && !isDashing;
+        }
+
+        public bool CanStandUp()
+        {
+            Rectangle standingBounds = GetBoundsAt(position, crouching: false);
+
+            for (int i = 0; i < _worldBlocks.Count; i++)
+            {
+                Rectangle blockBounds = _worldBlocks[i].Bounds;
+                if (blockBounds == Rectangle.Empty)
+                {
+                    continue;
+                }
+
+                if (standingBounds.Intersects(blockBounds))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public bool CanGrabWall()
         {
-            return climbHeld && IsTouchingWall && !IsTired;
+            return climbHeld && IsTouchingWall && !IsTired && !isCrouching;
+        }
+
+        public bool CanWallJump()
+        {
+            return !onGround && !isCrouching && GetWallJumpDirection() != 0;
+        }
+
+        public int GetWallJumpDirection()
+        {
+            if (touchingRightWall && !touchingLeftWall)
+            {
+                return -1;
+            }
+
+            if (touchingLeftWall && !touchingRightWall)
+            {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        public void PerformWallJump()
+        {
+            int direction = GetWallJumpDirection();
+            if (direction == 0)
+            {
+                return;
+            }
+
+            SetCrouching(false);
+            isClimbing = false;
+            isDangle = false;
+            ConsumeJumpGrace();
+            velocityX = PlayerWallJumpHorizontalSpeed * direction;
+            velocityY = -PlayerJumpSpeed;
+            BeginVariableJump();
+            FaceLeft = direction < 0;
+            Maddy.JumpFast(restart: true);
         }
 
         public void FaceTowardWall()
@@ -502,23 +703,29 @@ namespace Celeste.Character
 
         private void UpdateHorizontalVelocity(float dt)
         {
-            float targetSpeed = moveX * PlayerRunSpeed;
-            float accel = PlayerRunAcceleration * (onGround ? 1f : PlayerAirAccelerationMultiplier);
-            float decel = PlayerRunDeceleration * (onGround ? 1f : PlayerAirAccelerationMultiplier);
+            if (isCrouching)
+            {
+                velocityX = Approach(velocityX, 0f, PlayerDuckDeceleration * dt);
+                return;
+            }
+
+            float max = onGround ? PlayerRunSpeed : PlayerAirSpeed;
+            float mult = onGround ? 1f : PlayerAirAccelerationMultiplier;
+            float targetSpeed = max * moveX;
+            bool movingSameDirectionOverMax =
+                moveX != 0f
+                && Math.Abs(velocityX) > max
+                && Math.Sign(velocityX) == Math.Sign(moveX);
+
+            float approach = movingSameDirectionOverMax
+                ? PlayerRunDeceleration * mult * dt
+                : PlayerRunAcceleration * mult * dt;
+
+            velocityX = Approach(velocityX, targetSpeed, approach);
 
             if (moveX != 0f)
             {
-                velocityX = Approach(velocityX, targetSpeed, accel * dt);
                 RefreshFacingFromInput();
-            }
-            else
-            {
-                velocityX = Approach(velocityX, 0f, decel * dt);
-            }
-
-            if (!onGround && Math.Abs(velocityX) > PlayerAirSpeed)
-            {
-                velocityX = Approach(velocityX, Math.Sign(velocityX) * PlayerAirSpeed, decel * dt);
             }
         }
 
@@ -573,28 +780,45 @@ namespace Celeste.Character
         {
             _ledgeTopOutQueued = true;
             _ledgeTopOutPosition = targetPosition;
+            _ledgeTopOutTimer = PlayerLedgeTopOutAnimationTime;
             position = targetPosition;
             velocityY = 0f;
+            velocityX = 0f;
             onGround = true;
             hitCeiling = false;
             touchingLeftWall = false;
             touchingRightWall = false;
+            isClimbing = false;
+            isDangle = false;
+            isCrouching = false;
+            Maddy.ClimbPull();
+            Maddy.ClearSweat();
         }
 
-        private void ApplyQueuedTopOut()
+        private bool ApplyQueuedTopOut(float dt)
         {
             if (!_ledgeTopOutQueued)
             {
-                return;
+                return false;
+            }
+
+            position = _ledgeTopOutPosition;
+            velocityX = 0f;
+            velocityY = 0f;
+            onGround = true;
+            _ledgeTopOutTimer = Math.Max(0f, _ledgeTopOutTimer - dt);
+            if (_ledgeTopOutTimer > 0f && !Maddy.IsBodyAnimationFinished)
+            {
+                return true;
             }
 
             _ledgeTopOutQueued = false;
-            isClimbing = false;
-            isDangle = false;
+            _ledgeTopOutTimer = 0f;
             climbStamina = PlayerClimbMaxStamina;
             canDash = true;
             Maddy.OnDashRefill();
             changeState(moveX == 0f ? standState : runState);
+            return true;
         }
 
         private void ApplyQueuedDashRecovery()

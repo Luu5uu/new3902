@@ -9,8 +9,10 @@ namespace Celeste.MadelineStates
     {
         public void SetState(Madeline m)
         {
+            m.SetCrouching(false);
             m.FaceTowardWall();
-            m.Maddy.Dangling();
+            m.Maddy.WallSlide(restart: true);
+            m.Maddy.SetClimbSweat(climbingUp: false, tired: m.IsTired, onGround: m.onGround);
             m.isClimbing = true;
             m.isDangle = false;
             m.onGround = false;
@@ -22,7 +24,15 @@ namespace Celeste.MadelineStates
         {
             if (m.ConsumeJumpPress())
             {
-                m.changeState(m.jumpState);
+                int wallJumpDirection = m.GetWallJumpDirection();
+                if (wallJumpDirection != 0 && System.Math.Sign(m.moveX) == wallJumpDirection)
+                {
+                    m.PerformWallJump();
+                }
+                else
+                {
+                    m.changeState(m.jumpState);
+                }
                 return;
             }
 
@@ -60,18 +70,35 @@ namespace Celeste.MadelineStates
 
             if (m.moveY < 0f)
             {
-                m.Maddy.ClimbUp();
+                if (m.IsTired)
+                {
+                    m.Maddy.Tired();
+                }
+                else
+                {
+                    m.Maddy.ClimbUp();
+                }
+                m.Maddy.SetClimbSweat(climbingUp: true, tired: m.IsTired, onGround: m.onGround);
                 m.velocityY = -PlayerClimbUpSpeed;
                 m.climbStamina = Math.Max(0f, m.climbStamina - PlayerClimbUpCostPerSecond * dt);
             }
             else if (m.moveY > 0f)
             {
-                m.Maddy.Dangling();
+                m.Maddy.WallSlide();
+                m.Maddy.SetClimbSweat(climbingUp: false, tired: m.IsTired, onGround: m.onGround);
                 m.velocityY = PlayerClimbDownSpeed;
             }
             else
             {
-                m.Maddy.Dangling();
+                if (m.IsTired)
+                {
+                    m.Maddy.TiredStill();
+                }
+                else
+                {
+                    m.Maddy.WallSlide();
+                }
+                m.Maddy.SetClimbSweat(climbingUp: false, tired: m.IsTired, onGround: m.onGround);
                 m.velocityY = 0f;
                 if (!m.onGround)
                 {
@@ -83,6 +110,7 @@ namespace Celeste.MadelineStates
 
         public void Exit(Madeline m) {
             m.isClimbing = false;
+            m.Maddy.ClearSweat();
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Celeste.MadelineStates
             _idleTimer   = 0f;
             _fidgetTimer = -1f;
             m.Maddy.Idle();
+            m.Maddy.ClearSweat();
         }
 
         public void Update(Madeline m, float dt)
@@ -53,6 +54,7 @@ namespace Celeste.MadelineStates
             // --- State transitions ---
             if (m.canDash && m.ConsumeDashPress())           { m.changeState(m.dashState); return; }
             if (m.CanUseJumpGrace() && m.ConsumeJumpPress()) { m.changeState(m.jumpState); return; }
+            if (m.WantsToCrouch())                           { m.changeState(m.crouchState); return; }
             if (m.CanGrabWall())                 { m.changeState(m.climbState); return; }
             if (m.moveX != 0f)                     { m.changeState(m.runState);  return; }
 

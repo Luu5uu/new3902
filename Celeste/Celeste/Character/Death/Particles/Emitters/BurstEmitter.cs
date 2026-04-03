@@ -59,7 +59,9 @@ namespace Celeste.DeathAnimation.Particles.Emitters
                     Rotation = 0f,
                     AngularVelocity = (float)(_rng.NextDouble() * 6.0 - 3.0),
 
-                    Tint = _tint
+                    Tint = _tint,
+                    StartTint = _tint,
+                    EndTint = Color.White
                 };
 
                 system.Add(p);

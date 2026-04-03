@@ -48,7 +48,13 @@ namespace Celeste.DeathAnimation.Particles
                 float size = MathHelper.Lerp(p.StartSize, p.EndSize, t);
                 float alpha = MathHelper.Lerp(p.StartAlpha, p.EndAlpha, t);
 
-                Color tint = (p.Tint == default) ? Color.White : p.Tint;
+                Color startTint = p.StartTint != default
+                    ? p.StartTint
+                    : ((p.Tint == default) ? Color.White : p.Tint);
+                Color endTint = p.EndTint != default
+                    ? p.EndTint
+                    : startTint;
+                Color tint = Color.Lerp(startTint, endTint, t);
 
                 spriteBatch.Draw(
                     _tex,

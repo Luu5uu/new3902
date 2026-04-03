@@ -11,6 +11,8 @@ namespace Celeste.DeathAnimation
     {
         private readonly ClipPlayer _player;
         private readonly AnimationClip _clip;
+        private readonly float _playbackMultiplier;
+        private readonly SpriteEffects _effects;
 
         /// <summary>
         /// TOP-LEFT world position of the sprite (same semantics as Madeline.position).
@@ -24,10 +26,12 @@ namespace Celeste.DeathAnimation
         public int FrameWidth  => _clip.FrameWidth;
         public int FrameHeight => _clip.FrameHeight;
 
-        public DeathSpritePlayer(AnimationClip clip, Vector2 topLeft, float scale)
+        public DeathSpritePlayer(AnimationClip clip, Vector2 topLeft, float scale, bool faceLeft = false, float playbackMultiplier = 1f)
         {
             _clip = clip;
             _player = new ClipPlayer(clip, overrideLoop: false);
+            _playbackMultiplier = playbackMultiplier;
+            _effects = faceLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
             TopLeft = topLeft;
             Scale = scale;
@@ -35,7 +39,7 @@ namespace Celeste.DeathAnimation
 
         public void Update(float dt)
         {
-            _player.Update(dt);
+            _player.Update(dt * _playbackMultiplier);
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -46,7 +50,8 @@ namespace Celeste.DeathAnimation
                 TopLeft,
                 Scale,
                 origin: Vector2.Zero,
-                color: Color.White
+                color: Color.White,
+                effects: _effects
             );
         }
 

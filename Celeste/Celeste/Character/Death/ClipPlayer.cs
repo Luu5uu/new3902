@@ -56,7 +56,7 @@ namespace Celeste.DeathAnimation
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, float scale, Vector2 origin, Color color)
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, float scale, Vector2 origin, Color color, SpriteEffects effects = SpriteEffects.None)
         {
             Rectangle source = _clip.GetSourceRect(_currentFrame);
 
@@ -68,7 +68,7 @@ namespace Celeste.DeathAnimation
                 0f,
                 origin,
                 scale,
-                SpriteEffects.None,
+                effects,
                 0f
             );
         }

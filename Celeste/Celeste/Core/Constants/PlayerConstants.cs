@@ -8,6 +8,9 @@ namespace Celeste
         // Frame width/height for player body sprite strips
         public const int PlayerBodyFrameWidth = 32;
         public const int PlayerBodyFrameHeight = 32;
+        public const int PlayerHitboxWidth = 16;
+        public const int PlayerNormalHitboxHeight = 32;
+        public const int PlayerDuckHitboxHeight = 18;
 
         // Player movement / physics (used by Madeline and MadelineStates)
         public const float PlayerTileScale = 2.5f;
@@ -15,9 +18,11 @@ namespace Celeste
         public const float PlayerAirSpeed = 90f * PlayerTileScale;
         public const float PlayerRunAcceleration = 1000f * PlayerTileScale;
         public const float PlayerRunDeceleration = 400f * PlayerTileScale;
+        public const float PlayerDuckDeceleration = 500f * PlayerTileScale;
         public const float PlayerAirAccelerationMultiplier = 0.65f;
         public const float PlayerJumpSpeed = 105f * PlayerTileScale;
         public const float PlayerJumpHorizontalBoost = 40f * PlayerTileScale;
+        public const float PlayerWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost;
         public const float PlayerGravity = 900f * PlayerTileScale;
         public const float PlayerHalfGravityThreshold = 40f * PlayerTileScale;
         public const float PlayerMaxFallSpeed = 160f * PlayerTileScale;
@@ -31,6 +36,7 @@ namespace Celeste
         public const float PlayerDashEndSpeed = 160f * PlayerTileScale;
         public const float PlayerDashEndUpMultiplier = 0.75f;
         public const float PlayerDashCarryDeceleration = 1200f * PlayerTileScale;
+        public const float PlayerDashGhostInterval = 0.03f;
         public const float PlayerClimbMaxStamina = 110f;
         public const float PlayerClimbUpCostPerSecond = 45f;
         public const float PlayerClimbStillCostPerSecond = 10f;
@@ -41,5 +47,6 @@ namespace Celeste
         public const float PlayerDangleFallSpeed = 40f * PlayerTileScale;
         public const float PlayerLedgeTopOutInset = 2f;
         public const float PlayerLedgeTopOutHeightWindow = 10f;
+        public const float PlayerLedgeTopOutAnimationTime = 4f / 12f;
     }
 }

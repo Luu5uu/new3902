@@ -17,8 +17,10 @@ namespace Celeste.MadelineStates
 
         public void SetState(Madeline m)
         {
+            m.SetCrouching(false);
             m.Maddy.Dash();
             m.Maddy.OnDashUsed();
+            m.Maddy.ClearSweat();
             m.isDashing = true;
             m.canDash   = false;
             m.isClimbing = false;
@@ -59,6 +61,8 @@ namespace Celeste.MadelineStates
 
             m.velocityX = dashVelocity.X;
             m.velocityY = dashVelocity.Y;
+            m.AddGhost(m.position, m.FaceLeft);
+            m.TriggerDashVisual(_dashDirection);
 
             if (_dashDirection.X != 0f)
             {
@@ -85,7 +89,7 @@ namespace Celeste.MadelineStates
             if (_ghostTimer <= 0f)
             {
                 m.AddGhost(m.position, m.FaceLeft);
-                _ghostTimer = 0.04f;
+                _ghostTimer = PlayerDashGhostInterval;
             }
 
             _timeLeft -= dt;

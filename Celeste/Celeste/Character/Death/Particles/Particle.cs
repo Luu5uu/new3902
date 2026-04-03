@@ -23,6 +23,8 @@ namespace Celeste.DeathAnimation.Particles
         public float AngularVelocity;
 
         public Color Tint;
+        public Color StartTint;
+        public Color EndTint;
 
         public bool Alive => Age < Lifetime;
 

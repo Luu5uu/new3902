@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using Celeste.Utils;
 using Celeste.Collision;
 using System.Linq;
+using System.IO;
 
 namespace Celeste
 {
@@ -89,17 +90,16 @@ namespace Celeste
             _player = new Madeline(Content, _catalog, startPos);
 
             // ===== Inject DeathAnimation resources (no constructor change) =====
-            _deathDotTex = ProceduralParticleTexture.CreateHardDot(GraphicsDevice, size: 5);
+            _deathDotTex = LoadDeathDotTexture();
 
-            // Use the SAME key as AnimationLoader registered.
-            const string DeathClipKey = AnimationKeys.PlayerDeath; // "Player/Death"
-
-            if (!_catalog.Clips.TryGetValue(DeathClipKey, out var deathClip))
+            if (!_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathSide, out var deathSideClip)
+                || !_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathUp, out var deathUpClip)
+                || !_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathDown, out var deathDownClip))
                 throw new ContentLoadException(
-                    $"Death clip key '{DeathClipKey}' not found in AnimationCatalog. " +
+                    $"Directional death clips not found in AnimationCatalog. " +
                     $"Available keys: {string.Join(", ", _catalog.Clips.Keys)}");
 
-            _player.ConfigureDeathAnimation(deathClip, _deathDotTex);
+            _player.ConfigureDeathAnimation(deathSideClip, deathUpClip, deathDownClip, _deathDotTex);
 
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
@@ -180,6 +180,79 @@ namespace Celeste
             _player.RespawnPoint = checkpointSpawn;
         }
 
+        private Texture2D LoadDeathDotTexture()
+        {
+            string dotPath = Path.Combine(Content.RootDirectory, "DeathParticleDot.png");
+            try
+            {
+                using Stream stream = TitleContainer.OpenStream(dotPath);
+                Texture2D loaded = Texture2D.FromStream(GraphicsDevice, stream);
+                Texture2D trimmed = TrimTransparentBounds(loaded);
+                if (!ReferenceEquals(trimmed, loaded))
+                {
+                    loaded.Dispose();
+                }
+                return trimmed;
+            }
+            catch
+            {
+                return ProceduralParticleTexture.CreateHardDot(GraphicsDevice, size: 3);
+            }
+        }
+
+        private Texture2D TrimTransparentBounds(Texture2D texture)
+        {
+            Color[] pixels = new Color[texture.Width * texture.Height];
+            texture.GetData(pixels);
+
+            int minX = texture.Width;
+            int minY = texture.Height;
+            int maxX = -1;
+            int maxY = -1;
+
+            for (int y = 0; y < texture.Height; y++)
+            {
+                for (int x = 0; x < texture.Width; x++)
+                {
+                    Color pixel = pixels[(y * texture.Width) + x];
+                    if (pixel.A == 0)
+                    {
+                        continue;
+                    }
+
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+
+            if (maxX < minX || maxY < minY)
+            {
+                return texture;
+            }
+
+            int width = maxX - minX + 1;
+            int height = maxY - minY + 1;
+            if (width == texture.Width && height == texture.Height)
+            {
+                return texture;
+            }
+
+            Color[] trimmedPixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    trimmedPixels[(y * width) + x] = pixels[((minY + y) * texture.Width) + (minX + x)];
+                }
+            }
+
+            Texture2D trimmed = new Texture2D(GraphicsDevice, width, height);
+            trimmed.SetData(trimmedPixels);
+            return trimmed;
+        }
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
@@ -192,6 +265,7 @@ namespace Celeste
 
             _controllerLoader.Update();
             Vector2 prevPos = _player.position;
+            bool prevCrouching = _player.isCrouching;
 
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
@@ -210,7 +284,7 @@ namespace Celeste
                 else
                 {
                     HazardCollisioncs.ResolveHazardCollision();
-                    _collisionSystem.ResolveBlockCollision(prevPos);
+                    _collisionSystem.ResolveBlockCollision(prevPos, prevCrouching);
                     UpdateCollectibles(gameTime);
                     _player.UpdateSprite(gameTime);
                 }
@@ -252,7 +326,8 @@ namespace Celeste
             _worldMap.Draw(_spriteBatch);
             DrawCollectibles(_spriteBatch);
             _player.Draw(_spriteBatch);
-            DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
+            if (_debugOverlay.ShowDebug)
+                DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
             // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
             /*if (_blocksVisible && _totalBlocks > 0)
@@ -351,6 +426,7 @@ namespace Celeste
         {
             _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
             HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
+            _player.SetWorldBlocks(_worldMap._blocks);
         }
 
         private void RebuildCollectibles()

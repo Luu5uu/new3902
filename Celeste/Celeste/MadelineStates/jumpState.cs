@@ -8,12 +8,22 @@ namespace Celeste.MadelineStates
     {
         public void SetState(Madeline m)
         {
+            bool wasClimbing = m.isClimbing;
+            m.SetCrouching(false);
             m.ConsumeJumpGrace();
             m.velocityX += PlayerJumpHorizontalBoost * m.moveX;
             m.velocityY = -PlayerJumpSpeed;
             m.BeginVariableJump();
             m.onGround  = false;
             m.Maddy.JumpFast();
+            if (wasClimbing)
+            {
+                m.Maddy.SweatJump();
+            }
+            else
+            {
+                m.Maddy.ClearSweat();
+            }
         }
 
         public void Update(Madeline m, float dt)
