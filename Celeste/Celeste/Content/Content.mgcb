@@ -37,6 +37,36 @@
 /processorParam:TextureFormat=Color
 /build:7.png
 
+#begin Audio/collect_sound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/collect_sound.wav
+
+#begin Audio/dash_left.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/dash_left.wav
+
+#begin Audio/dash_right.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/dash_right.wav
+
+#begin Audio/death.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/death.wav
+
+#begin Audio/jump.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/jump.wav
+
 #begin bangs.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -1,6 +1,6 @@
-using Microsoft.Xna.Framework;
+using Celeste.AudioSystem;
 using Celeste.Character;
-
+using Microsoft.Xna.Framework;
 using static Celeste.PlayerConstants;
 
 namespace Celeste.MadelineStates
@@ -63,6 +63,20 @@ namespace Celeste.MadelineStates
             if (_dashDirection.X != 0f)
             {
                 m.FaceLeft = _dashDirection.X < 0f;
+            }
+
+
+            if (_dashDirection.X < 0f)
+            {
+                SoundManager.Play("dash_left");
+            }
+            else if (_dashDirection.X > 0f)
+            {
+                SoundManager.Play("dash_right");
+            }
+            else
+            {
+                SoundManager.Play(m.FaceLeft ? "dash_left" : "dash_right");
             }
 
             _dashStarted = true;

@@ -27,6 +27,8 @@ namespace Celeste.Collision
 
         public void ResolveBlockCollision(Vector2 prevPos)
         {
+            _player.CurrentGroundBlock = null;
+
             float attemptedDx = _player.position.X - prevPos.X;
             float attemptedDy = _player.position.Y - prevPos.Y;
             bool wasTouchingLeftWall = _player.touchingLeftWall;
@@ -120,6 +122,8 @@ namespace Celeste.Collision
         
         private void ResolveStandOnTop(Vector2 prevPos, float attemptedDy)
         {
+            IBlocks bestBlock = null;
+
             if (attemptedDy <= 0f) return;
 
             Rectangle prevBounds = GetBoundsAt(prevPos);
@@ -149,6 +153,8 @@ namespace Celeste.Collision
                 {
                     if (r.Top < bestTop)
                     {
+                        
+                        bestBlock = blk;
                         bestTop = r.Top;
                         found = true;
                     }
@@ -166,6 +172,8 @@ namespace Celeste.Collision
                     _player.Maddy.OnDashRefill();
                     _player.canDash = true;
                 }
+
+                _player.CurrentGroundBlock = bestBlock;
             }
         }
 

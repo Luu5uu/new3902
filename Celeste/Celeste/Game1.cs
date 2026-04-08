@@ -10,6 +10,7 @@ using Celeste.Blocks;
 using Celeste.Blocks.Rooms;
 using Celeste.DevTools;
 using Celeste.Input;
+using Celeste.AudioSystem;
 
 using Celeste.DeathAnimation.Particles;
 using System.Collections.Generic;
@@ -80,6 +81,7 @@ namespace Celeste
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _catalog = AnimationLoader.LoadAll(Content);
+            SoundManager.Load(Content);
 
             var startPos = new Vector2(
                 Window.ClientBounds.Width / 2f,
@@ -254,14 +256,7 @@ namespace Celeste
             _player.Draw(_spriteBatch);
             DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
-            // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
-            /*if (_blocksVisible && _totalBlocks > 0)
-            {
-                var block = _blockList[_activeBlockIndex];
-                block.Position = new Vector2(BlockConstants.BlockDisplayX, BlockConstants.BlockDisplayY);
-                block.Draw(_spriteBatch);
-                DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, block.Bounds, Color.Lime);
-            }*/
+            
 
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);
@@ -389,6 +384,7 @@ namespace Celeste
 
                 if (collectible.TryCollect(_player.Bounds))
                 {
+                    SoundManager.Play("collect");
                     _player.canDash = true;
                     _player.Maddy.OnDashRefill();
                 }
