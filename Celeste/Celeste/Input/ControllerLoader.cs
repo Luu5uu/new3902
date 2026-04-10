@@ -68,10 +68,10 @@ namespace Celeste.Input
                 vertical += 1f;
             }
 
-            bool jumpHeld = keyboardState.IsKeyDown(Keys.C) || gamepadState.IsButtonDown(Buttons.A);
-            bool jumpPressed = IsKeyboardPressed(keyboardState, Keys.C) || IsGamepadPressed(gamepadState, Buttons.A);
-            bool dashPressed = IsKeyboardPressed(keyboardState, Keys.X) || IsGamepadPressed(gamepadState, Buttons.B);
-            bool grabHeld = keyboardState.IsKeyDown(Keys.Z) || gamepadState.IsButtonDown(Buttons.RightShoulder);
+            bool jumpHeld = keyboardState.IsKeyDown(Keys.Space) || gamepadState.IsButtonDown(Buttons.A);
+            bool jumpPressed = IsKeyboardPressed(keyboardState, Keys.Space) || IsGamepadPressed(gamepadState, Buttons.A);
+            bool dashPressed = IsKeyboardPressed(keyboardState, Keys.Enter) || IsGamepadPressed(gamepadState, Buttons.B);
+            bool grabHeld = keyboardState.IsKeyDown(Keys.RightShift) || gamepadState.IsButtonDown(Buttons.RightShoulder);
             bool deathPressed = IsKeyboardPressed(keyboardState, Keys.E);
 
             _player.Move(MathHelper.Clamp(horizontal, -1f, 1f));

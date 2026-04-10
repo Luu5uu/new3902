@@ -1,22 +1,21 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Celeste.Animation;
+using Celeste.Blocks;
+using Celeste.Blocks.Rooms;
+using Celeste.Character;
+using Celeste.Collision;
+using Celeste.DeathAnimation.Particles;
+using Celeste.DevTools;
+using Celeste.Input;
+using Celeste.Items;
+using Celeste.UI;
+using Celeste.Utils;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-using Celeste.Animation;
-using Celeste.Character;
-using Celeste.Items;
-using Celeste.Blocks;
-using Celeste.Blocks.Rooms;
-using Celeste.DevTools;
-using Celeste.Input;
-
-using Celeste.DeathAnimation.Particles;
 using System.Collections.Generic;
-using Celeste.Utils;
-using Celeste.Collision;
-using System.Linq;
 using System.IO;
+using System.Linq;
 
 namespace Celeste
 {
@@ -34,6 +33,9 @@ namespace Celeste
 
         // NEW: particle dot texture
         private Texture2D _deathDotTex;
+        
+        //
+        private ClimbStaminaBar _climbStaminaBar;
 
         private ControllerLoader _controllerLoader;
         private int _activeBlockIndex = 0;  // T = previous, Y = next; only this block is drawn
@@ -89,6 +91,7 @@ namespace Celeste
             worldBound = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
             _player = new Madeline(Content, _catalog, startPos);
 
+
             // ===== Inject DeathAnimation resources (no constructor change) =====
             _deathDotTex = LoadDeathDotTexture();
 
@@ -103,6 +106,10 @@ namespace Celeste
 
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
+
+
+            //
+            _climbStaminaBar = new ClimbStaminaBar(_pixelTexture, 5, 36);
 
             // ---- Blocks (from allBlocks, adapted to new structure) ----
             var factory = BlockFactory.GetInstance;
@@ -322,6 +329,32 @@ namespace Celeste
             _spriteBatch.Begin(
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
+
+            if (_player.isClimbing || _player.IsTouchingWall)
+            {
+                Vector2 barPos;
+
+                if (_player.touchingLeftWall)
+                {
+                    barPos = new Vector2(_player.position.X + 12f, _player.position.Y - 18f);
+                }
+                else if (_player.touchingRightWall)
+                {
+                    barPos = new Vector2(_player.position.X - 16f, _player.position.Y - 18f);
+                }
+                else
+                {
+                    barPos = new Vector2(_player.position.X - 16f, _player.position.Y - 18f);
+                }
+
+                _climbStaminaBar.Draw(
+                    _spriteBatch,
+                    barPos,
+                    _player.ClimbStaminaPercent,
+                    _player.ClimbTiredPercent,
+                    _player.IsTired
+                );
+            }
 
             _worldMap.Draw(_spriteBatch);
             DrawCollectibles(_spriteBatch);

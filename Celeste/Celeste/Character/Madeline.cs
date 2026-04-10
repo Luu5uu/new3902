@@ -59,6 +59,14 @@ namespace Celeste.Character
         private Vector2 _ledgeTopOutPosition;
         private float _ledgeTopOutTimer;
         private readonly List<IBlocks> _worldBlocks = new();
+        //
+        public float ClimbStaminaPercent => climbStamina / PlayerClimbMaxStamina;
+        public float ClimbTiredPercent => PlayerClimbTiredThreshold / PlayerClimbMaxStamina;
+        private bool _wasTiredLastFrame;
+        private float _tiredFlashTimer;
+        private const float TiredFlashDuration = 0.45f;
+        private const int TiredFlashPulseCount = 3;
+
 
         // Position & facing
         public Vector2 position;
@@ -201,6 +209,8 @@ namespace Celeste.Character
             ClearMotionState();
             canDash = true;
             climbStamina = PlayerClimbMaxStamina;
+            _tiredFlashTimer = 0f;
+            _wasTiredLastFrame = false;
             changeState(standState);
         }
 
@@ -236,6 +246,8 @@ namespace Celeste.Character
             _ledgeTopOutQueued = false;
             _ledgeTopOutPosition = position;
             _ledgeTopOutTimer = 0f;
+            _tiredFlashTimer = 0f;
+            _wasTiredLastFrame = false;
             _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
             _dashRingEffect = null;
 
@@ -454,7 +466,27 @@ namespace Celeste.Character
             position.X += velocityX * dt;
             position.Y += velocityY * dt;
 
-          
+            bool isTiredNow = IsTired;
+
+            //
+            if (isTiredNow && !_wasTiredLastFrame)
+            {
+                _tiredFlashTimer = TiredFlashDuration;
+            }
+
+            _wasTiredLastFrame = isTiredNow;
+
+            if (_tiredFlashTimer > 0f)
+            {
+                _tiredFlashTimer -= dt;
+                if (_tiredFlashTimer < 0f)
+                {
+                    _tiredFlashTimer = 0f;
+                }
+            }
+
+
+
             ClearTransientInput();
         }
 
@@ -498,7 +530,7 @@ namespace Celeste.Character
 
             _dashRingEffect?.Draw(spriteBatch);
             _dashParticles?.Draw(spriteBatch);
-            Maddy.Draw(spriteBatch, position, Color.White, scale: DefaultScale, faceLeft: FaceLeft);
+            Maddy.Draw(spriteBatch, position, GetTiredFlashColor(), scale: DefaultScale, faceLeft: FaceLeft);
         }
 
         internal void TriggerDashVisual(Vector2 dashDirection)
@@ -690,6 +722,20 @@ namespace Celeste.Character
                 FaceLeft = false;
             }
         }
+        //
+        private Color GetTiredFlashColor()
+        {
+            if (_tiredFlashTimer <= 0f)
+            {
+                return Color.White;
+            }
+
+            float progress = 1f - (_tiredFlashTimer / TiredFlashDuration);
+            float wave = (float)Math.Sin(progress * TiredFlashPulseCount * Math.PI * 2f);
+
+            return wave > 0f ? new Color(255, 90, 90) : Color.White;
+        }
+
 
         private static float Approach(float value, float target, float maxDelta)
         {
