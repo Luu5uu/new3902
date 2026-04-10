@@ -109,6 +109,9 @@ namespace Celeste.Character
         // Sound Effect
         public IBlocks CurrentGroundBlock { get; set; }
 
+        private float footstepTimer = 0f;
+        private const float FootstepInterval = 0.12f;
+
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
             Maddy = MaddySprite.Build(content, catalog);
@@ -654,6 +657,31 @@ namespace Celeste.Character
 
             aim.Normalize();
             return aim;
+        }
+
+        public void UpdateFootstep(float dt)
+        {
+            bool shouldPlay =
+                onGround &&
+                CurrentGroundBlock != null &&
+                Math.Abs(velocityX) > 5f &&
+                !isDashing &&
+                !isClimbing &&
+                !isDangle;
+
+            if (!shouldPlay)
+            {
+                
+                return;
+            }
+
+            footstepTimer += dt;
+
+            if (footstepTimer >= FootstepInterval)
+            {
+                footstepTimer = 0f;
+                SoundManager.PlayFootstep(CurrentGroundBlock.Type);
+            }
         }
     }
 }

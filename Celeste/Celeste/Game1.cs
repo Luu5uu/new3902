@@ -182,8 +182,10 @@ namespace Celeste
             _player.RespawnPoint = checkpointSpawn;
         }
 
-        protected override void Update(GameTime gameTime)
-        {
+        protected override void Update(GameTime gameTime){
+
+           
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit(); // dont think we need this since we have a QuitCommand already handled in keyboard controller.
@@ -213,6 +215,7 @@ namespace Celeste
                 {
                     HazardCollisioncs.ResolveHazardCollision();
                     _collisionSystem.ResolveBlockCollision(prevPos);
+                    _player.UpdateFootstep((float)gameTime.ElapsedGameTime.TotalSeconds);
                     UpdateCollectibles(gameTime);
                     _player.UpdateSprite(gameTime);
                 }

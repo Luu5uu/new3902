@@ -61,6 +61,204 @@
 /processorParam:Quality=Best
 /build:Audio/death.wav
 
+#begin Audio/footstep/dirt/dirt_01.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/dirt/dirt_01.wav
+
+#begin Audio/footstep/dirt/dirt_02.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/dirt/dirt_02.wav
+
+#begin Audio/footstep/dirt/dirt_03.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/dirt/dirt_03.wav
+
+#begin Audio/footstep/dirt/dirt_04.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/dirt/dirt_04.wav
+
+#begin Audio/footstep/dirt/dirt_05.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/dirt/dirt_05.wav
+
+#begin Audio/footstep/girder/girder_01.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/girder/girder_01.wav
+
+#begin Audio/footstep/girder/girder_02.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/girder/girder_02.wav
+
+#begin Audio/footstep/girder/girder_03.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/girder/girder_03.wav
+
+#begin Audio/footstep/girder/girder_04.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/girder/girder_04.wav
+
+#begin Audio/footstep/girder/girder_05.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/girder/girder_05.wav
+
+#begin Audio/footstep/girder/girder_06.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/girder/girder_06.wav
+
+#begin Audio/footstep/girder/girder_07.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/girder/girder_07.wav
+
+#begin Audio/footstep/grass/grass_01.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grass/grass_01.wav;Audio/footstep/grass/grass_01
+
+#begin Audio/footstep/grass/grass_02.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grass/grass_02.wav;Audio/footstep/grass/grass_02
+
+#begin Audio/footstep/grass/grass_03.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grass/grass_03.wav;Audio/footstep/grass/grass_03
+
+#begin Audio/footstep/grass/grass_04.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grass/grass_04.wav;Audio/footstep/grass/grass_04
+
+#begin Audio/footstep/grass/grass_05.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grass/grass_05.wav;Audio/footstep/grass/grass_05
+
+#begin Audio/footstep/grass/grass_06.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grass/grass_06.wav;Audio/footstep/grass/grass_06
+
+#begin Audio/footstep/grass/grass_07.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grass/grass_07.wav;Audio/footstep/grass/grass_07
+
+#begin Audio/footstep/grider/girder_01.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grider/girder_01.wav
+
+#begin Audio/footstep/grider/girder_02.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grider/girder_02.wav
+
+#begin Audio/footstep/grider/girder_03.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grider/girder_03.wav
+
+#begin Audio/footstep/grider/girder_04.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grider/girder_04.wav
+
+#begin Audio/footstep/grider/girder_05.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grider/girder_05.wav
+
+#begin Audio/footstep/grider/girder_06.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grider/girder_06.wav
+
+#begin Audio/footstep/grider/girder_07.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/grider/girder_07.wav
+
+#begin Audio/footstep/snow/snow_01.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/snow/snow_01.wav
+
+#begin Audio/footstep/snow/snow_02.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/snow/snow_02.wav
+
+#begin Audio/footstep/snow/snow_03.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/snow/snow_03.wav
+
+#begin Audio/footstep/snow/snow_04.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/snow/snow_04.wav
+
+#begin Audio/footstep/snow/snow_05.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/snow/snow_05.wav
+
+#begin Audio/footstep/snow/snow_06.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/snow/snow_06.wav
+
+#begin Audio/footstep/snow/snow_07.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/footstep/snow/snow_07.wav
+
 #begin Audio/jump.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
