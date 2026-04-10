@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using Celeste.Utils;
 using Celeste.Collision;
 using System.Linq;
+using System.IO;
 
 namespace Celeste
 {
@@ -27,10 +28,6 @@ namespace Celeste
         private AnimationCatalog _catalog;
         private Madeline _player;
 
-        private ItemAnimation _normalStawAnim;
-        private ItemAnimation _flyStawAnim;
-        private ItemAnimation _crystalAnim;
-
         private KeyboardState _prevKb;
         private Texture2D _pixelTexture;
         private DebugOverlay _debugOverlay;
@@ -39,9 +36,7 @@ namespace Celeste
         private Texture2D _deathDotTex;
 
         private ControllerLoader _controllerLoader;
-        private int _activeItemIndex = 0;
         private int _activeBlockIndex = 0;  // T = previous, Y = next; only this block is drawn
-        private int _totalItems = 3;
         private int _totalBlocks;            // Set from _blockList.Count after load
 
         // new additions
@@ -54,18 +49,19 @@ namespace Celeste
         private int _currentRoom = 0;
 
         private List<IBlocks> _blockList;
+        private readonly List<CollectibleItem> _collectibles = new();
 
         /// <summary>When true, the currently displayed block (if animated) is updated each frame.</summary>
         private bool _blockAnimateEnabled;
 
-        /// <summary>When true, the current block/obstacle is drawn. Toggle with V.</summary>
-        private bool _blocksVisible = true;
 
-        // Test collision and platform
-        List<IBlocks> platform;
+        // Collasion systems
         CollisionSystem _collisionSystem;
-        List<IHazard> hazards;
         HazardCollisioncs HazardCollisioncs;
+
+        //worldBound
+
+        Rectangle worldBound;
 
         public Game1()
         {
@@ -90,31 +86,20 @@ namespace Celeste
                 Window.ClientBounds.Width / 2f,
                 Window.ClientBounds.Height / 2f);
 
+            worldBound = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
             _player = new Madeline(Content, _catalog, startPos);
 
             // ===== Inject DeathAnimation resources (no constructor change) =====
-            _deathDotTex = ProceduralParticleTexture.CreateHardDot(GraphicsDevice, size: 5);
+            _deathDotTex = LoadDeathDotTexture();
 
-            // Use the SAME key as AnimationLoader registered.
-            const string DeathClipKey = AnimationKeys.PlayerDeath; // "Player/Death"
-
-            if (!_catalog.Clips.TryGetValue(DeathClipKey, out var deathClip))
+            if (!_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathSide, out var deathSideClip)
+                || !_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathUp, out var deathUpClip)
+                || !_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathDown, out var deathDownClip))
                 throw new ContentLoadException(
-                    $"Death clip key '{DeathClipKey}' not found in AnimationCatalog. " +
+                    $"Directional death clips not found in AnimationCatalog. " +
                     $"Available keys: {string.Join(", ", _catalog.Clips.Keys)}");
 
-            _player.ConfigureDeathAnimation(deathClip, _deathDotTex);
-
-            // ===== Items =====
-            _normalStawAnim = ItemAnimationFactory.CreateNormalStaw(_catalog);
-            _flyStawAnim = ItemAnimationFactory.CreateFlyStaw(_catalog);
-            _crystalAnim = ItemAnimationFactory.CreateCrystal(_catalog);
-            _normalStawAnim.Position = new Vector2(ItemConstants.ItemNormalStawX, ItemConstants.ItemRowY);
-            _normalStawAnim.Scale = GlobalConstants.DefaultScale;
-            _flyStawAnim.Position = new Vector2(ItemConstants.ItemFlyStawX, ItemConstants.ItemRowY);
-            _flyStawAnim.Scale = GlobalConstants.DefaultScale;
-            _crystalAnim.Position = new Vector2(ItemConstants.ItemCrystalX, ItemConstants.ItemRowY);
-            _crystalAnim.Scale = GlobalConstants.DefaultScale;
+            _player.ConfigureDeathAnimation(deathSideClip, deathUpClip, deathDownClip, _deathDotTex);
 
             _pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
@@ -140,27 +125,12 @@ namespace Celeste
             _blockList.Add(new CrushBlock(new Vector2(0, 0), _catalog));
             _totalBlocks = _blockList.Count;
 
-            hazards = new List<IHazard>();
-            hazards.Add(factory.CreateHazerd("upSpike", new Vector2(500, 400)));
-            hazards.Add(factory.CreateHazerd("upSpike", new Vector2(520, 400)));
-
-            HazardCollisioncs = new HazardCollisioncs(hazards.Cast<ICollideable>().ToList(), _player);
-
-            platform = new List<IBlocks>();
-
-            platform.Add(factory.CreateSnowBlock(new Vector2(300, 400)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(400, 400)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(600, 400)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(300, 60)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(200, 230)));
-            platform.Add(factory.CreateSnowBlock(new Vector2(700, 300)));
-
-            _collisionSystem = new CollisionSystem(platform, _player);
+         
 
 
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
-            _controllerLoader = new ControllerLoader(this);
+            _controllerLoader = new ControllerLoader(this, _player);
 
             _worldMap = new MapBuilder(factory, 50, 30);
             _roomOne = new RoomOne(_worldMap, factory);
@@ -169,7 +139,7 @@ namespace Celeste
             _roomFour = new RoomFour(_worldMap, factory);
             _roomFive = new RoomFive(_worldMap, factory);
 
-            BuildMap();
+            RebuildCurrentRoom(resetPlayer: false);
         }
 
         // for debugging and figuring out map values
@@ -201,41 +171,101 @@ namespace Celeste
                     break;
                 case 0:
                 default:
+                    _roomThree.PlaceRoomThreeBlocks();
                     break;
             }
 
+            Vector2 checkpointSpawn = GetRespawnPointForRoom(_currentRoom);
+            _player.position = checkpointSpawn;
+            _player.RespawnPoint = checkpointSpawn;
+        }
 
+        private Texture2D LoadDeathDotTexture()
+        {
+            string dotPath = Path.Combine(Content.RootDirectory, "DeathParticleDot.png");
+            try
+            {
+                using Stream stream = TitleContainer.OpenStream(dotPath);
+                Texture2D loaded = Texture2D.FromStream(GraphicsDevice, stream);
+                Texture2D trimmed = TrimTransparentBounds(loaded);
+                if (!ReferenceEquals(trimmed, loaded))
+                {
+                    loaded.Dispose();
+                }
+                return trimmed;
+            }
+            catch
+            {
+                return ProceduralParticleTexture.CreateHardDot(GraphicsDevice, size: 3);
+            }
+        }
+
+        private Texture2D TrimTransparentBounds(Texture2D texture)
+        {
+            Color[] pixels = new Color[texture.Width * texture.Height];
+            texture.GetData(pixels);
+
+            int minX = texture.Width;
+            int minY = texture.Height;
+            int maxX = -1;
+            int maxY = -1;
+
+            for (int y = 0; y < texture.Height; y++)
+            {
+                for (int x = 0; x < texture.Width; x++)
+                {
+                    Color pixel = pixels[(y * texture.Width) + x];
+                    if (pixel.A == 0)
+                    {
+                        continue;
+                    }
+
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+
+            if (maxX < minX || maxY < minY)
+            {
+                return texture;
+            }
+
+            int width = maxX - minX + 1;
+            int height = maxY - minY + 1;
+            if (width == texture.Width && height == texture.Height)
+            {
+                return texture;
+            }
+
+            Color[] trimmedPixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    trimmedPixels[(y * width) + x] = pixels[((minY + y) * texture.Width) + (minX + x)];
+                }
+            }
+
+            Texture2D trimmed = new Texture2D(GraphicsDevice, width, height);
+            trimmed.SetData(trimmedPixels);
+            return trimmed;
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+                Exit(); // dont think we need this since we have a QuitCommand already handled in keyboard controller.
 
             var kb = Keyboard.GetState();
             _debugOverlay.HandleInput(kb, _player);
-
-            // FOR IN -CLASS CODE REVIEW
-            int previousRoom = _currentRoom;
-            if (kb.IsKeyDown(Keys.D0) && _prevKb.IsKeyUp(Keys.D0) || kb.IsKeyDown(Keys.NumPad0) && _prevKb.IsKeyUp(Keys.NumPad0)) { _currentRoom = 0; }
-            else if (kb.IsKeyDown(Keys.D1) && _prevKb.IsKeyUp(Keys.D1) || kb.IsKeyDown(Keys.NumPad1) && _prevKb.IsKeyUp(Keys.NumPad1)) { _currentRoom = 1; }
-            else if (kb.IsKeyDown(Keys.D2) && _prevKb.IsKeyUp(Keys.D2) || kb.IsKeyDown(Keys.NumPad2) && _prevKb.IsKeyUp(Keys.NumPad2)) { _currentRoom = 2; }
-            else if (kb.IsKeyDown(Keys.D3) && _prevKb.IsKeyUp(Keys.D3) || kb.IsKeyDown(Keys.NumPad3) && _prevKb.IsKeyUp(Keys.NumPad3)) { _currentRoom = 3; }
-            else if (kb.IsKeyDown(Keys.D4) && _prevKb.IsKeyUp(Keys.D4) || kb.IsKeyDown(Keys.NumPad4) && _prevKb.IsKeyUp(Keys.NumPad4)) { _currentRoom = 4; }
-            else if (kb.IsKeyDown(Keys.D5) && _prevKb.IsKeyUp(Keys.D5) || kb.IsKeyDown(Keys.NumPad5) && _prevKb.IsKeyUp(Keys.NumPad5)) { _currentRoom = 5; }
-            if (_currentRoom != previousRoom)
-            {
-                // rebuild room when changed
-                BuildMap();
-            }
-
-            var cmd = PlayerCommand.FromKeyboard(kb, _prevKb);
-            _prevKb = kb;
-            _player.SetMovementCommand(cmd);
+            HandleRoomHotkeys(kb);
 
             _controllerLoader.Update();
             Vector2 prevPos = _player.position;
+            bool prevCrouching = _player.isCrouching;
 
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
@@ -246,14 +276,19 @@ namespace Celeste
             else
             {
                 _player.Update(gameTime);
-                HazardCollisioncs.ResolveHazardCollision();
-                _collisionSystem.ResolveBlockCollision(prevPos);
 
+                if (_player.ConsumeLevelResetRequest())
+                {
+                    RebuildCurrentRoom(resetPlayer: true);
+                }
+                else
+                {
+                    HazardCollisioncs.ResolveHazardCollision();
+                    _collisionSystem.ResolveBlockCollision(prevPos, prevCrouching);
+                    UpdateCollectibles(gameTime);
+                    _player.UpdateSprite(gameTime);
+                }
             }
-
-            _normalStawAnim.Update(gameTime);
-            _flyStawAnim.Update(gameTime);
-            _crystalAnim.Update(gameTime);
 
             // When animation toggle is on, update the current block if it's an animated type (spring, move, crush).
             if (_blockAnimateEnabled && _totalBlocks > 0)
@@ -267,6 +302,13 @@ namespace Celeste
                     crushBlock.Update(gameTime);
             }
 
+            if(_player.Bounds.Bottom> worldBound.Bottom)
+            {
+                _player.Reset();
+                
+            }
+
+            _prevKb = kb;
 
             base.Update(gameTime);
         }
@@ -282,33 +324,10 @@ namespace Celeste
                 rasterizerState: RasterizerState.CullNone);
 
             _worldMap.Draw(_spriteBatch);
-
+            DrawCollectibles(_spriteBatch);
             _player.Draw(_spriteBatch);
-            DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
-
-            foreach (var b in platform)
-            {
-                b.Draw(_spriteBatch);
-            }
-
-
-            foreach (var h in hazards)
-            {
-                h.Draw(_spriteBatch);
-            }
-
-            switch (_activeItemIndex)
-            {
-                case 0:
-                    _normalStawAnim.Draw(_spriteBatch);
-                    break;
-                case 1:
-                    _flyStawAnim.Draw(_spriteBatch);
-                    break;
-                case 2:
-                    _crystalAnim.Draw(_spriteBatch);
-                    break;
-            }
+            if (_debugOverlay.ShowDebug)
+                DrawUtils.DrawRectangleOutline(_spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
 
             // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
             /*if (_blocksVisible && _totalBlocks > 0)
@@ -330,13 +349,34 @@ namespace Celeste
             base.Draw(gameTime);
         }
 
-        public void CycleActiveItem(int direction)
+        public void CycleGameScene(int direction)
         {
-            _activeItemIndex += direction;
+            const int firstRoom = 1;
+            const int lastRoom = 5;
 
-            if (_activeItemIndex < 0) _activeItemIndex = _totalItems - 1;
-            if (_activeItemIndex >= _totalItems) _activeItemIndex = 0;
+            int nextRoom = _currentRoom;
+            if (nextRoom < firstRoom || nextRoom > lastRoom)
+            {
+                nextRoom = 3;
+            }
+
+            nextRoom += direction;
+            if (nextRoom < firstRoom)
+            {
+                nextRoom = lastRoom;
+            }
+            else if (nextRoom > lastRoom)
+            {
+                nextRoom = firstRoom;
+            }
+
+            if (nextRoom != _currentRoom)
+            {
+                _currentRoom = nextRoom;
+                RebuildCurrentRoom(resetPlayer: false);
+            }
         }
+        public void Reset() => RebuildCurrentRoom(resetPlayer: true);
 
         public void CycleActiveBlock(int direction)
         {
@@ -350,6 +390,108 @@ namespace Celeste
         public void ToggleBlockAnimation() => _blockAnimateEnabled = !_blockAnimateEnabled;
 
         /// <summary>Toggles whether the current block/obstacle is drawn at all. Bound to V.</summary>
-        public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
+        //public void ToggleBlockDisplay() => _blocksVisible = !_blocksVisible;
+
+        private void HandleRoomHotkeys(KeyboardState kb)
+        {
+            int requestedRoom = _currentRoom;
+
+            if ((kb.IsKeyDown(Keys.D0) && _prevKb.IsKeyUp(Keys.D0)) || (kb.IsKeyDown(Keys.NumPad0) && _prevKb.IsKeyUp(Keys.NumPad0))) { requestedRoom = 0; }
+            else if ((kb.IsKeyDown(Keys.D1) && _prevKb.IsKeyUp(Keys.D1)) || (kb.IsKeyDown(Keys.NumPad1) && _prevKb.IsKeyUp(Keys.NumPad1))) { requestedRoom = 1; }
+            else if ((kb.IsKeyDown(Keys.D2) && _prevKb.IsKeyUp(Keys.D2)) || (kb.IsKeyDown(Keys.NumPad2) && _prevKb.IsKeyUp(Keys.NumPad2))) { requestedRoom = 2; }
+            else if ((kb.IsKeyDown(Keys.D3) && _prevKb.IsKeyUp(Keys.D3)) || (kb.IsKeyDown(Keys.NumPad3) && _prevKb.IsKeyUp(Keys.NumPad3))) { requestedRoom = 3; }
+            else if ((kb.IsKeyDown(Keys.D4) && _prevKb.IsKeyUp(Keys.D4)) || (kb.IsKeyDown(Keys.NumPad4) && _prevKb.IsKeyUp(Keys.NumPad4))) { requestedRoom = 4; }
+            else if ((kb.IsKeyDown(Keys.D5) && _prevKb.IsKeyUp(Keys.D5)) || (kb.IsKeyDown(Keys.NumPad5) && _prevKb.IsKeyUp(Keys.NumPad5))) { requestedRoom = 5; }
+
+            if (requestedRoom != _currentRoom)
+            {
+                _currentRoom = requestedRoom;
+                RebuildCurrentRoom(resetPlayer: false);
+            }
+        }
+
+        private void RebuildCurrentRoom(bool resetPlayer)
+        {
+            BuildMap();
+            RebuildCollisionSystems();
+            RebuildCollectibles();
+
+            if (resetPlayer)
+            {
+                _player.Reset();
+            }
+        }
+
+        private void RebuildCollisionSystems()
+        {
+            _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
+            HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
+            _player.SetWorldBlocks(_worldMap._blocks);
+        }
+
+        private void RebuildCollectibles()
+        {
+            _collectibles.Clear();
+
+            Vector2 spawn = _player.RespawnPoint;
+            if (_currentRoom == 0)
+            {
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(-80f, -40f)));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateFlyStaw(_catalog), spawn + new Vector2(0f, -60f)));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(90f, -20f)));
+                return;
+            }
+
+            _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(72f, -40f)));
+
+            if (_currentRoom == 2 || _currentRoom == 5)
+            {
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(120f, -56f)));
+            }
+        }
+
+        private static CollectibleItem CreateCollectible(ItemAnimation animation, Vector2 position)
+        {
+            animation.Position = position;
+            animation.Scale = GlobalConstants.DefaultScale;
+            return new CollectibleItem(animation);
+        }
+
+        private void UpdateCollectibles(GameTime gameTime)
+        {
+            foreach (var collectible in _collectibles)
+            {
+                collectible.Update(gameTime);
+
+                if (collectible.TryCollect(_player.Bounds))
+                {
+                    _player.canDash = true;
+                    _player.Maddy.OnDashRefill();
+                }
+            }
+        }
+
+        private void DrawCollectibles(SpriteBatch spriteBatch)
+        {
+            foreach (var collectible in _collectibles)
+            {
+                collectible.Draw(spriteBatch);
+            }
+        }
+
+        private Vector2 GetRespawnPointForRoom(int room)
+        {
+            return room switch
+            {
+                1 => new Vector2(250f, 200f),
+                2 => new Vector2(150f, 300f),
+                3 => new Vector2(200f, 150f),
+                4 => new Vector2(250f, 150f),
+                5 => new Vector2(175f, 150f),
+                _ => new Vector2(200f, 150f),
+            };
+        }
     }
+
+    
 }

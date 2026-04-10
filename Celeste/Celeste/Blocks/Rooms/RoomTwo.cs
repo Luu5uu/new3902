@@ -404,7 +404,7 @@ namespace Celeste.Blocks.Rooms
             {
                 _mapBuilder.PlaceBlock("girder", 15, y, 4);
             }
-
+             
             // ROW 19
             for (int x = 12; x <= 15; x++)
             {

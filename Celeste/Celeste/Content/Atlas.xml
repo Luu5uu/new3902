@@ -7,11 +7,25 @@
   <Clip key="Player/ClimbUp"     x="0"   y="128" w="32" h="32" frames="6" fps="12" loop="true"  framesPerRow="6" />
   <Clip key="Player/Dangling"    x="0"   y="160" w="32" h="32" frames="10" fps="8"  loop="true"  framesPerRow="10" />
   <Clip key="Player/Run"         x="0"   y="192" w="32" h="32" frames="12" fps="12" loop="true"  framesPerRow="12" />
-  <Clip key="Player/Dash"        x="0"   y="224" w="32" h="32" frames="4" fps="8"  loop="false" framesPerRow="4" />
+  <Clip key="Player/Dash"        x="0"   y="224" w="32" h="32" frames="4" fps="14" loop="false" framesPerRow="4" />
   <Clip key="Player/JumpFast"    x="0"   y="256" w="32" h="32" frames="2" fps="4"  loop="false" framesPerRow="2" />
   <Clip key="Player/FallSlow"    x="0"   y="288" w="32" h="32" frames="2" fps="4"  loop="true"  framesPerRow="2" />
   <Clip key="Player/Death"       x="0"   y="320" w="32" h="32" frames="16" fps="8"  loop="false" framesPerRow="16" />
   <Clip key="Player/Standard"    x="0"   y="352" w="32" h="32" frames="1" fps="1"  loop="true"  framesPerRow="1" />
+  <Clip key="Player/WallSlide"   x="0"   y="548" w="32" h="32" frames="1" fps="1"  loop="true"  framesPerRow="1" />
+  <Clip key="Player/Tired"       x="0"   y="580" w="32" h="32" frames="4" fps="12" loop="true"  framesPerRow="4" />
+  <Clip key="Player/TiredStill"  x="0"   y="612" w="32" h="32" frames="1" fps="1"  loop="true"  framesPerRow="1" />
+  <Clip key="Player/ClimbPull"   x="0"   y="644" w="32" h="32" frames="4" fps="12" loop="false" framesPerRow="4" />
+  <Clip key="Player/Duck"        x="0"   y="676" w="32" h="32" frames="1" fps="1"  loop="true"  framesPerRow="1" />
+  <Clip key="Player/DeathSide"   x="0"   y="708" w="32" h="32" frames="13" fps="16" loop="false" framesPerRow="13" />
+  <Clip key="Player/DeathUp"     x="0"   y="740" w="32" h="32" frames="13" fps="16" loop="false" framesPerRow="13" />
+  <Clip key="Player/DeathDown"   x="0"   y="772" w="32" h="32" frames="13" fps="16" loop="false" framesPerRow="13" />
+  <Clip key="PlayerSweat/Idle"       x="0" y="804" w="32" h="32" frames="1" fps="6"  loop="true"  framesPerRow="1" />
+  <Clip key="PlayerSweat/Still"      x="0" y="836" w="32" h="32" frames="6" fps="12" loop="true"  framesPerRow="6" />
+  <Clip key="PlayerSweat/Climb"      x="0" y="868" w="32" h="32" frames="2" fps="12" loop="false" framesPerRow="2" />
+  <Clip key="PlayerSweat/ClimbLoop"  x="0" y="900" w="32" h="32" frames="6" fps="12" loop="true"  framesPerRow="6" />
+  <Clip key="PlayerSweat/Danger"     x="0" y="932" w="32" h="32" frames="6" fps="12" loop="true"  framesPerRow="6" />
+  <Clip key="PlayerSweat/Jump"       x="0" y="964" w="32" h="32" frames="4" fps="12" loop="false" framesPerRow="4" />
   <!-- Item -->
   <Clip key="Item/NormalStaw"    x="0"   y="384" w="32" h="32" frames="7" fps="8"  loop="true"  framesPerRow="7" />
   <Clip key="Item/FlyStaw"       x="0"   y="416" w="40" h="40" frames="10" fps="8"  loop="true"  framesPerRow="10" />

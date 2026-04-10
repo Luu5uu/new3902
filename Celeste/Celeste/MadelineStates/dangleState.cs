@@ -1,8 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Celeste.Character;
 
 namespace Celeste.MadelineStates
@@ -12,39 +7,63 @@ namespace Celeste.MadelineStates
         public void SetState(Madeline m)
         {
             m.isDangle = true;
-            m.Maddy.Dangling();
+            m.isClimbing = false;
+            m.onGround = false;
+            m.velocityX = 0f;
+            m.velocityY = m.dangleFallSpeed;
+            m.Maddy.WallSlide();
+            m.Maddy.ClearSweat();
         }
 
         public void Update(Madeline m, float dt)
         {
-
-            if (m.jumpPressed)
+            if (m.ConsumeJumpPress())
             {
-                m.changeState(m.jumpState);
+                if (m.CanWallJump())
+                {
+                    m.PerformWallJump();
+                }
+                else
+                {
+                    m.changeState(m.jumpState);
+                }
+                return;
             }
-            if (m.climbHeld) { m.changeState(m.climbState); return; }
 
+            if (m.canDash && m.ConsumeDashPress())
+            {
+                m.changeState(m.dashState);
+                return;
+            }
 
-            if (m.moveX != 0)
+            if (m.CanGrabWall())
+            {
+                m.changeState(m.climbState);
+                return;
+            }
+
+            if (!m.IsTouchingWall)
             {
                 m.changeState(m.fallState);
+                return;
             }
 
             if (!m.onGround)
             {
-                
-                m.position.Y += m.dangleFallSpeed*dt;
+                m.velocityY = m.dangleFallSpeed;
             }
             else if (m.onGround)
             {
                 m.isClimbing = false;
-                m.changeState(m.standState);
+                m.velocityY = 0f;
+                m.changeState(m.WantsToCrouch() ? m.crouchState : m.standState);
+                return;
             }
         }
 
         public void Exit(Madeline m) {
             m.isDangle = false;
+            m.Maddy.ClearSweat();
         }
     }
 }
-

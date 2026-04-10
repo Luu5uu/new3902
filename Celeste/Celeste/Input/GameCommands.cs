@@ -14,46 +14,90 @@ namespace Celeste.Input
     {
         private readonly Game1 _game;
         public ResetCommand(Game1 game) => _game = game;
-        public void Execute()
-        {
-        }
+        public void Execute() => _game.Reset();
     }
-
-    public class CycleBlockCommand : ICommand
+    public class CycleGameSceneCommand : ICommand
     {
         private readonly Game1 _game;
         private readonly int _direction;
-        public CycleBlockCommand(Game1 game, int direction)
+        public CycleGameSceneCommand(Game1 game, int direction)
         {
             _game = game;
             _direction = direction;
         }
-        public void Execute() => _game.CycleActiveBlock(_direction);
+        public void Execute() => _game.CycleGameScene(_direction);
     }
-
-    public class CycleItemCommand : ICommand
+    
+    public class PlayerMoveCommand : ICommand
     {
-        private readonly Game1 _game;
-        private readonly int _direction;
-        public CycleItemCommand(Game1 game, int direction)
+        private readonly Character.Madeline _player;
+        private readonly float _direction;
+
+        public PlayerMoveCommand(Character.Madeline player, float direction)
         {
-            _game = game;
+            _player = player;
             _direction = direction;
         }
-        public void Execute() => _game.CycleActiveItem(_direction);
+        public void Execute() => _player.Move(_direction);
     }
 
-    public class ToggleBlockAnimationCommand : ICommand
+    public class PlayerAimVerticalCommand : ICommand
     {
-        private readonly Game1 _game;
-        public ToggleBlockAnimationCommand(Game1 game) => _game = game;
-        public void Execute() => _game.ToggleBlockAnimation();
+        private readonly Character.Madeline _player;
+        private readonly float _direction;
+
+        public PlayerAimVerticalCommand(Character.Madeline player, float direction)
+        {
+            _player = player;
+            _direction = direction;
+        }
+
+        public void Execute() => _player.AimVertical(_direction);
     }
 
-    public class ToggleBlockDisplayCommand : ICommand
+    public class PlayerJumpCommand : ICommand
     {
-        private readonly Game1 _game;
-        public ToggleBlockDisplayCommand(Game1 game) => _game = game;
-        public void Execute() => _game.ToggleBlockDisplay();
+        private readonly Character.Madeline _player;
+
+        public PlayerJumpCommand(Character.Madeline player) => _player = player;
+        public void Execute() => _player.Jump();
     }
+
+    public class PlayerJumpHoldCommand : ICommand
+    {
+        private readonly Character.Madeline _player;
+
+        public PlayerJumpHoldCommand(Character.Madeline player) => _player = player;
+        public void Execute() => _player.SetJumpHeld(true);
+    }
+
+    public class PlayerDashCommand : ICommand
+    {
+        private readonly Character.Madeline _player;
+
+        public PlayerDashCommand(Character.Madeline player) => _player = player;
+
+        public void Execute() => _player.Dash();
+    }
+
+    public class PlayerDeathCommand : ICommand
+    {
+        private readonly Character.Madeline _player;
+
+        public PlayerDeathCommand(Character.Madeline player) => _player = player;
+
+        public void Execute() => _player.Die();
+    }
+
+    public class PlayerGrabCommand : ICommand
+    {
+        private readonly Character.Madeline _player;
+
+        public PlayerGrabCommand(Character.Madeline player) => _player = player;
+
+        public void Execute() => _player.SetClimb(true);
+    }
+
+    
+
 }

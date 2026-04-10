@@ -12,13 +12,23 @@ namespace Celeste.MadelineStates
     {
         public void SetState(Madeline m)
         {
+            // Capture before clearing — used to color death particles
+            bool wasDashing = m.isDashing;
+            var deathDirection = m.GetDeathDirection();
+
             // Freeze character (conservative: disable dash/jump movement)
             m.isDashing = false;
+            m.isClimbing = false;
+            m.isDangle = false;
+            m.SetCrouching(false);
             m.velocityY = 0f;
             m.moveX = 0f;
+            m.onGround = false;
+            m.touchingLeftWall = false;
+            m.touchingRightWall = false;
 
             // Spawn the integrated death animation (sprite -> particles).
-            m.StartDeathEffect();
+            m.StartDeathEffect(wasDashing, deathDirection);
         }
 
         public void Update(Madeline m, float dt)
@@ -28,7 +38,7 @@ namespace Celeste.MadelineStates
             if (m.IsDeathEffectFinished())
             {
                 m.ClearDeathEffect();
-                m.changeState(m.standState);
+                m.RequestLevelReset();
             }
         }
 

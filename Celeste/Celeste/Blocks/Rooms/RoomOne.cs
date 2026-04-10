@@ -1,5 +1,7 @@
+using System;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Celeste.Blocks.Rooms
 {
@@ -22,7 +24,7 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.ClearBlocks();
 
             // csv version:
-            string filePath = "Content/Rooms/RoomOne.csv";
+            string filePath = Path.Combine(AppContext.BaseDirectory, "Content", "rooms", "RoomOne.csv");
             _roomLoader.LoadRoom(filePath);
 
 
@@ -31,7 +33,7 @@ namespace Celeste.Blocks.Rooms
 
             /* --------------- SNOW BLOCKS ---------------*/
             // ROW 1
-            /* _mapBuilder.PlaceBlock("snow", 0, 0, 83);
+           /* _mapBuilder.PlaceBlock("snow", 0, 0, 83);
             _mapBuilder.PlaceBlock("snow", 1, 0, 77);
             _mapBuilder.PlaceBlock("snow", 2, 0, 47);
             _mapBuilder.PlaceBlock("snow", 3, 0, 41);

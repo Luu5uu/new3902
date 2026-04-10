@@ -19,7 +19,23 @@ namespace Celeste.Animation
         public const string PlayerDash        = "Player/Dash";
         public const string PlayerClimbUp     = "Player/ClimbUp";
         public const string PlayerDangling    = "Player/Dangling";
-        public const string PlayerDeath   = "Player/Death";
+        public const string PlayerWallSlide   = "Player/WallSlide";
+        public const string PlayerTired       = "Player/Tired";
+        public const string PlayerTiredStill  = "Player/TiredStill";
+        public const string PlayerClimbPull   = "Player/ClimbPull";
+        public const string PlayerDuck        = "Player/Duck";
+        public const string PlayerDeath       = "Player/Death";
+        public const string PlayerDeathSide   = "Player/DeathSide";
+        public const string PlayerDeathUp     = "Player/DeathUp";
+        public const string PlayerDeathDown   = "Player/DeathDown";
+
+        // Player sweat overlay
+        public const string PlayerSweatIdle      = "PlayerSweat/Idle";
+        public const string PlayerSweatStill     = "PlayerSweat/Still";
+        public const string PlayerSweatClimb     = "PlayerSweat/Climb";
+        public const string PlayerSweatClimbLoop = "PlayerSweat/ClimbLoop";
+        public const string PlayerSweatDanger    = "PlayerSweat/Danger";
+        public const string PlayerSweatJump      = "PlayerSweat/Jump";
 
         // Items
         public const string ItemNormalStaw = "Item/NormalStaw";

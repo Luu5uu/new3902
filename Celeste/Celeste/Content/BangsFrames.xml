@@ -43,4 +43,24 @@
   <Anim name="dangling">
     <F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/><F i="0"/>
   </Anim>
+
+  <Anim name="wallslide">
+    <F i="0"/>
+  </Anim>
+
+  <Anim name="tired">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="tiredstill">
+    <F i="0"/>
+  </Anim>
+
+  <Anim name="climbpull">
+    <F i="0"/><F i="0"/><F i="0"/><F i="0"/>
+  </Anim>
+
+  <Anim name="duck">
+    <F i="0"/>
+  </Anim>
 </BangsFrames>

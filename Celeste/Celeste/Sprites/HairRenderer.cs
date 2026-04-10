@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
+using static Celeste.HairConstants;
+
 namespace Celeste.Sprites
 {
     // node 0 pinned to head, nodes 1+ trail with gravity/facing bias,
@@ -28,7 +30,7 @@ namespace Celeste.Sprites
         private readonly Vector2[] _nodes;
         private bool _faceLeft;
 
-        public Color HairColor { get; set; } = new Color(172, 50, 50); // Madeline's red
+        public Color HairColor { get; set; } = DefaultHairColor;
         public int NodeCount => _nodes.Length;
 
         public HairRenderer(int nodeCount = DefaultNodeCount)
@@ -102,7 +104,7 @@ namespace Celeste.Sprites
             {
                 for (int i = _nodes.Length - 1; i >= 1; i--)
                 {
-                    float taper = 0.25f + (1f - (float)i / _nodes.Length) * 0.75f;
+                    float taper = HairTaperMin + (1f - (float)i / _nodes.Length) * HairTaperRange;
                     spriteBatch.Draw(_circleTexture, _nodes[i] + off, null, Color.Black,
                         0f, circleOrigin, new Vector2(taper * scale), SpriteEffects.None, 0f);
                 }

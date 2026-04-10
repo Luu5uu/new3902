@@ -58,4 +58,4 @@ python tools/strip_builder.py \
 2. **strip_builder** → one horizontal strip PNG per animation.  
 3. **Content** — add strips to MonoGame Content (and `Content.mgcb` if needed).  
 4. **AnimationLoader / AnimationKeys** (optional) — register strips in the catalog.  
-5. **Game** — use in MaddySprite and tune hair with debug mode (see `Celeste/Celeste/Docs/DebugMode.md`).
+5. **Game** — use in MaddySprite and tune hair with debug mode (see `Celeste/Celeste/DevTools/DebugMode.md`).

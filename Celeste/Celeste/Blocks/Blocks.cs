@@ -43,7 +43,7 @@ namespace Celeste.Blocks
             }
         }
 
-        public Rectangle Bounds
+        /*public Rectangle Bounds
         {
             get
             {
@@ -52,6 +52,28 @@ namespace Celeste.Blocks
 
                 int w = (int)(Texture.Width * Scale);
                 int h = (int)(Texture.Height * Scale);
+
+                return new Rectangle(
+                    (int)Position.X,
+                    (int)Position.Y,
+                    w,
+                    h
+                );
+            }
+        }*/
+
+        public Rectangle Bounds
+        {
+            get
+            {
+                if (Texture == null)
+                    return Rectangle.Empty;
+
+                int srcW = SourceRect.HasValue ? SourceRect.Value.Width : Texture.Width;
+                int srcH = SourceRect.HasValue ? SourceRect.Value.Height : Texture.Height;
+
+                int w = (int)(srcW * Scale);
+                int h = (int)(srcH * Scale);
 
                 return new Rectangle(
                     (int)Position.X,

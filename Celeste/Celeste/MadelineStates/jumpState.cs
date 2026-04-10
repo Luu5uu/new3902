@@ -8,26 +8,35 @@ namespace Celeste.MadelineStates
     {
         public void SetState(Madeline m)
         {
+            bool wasClimbing = m.isClimbing;
+            m.SetCrouching(false);
+            m.ConsumeJumpGrace();
+            m.velocityX += PlayerJumpHorizontalBoost * m.moveX;
             m.velocityY = -PlayerJumpSpeed;
+            m.BeginVariableJump();
             m.onGround  = false;
             m.Maddy.JumpFast();
+            if (wasClimbing)
+            {
+                m.Maddy.SweatJump();
+            }
+            else
+            {
+                m.Maddy.ClearSweat();
+            }
         }
 
         public void Update(Madeline m, float dt)
         {
-            if (m.dashPressed && m.canDash)
+            if (m.canDash && m.ConsumeDashPress())
             {
                 m.changeState(m.dashState);
                 return;
             }
 
-            float x = m.moveX * PlayerAirSpeed * dt;
-            m.position.X += x;
-
             if (m.velocityY > 0) m.changeState(m.fallState);
 
-            if (x < 0f) m.FaceLeft = true;
-            else if (x > 0f) m.FaceLeft = false;
+            m.RefreshFacingFromInput();
         }
 
         public void Exit(Madeline m) { }
