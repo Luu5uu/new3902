@@ -62,10 +62,8 @@ namespace Celeste.Character
         //
         public float ClimbStaminaPercent => climbStamina / PlayerClimbMaxStamina;
         public float ClimbTiredPercent => PlayerClimbTiredThreshold / PlayerClimbMaxStamina;
-        private bool _wasTiredLastFrame;
-        private float _tiredFlashTimer;
-        private const float TiredFlashDuration = 0.45f;
-        private const int TiredFlashPulseCount = 3;
+        private float _tiredFlashPhase;
+        private const float TiredFlashSpeed = 12f;
 
 
         // Position & facing
@@ -209,8 +207,7 @@ namespace Celeste.Character
             ClearMotionState();
             canDash = true;
             climbStamina = PlayerClimbMaxStamina;
-            _tiredFlashTimer = 0f;
-            _wasTiredLastFrame = false;
+            _tiredFlashPhase = 0f;
             changeState(standState);
         }
 
@@ -246,8 +243,7 @@ namespace Celeste.Character
             _ledgeTopOutQueued = false;
             _ledgeTopOutPosition = position;
             _ledgeTopOutTimer = 0f;
-            _tiredFlashTimer = 0f;
-            _wasTiredLastFrame = false;
+            _tiredFlashPhase = 0f;
             _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
             _dashRingEffect = null;
 
@@ -466,23 +462,13 @@ namespace Celeste.Character
             position.X += velocityX * dt;
             position.Y += velocityY * dt;
 
-            bool isTiredNow = IsTired;
-
-            //
-            if (isTiredNow && !_wasTiredLastFrame)
+            if (IsTired)
             {
-                _tiredFlashTimer = TiredFlashDuration;
+                _tiredFlashPhase += TiredFlashSpeed * dt;
             }
-
-            _wasTiredLastFrame = isTiredNow;
-
-            if (_tiredFlashTimer > 0f)
+            else
             {
-                _tiredFlashTimer -= dt;
-                if (_tiredFlashTimer < 0f)
-                {
-                    _tiredFlashTimer = 0f;
-                }
+                _tiredFlashPhase = 0f;
             }
 
 
@@ -725,13 +711,12 @@ namespace Celeste.Character
         //
         private Color GetTiredFlashColor()
         {
-            if (_tiredFlashTimer <= 0f)
+            if (!IsTired)
             {
                 return Color.White;
             }
 
-            float progress = 1f - (_tiredFlashTimer / TiredFlashDuration);
-            float wave = (float)Math.Sin(progress * TiredFlashPulseCount * Math.PI * 2f);
+            float wave = (float)Math.Sin(_tiredFlashPhase);
 
             return wave > 0f ? new Color(255, 90, 90) : Color.White;
         }
