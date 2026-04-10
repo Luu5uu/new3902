@@ -194,37 +194,37 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("cement", 22, 1, 16);
             _mapBuilder.PlaceBlock("cement", 23, 1, 83);
 
-            _mapBuilder.PlaceBlock("cement", 25, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 26, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 27, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 28, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 29, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 30, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 31, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 32, 1, 12);
+            _mapBuilder.PlaceBlock("cement", 25, 1, 6);
+            _mapBuilder.PlaceBlock("cement", 26, 1, 7);
+            _mapBuilder.PlaceBlock("cement", 27, 1, 16);
+            _mapBuilder.PlaceBlock("cement", 28, 1, 17);
+            _mapBuilder.PlaceBlock("cement", 29, 1, 77);
+            _mapBuilder.PlaceBlock("cement", 30, 1, 83);
+            _mapBuilder.PlaceBlock("cement", 31, 1, 89);
+            _mapBuilder.PlaceBlock("cement", 32, 1, 71);
 
-            _mapBuilder.PlaceBlock("cement", 38, 1, 12);
-            _mapBuilder.PlaceBlock("cement", 39, 1, 12);
+            _mapBuilder.PlaceBlock("cement", 38, 1, 13);
+            _mapBuilder.PlaceBlock("cement", 39, 1, 41);
 
             // ROW 2
-            _mapBuilder.PlaceBlock("cement", 0, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 1, 2, 12);
+            _mapBuilder.PlaceBlock("cement", 0, 2, 83);
+            _mapBuilder.PlaceBlock("cement", 1, 2, 53);
 
-            _mapBuilder.PlaceBlock("cement", 9, 2, 12);
+            _mapBuilder.PlaceBlock("cement", 9, 2, 18);
 
-            _mapBuilder.PlaceBlock("cement", 20, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 21, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 22, 2, 12);
+            _mapBuilder.PlaceBlock("cement", 20, 2, 14);
+            _mapBuilder.PlaceBlock("cement", 21, 2, 65);
+            _mapBuilder.PlaceBlock("cement", 22, 2, 83);
 
-            _mapBuilder.PlaceBlock("cement", 27, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 28, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 29, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 30, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 31, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 32, 2, 12);
+            _mapBuilder.PlaceBlock("cement", 27, 2, 78);
+            _mapBuilder.PlaceBlock("cement", 28, 2, 9);
+            _mapBuilder.PlaceBlock("cement", 29, 2, 16);
+            _mapBuilder.PlaceBlock("cement", 30, 2, 83);
+            _mapBuilder.PlaceBlock("cement", 31, 2, 89);
+            _mapBuilder.PlaceBlock("cement", 32, 2, 41);
 
-            _mapBuilder.PlaceBlock("cement", 38, 2, 12);
-            _mapBuilder.PlaceBlock("cement", 39, 2, 12);
+            _mapBuilder.PlaceBlock("cement", 38, 2, 13);
+            _mapBuilder.PlaceBlock("cement", 39, 2, 35);
 
             // ROW 3
             _mapBuilder.PlaceBlock("cement", 0, 3, 12);
@@ -232,9 +232,9 @@ namespace Celeste.Blocks.Rooms
 
             _mapBuilder.PlaceBlock("cement", 9, 3, 12);
 
-            _mapBuilder.PlaceBlock("cement", 20, 3, 12);
-            _mapBuilder.PlaceBlock("cement", 21, 3, 12);
-            _mapBuilder.PlaceBlock("cement", 22, 3, 12);
+            _mapBuilder.PlaceBlock("cement", 20, 3, 13);
+            _mapBuilder.PlaceBlock("cement", 21, 3, 5);
+            _mapBuilder.PlaceBlock("cement", 22, 3, 83);
 
             _mapBuilder.PlaceBlock("cement", 29, 3, 12);
             _mapBuilder.PlaceBlock("cement", 30, 3, 12);
