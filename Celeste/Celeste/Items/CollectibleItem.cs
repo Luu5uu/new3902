@@ -1,5 +1,6 @@
 using System;
 using Celeste.CollectText;
+using Celeste.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,12 +8,25 @@ namespace Celeste.Items
 {
     public sealed class CollectibleItem : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable
     {
+
+        public enum ItemType
+        {
+            Strawberry,
+            Crystal
+        }
+
+        private static int _strawberryCount = 0;
+        public static int StrawberryCount => _strawberryCount;
+
         private readonly ItemAnimation _animation;
         private readonly CollectTextPrompt _prompt = new CollectTextPrompt();
 
-        public CollectibleItem(ItemAnimation animation)
+        private readonly ItemType _itemType;
+
+        public CollectibleItem(ItemAnimation animation, ItemType itemType = ItemType.Strawberry)
         {
             _animation = animation ?? throw new ArgumentNullException(nameof(animation));
+            _itemType = itemType;
         }
 
         public Vector2 Position
@@ -53,6 +67,11 @@ namespace Celeste.Items
             _prompt.Reset();
         }
 
+        public static void ResetStrawberryCount()
+        {
+            _strawberryCount = 0;
+        }
+
         public bool TryCollect(Rectangle playerBounds)
         {
             if (Collected || !Bounds.Intersects(playerBounds))
@@ -63,11 +82,15 @@ namespace Celeste.Items
             Collected = true;
             CollectAnimFinished = false;
 
-            
+            if (_itemType == ItemType.Strawberry)
+            {
+                _strawberryCount++;
+                System.Diagnostics.Debug.WriteLine($"Strawberries collected: {_strawberryCount}");
+            }
 
             _prompt.Position = new Vector2(
-                Position.X ,
-                Position.Y 
+                Position.X,
+                Position.Y
             );
 
             _prompt.Scale = Scale;
@@ -106,4 +129,4 @@ namespace Celeste.Items
         }
     }
 }
-   
+

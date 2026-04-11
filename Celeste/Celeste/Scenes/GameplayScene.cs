@@ -28,6 +28,7 @@ namespace Celeste.Scenes
         private DebugOverlay _debugOverlay;
         private Texture2D _deathDotTex;
         private ControllerLoader _controllerLoader;
+        private SpriteFont _uiFont;
 
         private MapBuilder _worldMap;
         private RoomOne _roomOne;
@@ -51,6 +52,9 @@ namespace Celeste.Scenes
             _catalog = AnimationLoader.LoadAll(Game.Content);
             CollectTextPrompt.Initialize(Game.Content);
             SoundManager.Load(Game.Content);
+
+            _uiFont = Game.Content.Load<SpriteFont>("MenuFont");
+
 
             var startPos = new Vector2(
                 Game.Window.ClientBounds.Width / 2f,
@@ -93,6 +97,7 @@ namespace Celeste.Scenes
             _roomFour = new RoomFour(_worldMap, factory);
             _roomFive = new RoomFive(_worldMap, factory);
 
+            CollectibleItem.ResetStrawberryCount();
             RebuildCurrentRoom(resetPlayer: false);
         }
 
@@ -154,6 +159,10 @@ namespace Celeste.Scenes
                 Game.Window.Title =
                     $"Celeste - {Game.Window.ClientBounds.Width}x{Game.Window.ClientBounds.Height} | Room: {_currentRoom} | BGM: {Game1.GetBgmStatusText()}";
             }
+
+            string strawberryText = $"Strawberries: {CollectibleItem.StrawberryCount}";
+            spriteBatch.DrawString(_uiFont, strawberryText, new Vector2(10, 10), Color.White);
+
 
             spriteBatch.End();
         }
@@ -268,25 +277,25 @@ namespace Celeste.Scenes
             Vector2 spawn = _player.RespawnPoint;
             if (_currentRoom == 0)
             {
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(-80f, -40f)));
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateFlyStaw(_catalog), spawn + new Vector2(0f, -60f)));
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(90f, -20f)));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(-80f, -40f), CollectibleItem.ItemType.Strawberry));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateFlyStaw(_catalog), spawn + new Vector2(0f, -60f), CollectibleItem.ItemType.Strawberry));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(90f, -20f), CollectibleItem.ItemType.Crystal));
                 return;
             }
 
-            _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(72f, -40f)));
+            _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(72f, -40f), CollectibleItem.ItemType.Strawberry));
 
             if (_currentRoom == 2 || _currentRoom == 5)
             {
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(120f, -56f)));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(120f, -56f), CollectibleItem.ItemType.Crystal));
             }
         }
 
-        private static CollectibleItem CreateCollectible(ItemAnimation animation, Vector2 position)
+        private static CollectibleItem CreateCollectible(ItemAnimation animation, Vector2 position, CollectibleItem.ItemType itemType = CollectibleItem.ItemType.Strawberry)
         {
             animation.Position = position;
             animation.Scale = GlobalConstants.DefaultScale;
-            return new CollectibleItem(animation);
+            return new CollectibleItem(animation, itemType);
         }
 
         private void UpdateCollectibles(GameTime gameTime)
