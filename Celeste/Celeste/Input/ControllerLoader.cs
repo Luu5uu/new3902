@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
-using Celeste;
+using System.Linq;
+using Celeste.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -12,26 +14,22 @@ namespace Celeste.Input
         private KeyboardState _previousKeyboardState;
         private GamePadState _previousGamepadState;
 
+        public KeyboardController GetKeyboard() => _controllers.OfType<KeyboardController>().FirstOrDefault();
+        public GamepadController GetGamepad() => _controllers.OfType<GamepadController>().FirstOrDefault();
+
         public ControllerLoader(Game1 game, Character.Madeline player)
         {
             _player = player;
-            _previousKeyboardState = Keyboard.GetState();
-            _previousGamepadState = GamePad.GetState(PlayerIndex.One);
+           // _previousKeyboardState = Keyboard.GetState();
+           // _previousGamepadState = GamePad.GetState(PlayerIndex.One);
 
             var keyboard = new KeyboardController();
             var mouse = new MouseController();
-            
-            //keyboard commands registration
-            keyboard.RegisterCommand(Keys.Q,      new QuitCommand(game));
-            keyboard.RegisterCommand(Keys.Escape, new QuitCommand(game));
-            keyboard.RegisterCommand(Keys.R, new ResetCommand(game));
-
-            //mouse commands registration
-            mouse.RegisterCommand(MouseButton.Left , new CycleGameSceneCommand(game, -1));
-            mouse.RegisterCommand(MouseButton.Right, new CycleGameSceneCommand(game, 1));
+            var gamepad = new GamepadController();
             
             _controllers.Add(keyboard);
             _controllers.Add(mouse);
+            _controllers.Add(gamepad);
         }
 
         public void Update()
@@ -116,6 +114,36 @@ namespace Celeste.Input
         private bool IsGamepadPressed(GamePadState state, Buttons button)
         {
             return state.IsButtonDown(button) && !_previousGamepadState.IsButtonDown(button);
+        }
+    }
+
+    public static class InputMapper
+    {
+        public static void ConfigureMenu(KeyboardController kb, GamepadController gp, Action onUp, Action onDown, Action onSelect, Action onBack = null)
+        {
+            kb.RegisterCommand(Keys.Up, new ActionCommand(onUp));
+            kb.RegisterCommand(Keys.Down, new ActionCommand(onDown));
+            kb.RegisterCommand(Keys.Enter, new ActionCommand(onSelect));
+            if (onBack != null) kb.RegisterCommand(Keys.Escape, new ActionCommand(onBack));
+
+            if (gp != null)
+            {
+                gp.RegisterCommand(Buttons.DPadUp, new ActionCommand(onUp));
+                gp.RegisterCommand(Buttons.DPadDown, new ActionCommand(onDown));
+                gp.RegisterCommand(Buttons.A, new ActionCommand(onSelect));
+            }
+        }
+
+        public static void ConfigureGameplay(KeyboardController kb, Game1 game, GameplayScene scene)
+        {
+            kb.RegisterCommand(Keys.R, new ResetCommand(game));
+            kb.RegisterCommand(Keys.Escape, new PauseCommand(game));
+            kb.RegisterCommand(Keys.Q, new QuitCommand(game));
+
+            // Room Hotkeys
+            kb.RegisterCommand(Keys.D1, new ActionCommand(() => scene.JumpToRoom(1)));
+            kb.RegisterCommand(Keys.D2, new ActionCommand(() => scene.JumpToRoom(2)));
+            kb.RegisterCommand(Keys.D3, new ActionCommand(() => scene.JumpToRoom(3)));
         }
     }
 }

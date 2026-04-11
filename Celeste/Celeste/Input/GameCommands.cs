@@ -1,5 +1,7 @@
 using Celeste;
 using Microsoft.Xna.Framework;
+using Celeste.Scenes;
+using System;
 
 namespace Celeste.Input
 {
@@ -15,6 +17,35 @@ namespace Celeste.Input
         private readonly Game1 _game;
         public ResetCommand(Game1 game) => _game = game;
         public void Execute() => _game.Reset();
+    }
+    public class PauseCommand : ICommand
+        {
+        private readonly Game1 _game;
+        
+        public PauseCommand(Game1 game)
+        {
+            _game = game;
+        }
+
+        public void Execute()
+        {
+            // Pushes the pause scene on top of the gameplay scene
+            SceneManager.PushScene(new PauseScene(_game));
+        }
+    }
+    public class ActionCommand : ICommand
+    {
+        private readonly Action _action;
+
+        public ActionCommand(Action action)
+        {
+            _action = action;
+        }
+
+        public void Execute()
+        {
+            _action?.Invoke();
+        }
     }
     public class CycleGameSceneCommand : ICommand
     {
