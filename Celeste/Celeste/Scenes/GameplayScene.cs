@@ -29,6 +29,8 @@ namespace Celeste.Scenes
         private Texture2D _deathDotTex;
         private ControllerLoader _controllerLoader;
         private SpriteFont _uiFont;
+        private float _gameTimer = 0f;
+        private bool _timerRunning = true;
 
         private MapBuilder _worldMap;
         private RoomOne _roomOne;
@@ -133,6 +135,11 @@ namespace Celeste.Scenes
                 _player.UpdateSprite(gameTime);
             }
 
+            if (_timerRunning)
+            {
+                _gameTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
             if (_player.Bounds.Bottom > _worldBound.Bottom)
             {
                 _player.Reset();
@@ -163,8 +170,18 @@ namespace Celeste.Scenes
             string strawberryText = $"Strawberries: {CollectibleItem.StrawberryCount}";
             spriteBatch.DrawString(_uiFont, strawberryText, new Vector2(10, 10), Color.White);
 
+            string timerText = $"Time: {FormatTime(_gameTimer)}";
+            spriteBatch.DrawString(_uiFont, timerText, new Vector2(10, 40), Color.White);
 
             spriteBatch.End();
+        }
+
+        private string FormatTime(float time)
+        {
+            int minutes = (int)(time / 60);
+            int seconds = (int)(time % 60);
+            int milliseconds = (int)((time * 100) % 100);
+            return $"{minutes:D2}:{seconds:D2}.{milliseconds:D2}";
         }
 
         public void Reset()
