@@ -27,6 +27,34 @@ namespace Celeste.Input
         }
         public void Execute() => _game.CycleGameScene(_direction);
     }
+
+    public class PreviousBgmCommand : ICommand
+    {
+        private readonly Game1 _game;
+        public PreviousBgmCommand(Game1 game) => _game = game;
+        public void Execute() => _game.PlayPreviousBgm();
+    }
+
+    public class NextBgmCommand : ICommand
+    {
+        private readonly Game1 _game;
+        public NextBgmCommand(Game1 game) => _game = game;
+        public void Execute() => _game.PlayNextBgm();
+    }
+
+    public class PauseBgmCommand : ICommand
+    {
+        private readonly Game1 _game;
+        public PauseBgmCommand(Game1 game) => _game = game;
+        public void Execute() => _game.PauseBgm();
+    }
+
+    public class ResumeBgmCommand : ICommand
+    {
+        private readonly Game1 _game;
+        public ResumeBgmCommand(Game1 game) => _game = game;
+        public void Execute() => _game.ResumeBgm();
+    }
     
     public class PlayerMoveCommand : ICommand
     {

@@ -25,6 +25,10 @@ namespace Celeste.Input
             keyboard.RegisterCommand(Keys.Q,      new QuitCommand(game));
             keyboard.RegisterCommand(Keys.Escape, new QuitCommand(game));
             keyboard.RegisterCommand(Keys.R, new ResetCommand(game));
+            keyboard.RegisterCommand(Keys.F5, new PreviousBgmCommand(game));
+            keyboard.RegisterCommand(Keys.F6, new NextBgmCommand(game));
+            keyboard.RegisterCommand(Keys.F7, new PauseBgmCommand(game));
+            keyboard.RegisterCommand(Keys.F8, new ResumeBgmCommand(game));
 
             //mouse commands registration
             mouse.RegisterCommand(MouseButton.Left , new CycleGameSceneCommand(game, -1));

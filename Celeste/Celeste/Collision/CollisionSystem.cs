@@ -38,6 +38,7 @@ namespace Celeste.Collision
             ResolveRemainingPenetration(prevPos, prevCrouching, attemptedDx, attemptedDy);
             UpdateWallContacts();
             ResolveLedgeTopOut(prevPos, prevCrouching, attemptedDy, wasTouchingLeftWall, wasTouchingRightWall);
+            ActivateTouchedCrushBlocks();
         }
         private void UpdateWallContacts()
         {
@@ -64,6 +65,7 @@ namespace Celeste.Collision
             {
                 var blk = _worldBlocks[i];
                 if (blk == null) continue;
+                if (!CanStandOnBlock(blk)) continue;
 
                 Rectangle r = blk.Bounds;
                 if (r == Rectangle.Empty) continue;
@@ -133,6 +135,7 @@ namespace Celeste.Collision
             {
                 var blk = _worldBlocks[i];
                 if (blk == null) continue;
+                if (!CanStandOnBlock(blk)) continue;
 
                 Rectangle r = blk.Bounds;
                 if (r == Rectangle.Empty) continue;
@@ -324,6 +327,11 @@ namespace Celeste.Collision
                 bool cameFromLeft = prevBounds.Right <= r.Left;
                 bool cameFromRight = prevBounds.Left >= r.Right;
 
+                if (ShouldIgnoreTopCollision(blk, r, p, prevBounds, attemptedDy))
+                {
+                    continue;
+                }
+
                 if (System.Math.Abs(attemptedDy) >= System.Math.Abs(attemptedDx) && minVertical <= minHorizontal)
                 {
                     if (cameFromBelow || attemptedDy < 0f || _player.hitCeiling)
@@ -334,6 +342,11 @@ namespace Celeste.Collision
                     }
                     else if (cameFromAbove || attemptedDy > 0f || _player.onGround)
                     {
+                        if (!CanStandOnBlock(blk))
+                        {
+                            continue;
+                        }
+
                         _player.position.Y = r.Top;
                         _player.velocityY = 0f;
                         _player.onGround = true;
@@ -346,6 +359,11 @@ namespace Celeste.Collision
                     }
                     else
                     {
+                        if (!CanStandOnBlock(blk))
+                        {
+                            continue;
+                        }
+
                         _player.position.Y = r.Top;
                         _player.velocityY = 0f;
                         _player.onGround = true;
@@ -454,6 +472,70 @@ namespace Celeste.Collision
             }
 
             return true;
+        }
+
+        private void ActivateTouchedCrushBlocks()
+        {
+            Rectangle playerBounds = _player.Bounds;
+
+            for (int i = 0; i < _worldBlocks.Count; i++)
+            {
+                if (_worldBlocks[i] is not CrushBlock crushBlock)
+                {
+                    continue;
+                }
+
+                Rectangle blockBounds = crushBlock.Bounds;
+                if (blockBounds == Rectangle.Empty)
+                {
+                    continue;
+                }
+
+                if (IsTouchingBlock(playerBounds, blockBounds))
+                {
+                    crushBlock.Activate();
+                }
+            }
+        }
+
+        private static bool IsTouchingBlock(Rectangle playerBounds, Rectangle blockBounds)
+        {
+            if (playerBounds.Intersects(blockBounds))
+            {
+                return true;
+            }
+
+            bool xOverlap = playerBounds.Right > blockBounds.Left && playerBounds.Left < blockBounds.Right;
+            bool yOverlap = playerBounds.Bottom > blockBounds.Top && playerBounds.Top < blockBounds.Bottom;
+
+            bool touchingTop = xOverlap && playerBounds.Bottom == blockBounds.Top;
+            bool touchingBottom = xOverlap && playerBounds.Top == blockBounds.Bottom;
+            bool touchingLeft = yOverlap && playerBounds.Right == blockBounds.Left;
+            bool touchingRight = yOverlap && playerBounds.Left == blockBounds.Right;
+
+            return touchingTop || touchingBottom || touchingLeft || touchingRight;
+        }
+
+        private static bool CanStandOnBlock(IBlocks block)
+        {
+            return block is not CrushBlock crushBlock || crushBlock.CanStandOn;
+        }
+
+        private static bool ShouldIgnoreTopCollision(IBlocks block, Rectangle blockBounds, Rectangle playerBounds, Rectangle previousBounds, float attemptedDy)
+        {
+            if (block is not CrushBlock crushBlock || crushBlock.CanStandOn)
+            {
+                return false;
+            }
+
+            if (attemptedDy < 0f)
+            {
+                return false;
+            }
+
+            bool xOverlap = playerBounds.Right > blockBounds.Left && playerBounds.Left < blockBounds.Right;
+            bool cameFromAbove = previousBounds.Bottom <= blockBounds.Top && playerBounds.Bottom >= blockBounds.Top;
+            return xOverlap && cameFromAbove;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 using Celeste.Animation;
 using Celeste.Character;
@@ -10,6 +11,7 @@ using Celeste.Blocks;
 using Celeste.Blocks.Rooms;
 using Celeste.DevTools;
 using Celeste.Input;
+using BgmAudioPlayer = Celeste.BGMPlayer.BGMPlayer;
 
 using Celeste.DeathAnimation.Particles;
 using System.Collections.Generic;
@@ -131,8 +133,10 @@ namespace Celeste
             _debugOverlay = new DebugOverlay();
             _prevKb = Keyboard.GetState();
             _controllerLoader = new ControllerLoader(this, _player);
+            BgmAudioPlayer.Initialize(Content);
+            BgmAudioPlayer.bgmSwitchTo("prologue");
 
-            _worldMap = new MapBuilder(factory, 50, 30);
+            _worldMap = new MapBuilder(factory, _catalog, 50, 30);
             _roomOne = new RoomOne(_worldMap, factory);
             _roomTwo = new RoomTwo(_worldMap, factory);
             _roomThree = new RoomThree(_worldMap, factory);
@@ -276,6 +280,7 @@ namespace Celeste
             else
             {
                 _player.Update(gameTime);
+                _worldMap.Update(gameTime);
 
                 if (_player.ConsumeLevelResetRequest())
                 {
@@ -341,12 +346,16 @@ namespace Celeste
             if (_debugOverlay.ShowDebug)
                 _debugOverlay.Draw(_spriteBatch, _player, _pixelTexture, Window);
             else
-
-                // to get resolution
-                Window.Title = $"Celeste - {Window.ClientBounds.Width}x{Window.ClientBounds.Height}";
+                Window.Title = $"Celeste - {Window.ClientBounds.Width}x{Window.ClientBounds.Height} | Room: {_currentRoom} | BGM: {GetBgmStatusText()}";
 
             _spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        private static string GetBgmStatusText()
+        {
+            string trackName = string.IsNullOrWhiteSpace(BgmAudioPlayer.CurrentTrackName) ? "none" : BgmAudioPlayer.CurrentTrackName;
+            return $"{trackName} ({MediaPlayer.State})";
         }
 
         public void CycleGameScene(int direction)
@@ -376,6 +385,26 @@ namespace Celeste
                 RebuildCurrentRoom(resetPlayer: false);
             }
         }
+
+        public void PlayPreviousBgm()
+        {
+            if (BgmAudioPlayer.TrackCount > 0)
+            {
+                BgmAudioPlayer.bgmPrevious();
+            }
+        }
+
+        public void PlayNextBgm()
+        {
+            if (BgmAudioPlayer.TrackCount > 0)
+            {
+                BgmAudioPlayer.bgmNext();
+            }
+        }
+
+        public void PauseBgm() => BgmAudioPlayer.bgmPause();
+        public void ResumeBgm() => BgmAudioPlayer.bgmPlay();
+
         public void Reset() => RebuildCurrentRoom(resetPlayer: true);
 
         public void CycleActiveBlock(int direction)
@@ -396,18 +425,23 @@ namespace Celeste
         {
             int requestedRoom = _currentRoom;
 
-            if ((kb.IsKeyDown(Keys.D0) && _prevKb.IsKeyUp(Keys.D0)) || (kb.IsKeyDown(Keys.NumPad0) && _prevKb.IsKeyUp(Keys.NumPad0))) { requestedRoom = 0; }
-            else if ((kb.IsKeyDown(Keys.D1) && _prevKb.IsKeyUp(Keys.D1)) || (kb.IsKeyDown(Keys.NumPad1) && _prevKb.IsKeyUp(Keys.NumPad1))) { requestedRoom = 1; }
-            else if ((kb.IsKeyDown(Keys.D2) && _prevKb.IsKeyUp(Keys.D2)) || (kb.IsKeyDown(Keys.NumPad2) && _prevKb.IsKeyUp(Keys.NumPad2))) { requestedRoom = 2; }
-            else if ((kb.IsKeyDown(Keys.D3) && _prevKb.IsKeyUp(Keys.D3)) || (kb.IsKeyDown(Keys.NumPad3) && _prevKb.IsKeyUp(Keys.NumPad3))) { requestedRoom = 3; }
-            else if ((kb.IsKeyDown(Keys.D4) && _prevKb.IsKeyUp(Keys.D4)) || (kb.IsKeyDown(Keys.NumPad4) && _prevKb.IsKeyUp(Keys.NumPad4))) { requestedRoom = 4; }
-            else if ((kb.IsKeyDown(Keys.D5) && _prevKb.IsKeyUp(Keys.D5)) || (kb.IsKeyDown(Keys.NumPad5) && _prevKb.IsKeyUp(Keys.NumPad5))) { requestedRoom = 5; }
+            if (IsNewKeyPress(kb, Keys.D0) || IsNewKeyPress(kb, Keys.NumPad0)) { requestedRoom = 0; }
+            else if (IsNewKeyPress(kb, Keys.D1) || IsNewKeyPress(kb, Keys.NumPad1)) { requestedRoom = 1; }
+            else if (IsNewKeyPress(kb, Keys.D2) || IsNewKeyPress(kb, Keys.NumPad2)) { requestedRoom = 2; }
+            else if (IsNewKeyPress(kb, Keys.D3) || IsNewKeyPress(kb, Keys.NumPad3)) { requestedRoom = 3; }
+            else if (IsNewKeyPress(kb, Keys.D4) || IsNewKeyPress(kb, Keys.NumPad4)) { requestedRoom = 4; }
+            else if (IsNewKeyPress(kb, Keys.D5) || IsNewKeyPress(kb, Keys.NumPad5)) { requestedRoom = 5; }
 
             if (requestedRoom != _currentRoom)
             {
                 _currentRoom = requestedRoom;
                 RebuildCurrentRoom(resetPlayer: false);
             }
+        }
+
+        private bool IsNewKeyPress(KeyboardState currentState, Keys key)
+        {
+            return currentState.IsKeyDown(key) && _prevKb.IsKeyUp(key);
         }
 
         private void RebuildCurrentRoom(bool resetPlayer)
