@@ -12,19 +12,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Content\rooms\RoomOne.csv" />
-    <None Remove="Content\rooms\RoomTwo.csv" />
-    <None Remove="Content\rooms\RoomThree.csv" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\rooms\RoomOne.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\rooms\RoomTwo.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\rooms\RoomThree.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
