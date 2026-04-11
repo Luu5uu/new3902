@@ -16,6 +16,11 @@ namespace Celeste.Animation
         Dash,
         ClimbUp,
         Dangling,
+        WallSlide,
+        Tired,
+        TiredStill,
+        ClimbPull,
+        Duck,
         Death
     }
 }

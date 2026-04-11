@@ -17,4 +17,7 @@ Current gameplay bindings follow the Celeste-style keyboard layout:
 - `Z` is grab / climb
 - `X` is dash
 - `C` is jump
+- `Down` while grounded is crouch / duck
+- touching a wall without grab starts a wall slide
+- pressing jump while sliding on a wall performs a wall jump
 - `WASD` remains available as a directional testing fallback

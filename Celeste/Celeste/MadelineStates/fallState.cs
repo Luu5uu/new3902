@@ -9,10 +9,26 @@ namespace Celeste.MadelineStates
         public void SetState(Madeline m)
         {
             m.Maddy.FallSlow();
+            m.Maddy.ClearSweat();
         }
 
         public void Update(Madeline m, float dt)
         {
+            if (m.ConsumeJumpPress())
+            {
+                if (m.CanUseJumpGrace())
+                {
+                    m.changeState(m.jumpState);
+                    return;
+                }
+
+                if (m.CanWallJump())
+                {
+                    m.PerformWallJump();
+                    return;
+                }
+            }
+
             if (m.canDash && m.ConsumeDashPress())
             {
                 m.changeState(m.dashState);
@@ -23,10 +39,18 @@ namespace Celeste.MadelineStates
                 m.changeState(m.climbState);
                 return;
             }
+            if (m.IsTouchingWall && m.velocityY >= 0f)
+            {
+                m.changeState(m.dangleState);
+                return;
+            }
 
             m.RefreshFacingFromInput();
 
-            if (m.onGround) m.changeState(m.standState);
+            if (m.onGround)
+            {
+                m.changeState(m.WantsToCrouch() ? m.crouchState : m.standState);
+            }
         }
 
         public void Exit(Madeline m) { }

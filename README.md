@@ -13,10 +13,11 @@
 | Key(s) | Action |
 |--------|--------|
 | `←` / `→` | Move left / right |
-| `↑` / `↓` | Aim dash vertically / climb up or down while grabbing |
+| `↑` / `↓` | Aim dash vertically / climb up or down while grabbing / crouch while grounded |
 | `Z` (hold) | Grab / climb |
 | `X` | Dash |
 | `C` | Jump |
+| `C` while sliding on wall | Wall jump / kick off the wall |
 | `W` / `A` / `S` / `D` | Testing fallback for directional input |
 | `E` | Trigger death sequence (test / demo only) |
 
@@ -28,12 +29,30 @@
 | Right mouse | Next playable room |
 | `0`-`5` | Jump directly to a room for testing |
 
+### BGM Controls
+
+| Key(s) | Action |
+|--------|--------|
+| `F5` | Previous BGM track |
+| `F6` | Next BGM track |
+| `F7` | Pause BGM |
+| `F8` | Resume BGM |
+
 ### Other Controls
 
 | Key(s) | Action |
 |--------|--------|
-| `Q` / `Escape` | Quit |
+| `Q` | Quit |
+| `Escape` | Open pause menu during gameplay / go back in menus |
 | `R` | Reset the current room |
+
+### Menu Controls
+
+| Key(s) | Action |
+|--------|--------|
+| `Up` / `Down` | Move menu selection |
+| `Enter` | Confirm current menu option |
+| `Escape` | Back out of pause menu / exit from main menu |
 
 ### Debug Mode Controls
 

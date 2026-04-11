@@ -72,6 +72,13 @@ namespace Celeste.AudioSystem
         {
             if (effects.ContainsKey(key))
             {
+                if(key == "collect")
+                {
+                    var instance = effects[key].CreateInstance();
+                    instance.Volume = 0.25f; // Set the desired volume
+                    instance.Play();
+                    return;
+                }
                 effects[key].Play();
             }
         }

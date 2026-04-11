@@ -25,7 +25,7 @@ namespace Celeste.Collision
 
 
 
-        public void ResolveBlockCollision(Vector2 prevPos)
+        public void ResolveBlockCollision(Vector2 prevPos, bool prevCrouching)
         {
             _player.CurrentGroundBlock = null;
 
@@ -35,11 +35,12 @@ namespace Celeste.Collision
             bool wasTouchingRightWall = _player.touchingRightWall;
 
             _player.hitCeiling = false;
-            ResolveHorizontal(prevPos, attemptedDx);
-            ResolveVertical(prevPos, attemptedDy);
-            ResolveRemainingPenetration(prevPos, attemptedDx, attemptedDy);
+            ResolveHorizontal(prevPos, prevCrouching, attemptedDx);
+            ResolveVertical(prevPos, prevCrouching, attemptedDy);
+            ResolveRemainingPenetration(prevPos, prevCrouching, attemptedDx, attemptedDy);
             UpdateWallContacts();
-            ResolveLedgeTopOut(prevPos, attemptedDy, wasTouchingLeftWall, wasTouchingRightWall);
+            ResolveLedgeTopOut(prevPos, prevCrouching, attemptedDy, wasTouchingLeftWall, wasTouchingRightWall);
+            ActivateTouchedCrushBlocks();
         }
         private void UpdateWallContacts()
         {
@@ -66,6 +67,7 @@ namespace Celeste.Collision
             {
                 var blk = _worldBlocks[i];
                 if (blk == null) continue;
+                if (!CanStandOnBlock(blk)) continue;
 
                 Rectangle r = blk.Bounds;
                 if (r == Rectangle.Empty) continue;
@@ -81,52 +83,49 @@ namespace Celeste.Collision
             }
         }
 
-        private Rectangle GetBoundsAt(Vector2 position)
+        private Rectangle GetBoundsAt(Vector2 position, bool crouching)
         {
-            Rectangle current = _player.Bounds;
-            int left = (int)(position.X - current.Width / 2f);
-            int top = (int)(position.Y - current.Height);
-            return new Rectangle(left, top, current.Width, current.Height);
+            return _player.GetBoundsAt(position, crouching);
         }
 
-        public void ResolveHorizontal(Vector2 prevPos, float attemptedDx)
+        public void ResolveHorizontal(Vector2 prevPos, bool prevCrouching, float attemptedDx)
         {
             _player.touchingLeftWall = false;
             _player.touchingRightWall = false;
 
             if (attemptedDx > 0)
             {
-                ResolveHitLeftWall(prevPos, attemptedDx);
+                ResolveHitLeftWall(prevPos, prevCrouching, attemptedDx);
             }
             else if (attemptedDx < 0)
             {
-                ResolveHitRightWall(prevPos, attemptedDx);
+                ResolveHitRightWall(prevPos, prevCrouching, attemptedDx);
             }
         }
 
 
 
-        public void ResolveVertical(Vector2 prevPos, float attemptedDy)
+        public void ResolveVertical(Vector2 prevPos, bool prevCrouching, float attemptedDy)
         {
             _player.onGround = false;
 
             
-            ResolveStandOnTop(prevPos, attemptedDy);
+            ResolveStandOnTop(prevPos, prevCrouching, attemptedDy);
 
             
-            ResolveHitCeiling(prevPos, attemptedDy);
+            ResolveHitCeiling(prevPos, prevCrouching, attemptedDy);
         }
 
 
 
         
-        private void ResolveStandOnTop(Vector2 prevPos, float attemptedDy)
+        private void ResolveStandOnTop(Vector2 prevPos, bool prevCrouching, float attemptedDy)
         {
             IBlocks bestBlock = null;
 
             if (attemptedDy <= 0f) return;
 
-            Rectangle prevBounds = GetBoundsAt(prevPos);
+            Rectangle prevBounds = GetBoundsAt(prevPos, prevCrouching);
             Rectangle p = _player.Bounds;
             Rectangle swept = Rectangle.Union(prevBounds, p);
 
@@ -140,6 +139,7 @@ namespace Celeste.Collision
             {
                 var blk = _worldBlocks[i];
                 if (blk == null) continue;
+                if (!CanStandOnBlock(blk)) continue;
 
                 Rectangle r = blk.Bounds;
                 if (r == Rectangle.Empty) continue;
@@ -178,11 +178,11 @@ namespace Celeste.Collision
         }
 
         
-        private void ResolveHitCeiling(Vector2 prevPos, float attemptedDy)
+        private void ResolveHitCeiling(Vector2 prevPos, bool prevCrouching, float attemptedDy)
         {
             if (attemptedDy >= 0f) return;
 
-            Rectangle prevBounds = GetBoundsAt(prevPos);
+            Rectangle prevBounds = GetBoundsAt(prevPos, prevCrouching);
             Rectangle p = _player.Bounds;
             Rectangle swept = Rectangle.Union(prevBounds, p);
 
@@ -226,7 +226,7 @@ namespace Celeste.Collision
 
 
 
-        private void ResolveHitLeftWall(Vector2 prevPos, float dx)
+        private void ResolveHitLeftWall(Vector2 prevPos, bool prevCrouching, float dx)
         {
             if (dx <= 0) return;
 
@@ -268,7 +268,7 @@ namespace Celeste.Collision
             }
         }
 
-        private void ResolveHitRightWall(Vector2 prevPos, float dx)
+        private void ResolveHitRightWall(Vector2 prevPos, bool prevCrouching, float dx)
         {
             if (dx >= 0) return;
 
@@ -310,10 +310,10 @@ namespace Celeste.Collision
             }
         }
 
-        private void ResolveRemainingPenetration(Vector2 prevPos, float attemptedDx, float attemptedDy)
+        private void ResolveRemainingPenetration(Vector2 prevPos, bool prevCrouching, float attemptedDx, float attemptedDy)
         {
             Rectangle p = _player.Bounds;
-            Rectangle prevBounds = GetBoundsAt(prevPos);
+            Rectangle prevBounds = GetBoundsAt(prevPos, prevCrouching);
 
             for (int i = 0; i < _worldBlocks.Count; i++)
             {
@@ -335,6 +335,11 @@ namespace Celeste.Collision
                 bool cameFromLeft = prevBounds.Right <= r.Left;
                 bool cameFromRight = prevBounds.Left >= r.Right;
 
+                if (ShouldIgnoreTopCollision(blk, r, p, prevBounds, attemptedDy))
+                {
+                    continue;
+                }
+
                 if (System.Math.Abs(attemptedDy) >= System.Math.Abs(attemptedDx) && minVertical <= minHorizontal)
                 {
                     if (cameFromBelow || attemptedDy < 0f || _player.hitCeiling)
@@ -345,6 +350,11 @@ namespace Celeste.Collision
                     }
                     else if (cameFromAbove || attemptedDy > 0f || _player.onGround)
                     {
+                        if (!CanStandOnBlock(blk))
+                        {
+                            continue;
+                        }
+
                         _player.position.Y = r.Top;
                         _player.velocityY = 0f;
                         _player.onGround = true;
@@ -357,6 +367,11 @@ namespace Celeste.Collision
                     }
                     else
                     {
+                        if (!CanStandOnBlock(blk))
+                        {
+                            continue;
+                        }
+
                         _player.position.Y = r.Top;
                         _player.velocityY = 0f;
                         _player.onGround = true;
@@ -392,7 +407,7 @@ namespace Celeste.Collision
             }
         }
 
-        private void ResolveLedgeTopOut(Vector2 prevPos, float attemptedDy, bool wasTouchingLeftWall, bool wasTouchingRightWall)
+        private void ResolveLedgeTopOut(Vector2 prevPos, bool prevCrouching, float attemptedDy, bool wasTouchingLeftWall, bool wasTouchingRightWall)
         {
             if (!_player.isClimbing || _player.moveY >= 0f || attemptedDy >= 0f)
             {
@@ -436,7 +451,7 @@ namespace Celeste.Collision
                     ? r.Left + p.Width / 2f + PlayerConstants.PlayerLedgeTopOutInset
                     : r.Right - p.Width / 2f - PlayerConstants.PlayerLedgeTopOutInset;
                 Vector2 targetPosition = new Vector2(targetX, r.Top);
-                Rectangle targetBounds = GetBoundsAt(targetPosition);
+                Rectangle targetBounds = GetBoundsAt(targetPosition, crouching: false);
 
                 if (!IsStandingSpotClear(targetBounds, blk))
                 {
@@ -465,6 +480,70 @@ namespace Celeste.Collision
             }
 
             return true;
+        }
+
+        private void ActivateTouchedCrushBlocks()
+        {
+            Rectangle playerBounds = _player.Bounds;
+
+            for (int i = 0; i < _worldBlocks.Count; i++)
+            {
+                if (_worldBlocks[i] is not CrushBlock crushBlock)
+                {
+                    continue;
+                }
+
+                Rectangle blockBounds = crushBlock.Bounds;
+                if (blockBounds == Rectangle.Empty)
+                {
+                    continue;
+                }
+
+                if (IsTouchingBlock(playerBounds, blockBounds))
+                {
+                    crushBlock.Activate();
+                }
+            }
+        }
+
+        private static bool IsTouchingBlock(Rectangle playerBounds, Rectangle blockBounds)
+        {
+            if (playerBounds.Intersects(blockBounds))
+            {
+                return true;
+            }
+
+            bool xOverlap = playerBounds.Right > blockBounds.Left && playerBounds.Left < blockBounds.Right;
+            bool yOverlap = playerBounds.Bottom > blockBounds.Top && playerBounds.Top < blockBounds.Bottom;
+
+            bool touchingTop = xOverlap && playerBounds.Bottom == blockBounds.Top;
+            bool touchingBottom = xOverlap && playerBounds.Top == blockBounds.Bottom;
+            bool touchingLeft = yOverlap && playerBounds.Right == blockBounds.Left;
+            bool touchingRight = yOverlap && playerBounds.Left == blockBounds.Right;
+
+            return touchingTop || touchingBottom || touchingLeft || touchingRight;
+        }
+
+        private static bool CanStandOnBlock(IBlocks block)
+        {
+            return block is not CrushBlock crushBlock || crushBlock.CanStandOn;
+        }
+
+        private static bool ShouldIgnoreTopCollision(IBlocks block, Rectangle blockBounds, Rectangle playerBounds, Rectangle previousBounds, float attemptedDy)
+        {
+            if (block is not CrushBlock crushBlock || crushBlock.CanStandOn)
+            {
+                return false;
+            }
+
+            if (attemptedDy < 0f)
+            {
+                return false;
+            }
+
+            bool xOverlap = playerBounds.Right > blockBounds.Left && playerBounds.Left < blockBounds.Right;
+            bool cameFromAbove = previousBounds.Bottom <= blockBounds.Top && playerBounds.Bottom >= blockBounds.Top;
+            return xOverlap && cameFromAbove;
         }
     }
 }

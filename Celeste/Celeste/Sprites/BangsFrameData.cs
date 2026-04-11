@@ -39,6 +39,11 @@ namespace Celeste.Sprites
                     AnimationKeys.PlayerFallSlow     => "fallslow",
                     AnimationKeys.PlayerClimbUp      => "climbup",
                     AnimationKeys.PlayerDangling     => "dangling",
+                    AnimationKeys.PlayerWallSlide    => "wallslide",
+                    AnimationKeys.PlayerTired        => "tired",
+                    AnimationKeys.PlayerTiredStill   => "tiredstill",
+                    AnimationKeys.PlayerClimbPull    => "climbpull",
+                    AnimationKeys.PlayerDuck         => "duck",
                     _ => ""
                 };
 

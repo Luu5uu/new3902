@@ -11,14 +11,22 @@ namespace Celeste.MadelineStates
             m.onGround = false;
             m.velocityX = 0f;
             m.velocityY = m.dangleFallSpeed;
-            m.Maddy.Dangling();
+            m.Maddy.WallSlide();
+            m.Maddy.ClearSweat();
         }
 
         public void Update(Madeline m, float dt)
         {
             if (m.ConsumeJumpPress())
             {
-                m.changeState(m.jumpState);
+                if (m.CanWallJump())
+                {
+                    m.PerformWallJump();
+                }
+                else
+                {
+                    m.changeState(m.jumpState);
+                }
                 return;
             }
 
@@ -48,13 +56,14 @@ namespace Celeste.MadelineStates
             {
                 m.isClimbing = false;
                 m.velocityY = 0f;
-                m.changeState(m.standState);
+                m.changeState(m.WantsToCrouch() ? m.crouchState : m.standState);
                 return;
             }
         }
 
         public void Exit(Madeline m) {
             m.isDangle = false;
+            m.Maddy.ClearSweat();
         }
     }
 }

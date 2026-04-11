@@ -9,6 +9,7 @@ namespace Celeste.MadelineStates
         public void SetState(Madeline m)
         {
             m.Maddy.Run();
+            m.Maddy.ClearSweat();
         }
 
         public void Update(Madeline m, float dt)
@@ -21,6 +22,11 @@ namespace Celeste.MadelineStates
             if (m.CanUseJumpGrace() && m.ConsumeJumpPress())
             {
                 m.changeState(m.jumpState);
+                return;
+            }
+            if (m.WantsToCrouch())
+            {
+                m.changeState(m.crouchState);
                 return;
             }
             if (m.CanGrabWall())
