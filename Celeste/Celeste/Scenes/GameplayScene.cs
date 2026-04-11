@@ -31,6 +31,8 @@ namespace Celeste.Scenes
         private SpriteFont _uiFont;
         private float _gameTimer = 0f;
         private bool _timerRunning = true;
+        private bool _showUI = true;
+        private KeyboardState _previousKeyboardState;
 
         private MapBuilder _worldMap;
         private RoomOne _roomOne;
@@ -47,6 +49,7 @@ namespace Celeste.Scenes
 
         public GameplayScene(Game1 game) : base(game)
         {
+            _previousKeyboardState = Keyboard.GetState();
         }
 
         public override void LoadContent()
@@ -112,6 +115,12 @@ namespace Celeste.Scenes
             Vector2 previousPosition = _player.position;
             bool wasCrouching = _player.isCrouching;
 
+            if (keyboard.IsKeyDown(Keys.T) && _previousKeyboardState.IsKeyUp(Keys.T))
+            {
+                _showUI = !_showUI;
+            }
+            _previousKeyboardState = keyboard;
+
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
             {
                 _player.Maddy.SetPosition(_player.position, scale: GlobalConstants.DefaultScale, faceLeft: _player.FaceLeft);
@@ -167,13 +176,17 @@ namespace Celeste.Scenes
                     $"Celeste - {Game.Window.ClientBounds.Width}x{Game.Window.ClientBounds.Height} | Room: {_currentRoom} | BGM: {Game1.GetBgmStatusText()}";
             }
 
-            string strawberryText = $"Strawberries: {CollectibleItem.StrawberryCount}";
-            spriteBatch.DrawString(_uiFont, strawberryText, new Vector2(10, 10), Color.White);
+            if (_showUI)
+            {
+                string strawberryText = $"Strawberries: {CollectibleItem.StrawberryCount}";
+                spriteBatch.DrawString(_uiFont, strawberryText, new Vector2(10, 10), Color.White);
 
-            string timerText = $"Time: {FormatTime(_gameTimer)}";
-            spriteBatch.DrawString(_uiFont, timerText, new Vector2(10, 40), Color.White);
+                string timerText = $"Time: {FormatTime(_gameTimer)}";
+                spriteBatch.DrawString(_uiFont, timerText, new Vector2(10, 40), Color.White);
+            }
 
             spriteBatch.End();
+
         }
 
 
