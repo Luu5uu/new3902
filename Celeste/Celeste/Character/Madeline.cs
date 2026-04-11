@@ -5,21 +5,15 @@ using Celeste.AudioSystem;
 using Celeste.Blocks;
 using Celeste.DeathAnimation;
 using Celeste.DeathAnimation.Particles;
-using Celeste.Input;
 using Celeste.MadelineStates;
 using Celeste.Sprites;
-using Celeste.Blocks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Celeste.DeathAnimation;
-using Celeste.DeathAnimation.Particles;
 using Celeste.DeathAnimation.Particles.Emitters;
 using Microsoft.Xna.Framework.Content;
 using static Celeste.PlayerConstants;
 using static Celeste.GlobalConstants;
 using static Celeste.DeathConstants;
-using static Celeste.GlobalConstants;
-using static Celeste.PlayerConstants;
 
 namespace Celeste.Character
 {
@@ -315,7 +309,7 @@ namespace Celeste.Character
 
         public void Jump()
         {
-            
+
             jumpPressed = true;
             _jumpBufferTimer = PlayerJumpBufferTime;
         }
@@ -327,10 +321,10 @@ namespace Celeste.Character
 
         public void Dash()
         {
-            
+
             dashPressed = true;
             _dashBufferTimer = PlayerDashBufferTime;
-        }  
+        }
 
         public void Die()
         {
@@ -465,7 +459,7 @@ namespace Celeste.Character
             position.X += velocityX * dt;
             position.Y += velocityY * dt;
 
-          
+
             ClearTransientInput();
         }
 
@@ -564,7 +558,7 @@ namespace Celeste.Character
             if (_deathSideClip == null || _deathUpClip == null || _deathDownClip == null || _deathDotTex == null)
                 return;
 
-        
+
 
             AnimationClip clip = ResolveDeathClip(direction);
 
@@ -900,7 +894,7 @@ namespace Celeste.Character
 
             if (!shouldPlay)
             {
-                
+
                 return;
             }
 
