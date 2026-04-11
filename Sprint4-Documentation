@@ -31,3 +31,9 @@ including different footstep sounds on different surfaces, which makes gameplay 
 the implementation used the XML to organize and load sound assets more efficiently.                                                                                                                            
 Technical Concerns / Suggestions:
 The implementation is strong overall, but there are a few areas that could be improved in future iterations. Some sound effects may need additional volume balancing so that certain clips do not overpower others during gameplay.
+
+HUD elements (timer & strawberry counter) with toggle feature and blocks update for level/room 2 #22 request by Isaac  Reviewed by Albert
+Strengths:
+Successfuly added the HUD featured required in the sprint and updated level/room 2's blocks to their original game texture.
+Technical Concerns / Suggestions:
+Match the font of the HUD to the original game's and make the strawberry counter appear when a strawberry is collected. Convert Room 2 generation class into a CSV file.
