@@ -1,0 +1,33 @@
+In Sprint 4, each team member was assigned a specific task bundle.
+Henry was responsible for sprint planning, submission preparation, final integration, and movement cleanup.
+
+Aaron was responsible for Bundle A: Menu + Pause Flow, including the implementation of the main menu, gameplay flow, and pause flow.
+
+Isaac was responsible for Bundle B: HUD + Score / Strawberry UI, including the HUD and player-facing interface elements such as score and strawberry count.
+
+Zijun was responsible for Bundle C: Strawberry Collection Polish, including polishing strawberry collection behavior, collection feedback, reset behavior after death, and related visual/audio responses. This work also included fixing a previous bug and adding a text prompt for collection feedback.
+
+Sihao was responsible for Bundle D: Tired Climb Animation / Feedback, including connecting the tired climbing system to animation and feedback so that the stamina mechanic would be more readable to the player.
+
+Albert was responsible for Bundle E: Room / Level Polish + Audio, including room and level polish, maintaining the testing/teleport flow for grading, and adding audio-related features such as music, sound effects, and mute functionality.
+
+
+
+Code Review For Sprint 4
+Pull Request:
+
+SceneManager and Menus #18  request by Aaron   reviewed by Albert
+Strenths: Significantly optimized game1.cs, making it more concise and easier to maintain.
+Technical Concerns / Suggestions: When a bug is detected, it can only be switched between rooms 1 to 5. The menu interface could be improved. It is suggested to add prompt words to inform users how to operate.
+
+Albert bgm test branch #20   request by Albert   reviewed by Zijun Lu
+Strenths: Finish the BGM system, implement crush block and improve the menu useability, also fix some bug from PR#18
+Technical Concerns / Suggestions: More songs need to be added to enhance the complexity of the music library. At the same time, it is necessary to consider whether a small number of songs are worth being stored using XML.
+
+Strawberry collection #21 request by Zijun Lu   reviewed by Henry
+Strengths:
+This pull request successfully improved the strawberry collection polish by adding both sound and feedback-related features. A major strength of this work is the implementation of sound effects for Madeline’s actions and movement, 
+including different footstep sounds on different surfaces, which makes gameplay feedback more immersive and responsive. Another strength is the asset integration approach: instead of importing sound effect files one by one manually, 
+the implementation used the XML to organize and load sound assets more efficiently.                                                                                                                            
+Technical Concerns / Suggestions:
+The implementation is strong overall, but there are a few areas that could be improved in future iterations. Some sound effects may need additional volume balancing so that certain clips do not overpower others during gameplay.

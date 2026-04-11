@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System;
+using Celeste.Animation;
 
 namespace Celeste.Blocks
 {
@@ -10,6 +11,7 @@ namespace Celeste.Blocks
         public List<IBlocks> _blocks = new List<IBlocks>();
         public List<IHazard> _hazards = new List<IHazard>();
         private BlockFactory _blockFactory;
+        private readonly PlaceCrushBlock _placeCrushBlock;
         // size * scale
         private float blockSize = 8 * 2.5f;
         private IBlocks[,] grid;
@@ -19,9 +21,10 @@ namespace Celeste.Blocks
         public int Width => w;
         public int Height => h;
 
-        public MapBuilder(BlockFactory blockFactory, int width = 48, int height = 120)
+        public MapBuilder(BlockFactory blockFactory, AnimationCatalog catalog, int width = 48, int height = 120)
         {
             this._blockFactory = blockFactory;
+            _placeCrushBlock = new PlaceCrushBlock(catalog, blockSize);
             this.w = width;
             this.h = height;
             grid = new IBlocks[width, height];
@@ -44,7 +47,9 @@ namespace Celeste.Blocks
             }
             else
             {
-                IBlocks block = _blockFactory.CreateBlock(type, position, frameNum);
+                IBlocks block = type == "crushBlock"
+                    ? _placeCrushBlock.CreateAtGrid(gridX, gridY)
+                    : _blockFactory.CreateBlock(type, position, frameNum);
                 if (block != null)
                 {
                     RemoveBlock(gridX, gridY);
@@ -52,6 +57,19 @@ namespace Celeste.Blocks
                     grid[gridX, gridY] = block;
                 }
             }
+        }
+
+        public void PlaceCrushBlock(int gridX, int gridY, float scale = 2.5f)
+        {
+            if (gridX < 0 || gridX >= w || gridY < 0 || gridY >= h)
+            {
+                return;
+            }
+
+            IBlocks block = _placeCrushBlock.CreateAtGrid(gridX, gridY, scale);
+            RemoveBlock(gridX, gridY);
+            _blocks.Add(block);
+            grid[gridX, gridY] = block;
         }
 
         private static bool IsHazardType(string type)
@@ -104,6 +122,25 @@ namespace Celeste.Blocks
             foreach (var hazard in _hazards)
             {
                 hazard.Draw(spriteBatch);
+            }
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            foreach (var block in _blocks)
+            {
+                if (block is Spring spring)
+                {
+                    spring.Update(gameTime);
+                }
+                else if (block is MoveBlock moveBlock)
+                {
+                    moveBlock.Update(gameTime);
+                }
+                else if (block is CrushBlock crushBlock)
+                {
+                    crushBlock.Update(gameTime);
+                }
             }
         }
 
