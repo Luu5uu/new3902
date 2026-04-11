@@ -29,6 +29,15 @@
 | Right mouse | Next playable room |
 | `0`-`5` | Jump directly to a room for testing |
 
+### BGM Controls
+
+| Key(s) | Action |
+|--------|--------|
+| `F5` | Previous BGM track |
+| `F6` | Next BGM track |
+| `F7` | Pause BGM |
+| `F8` | Resume BGM |
+
 ### Other Controls
 
 | Key(s) | Action |
@@ -36,8 +45,6 @@
 | `Q` | Quit |
 | `Escape` | Open pause menu during gameplay / go back in menus |
 | `R` | Reset the current room |
-| `F5` / `F6` | Previous / next BGM track |
-| `F7` / `F8` | Pause / resume BGM |
 
 ### Menu Controls
 

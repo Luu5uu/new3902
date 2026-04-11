@@ -1,23 +1,26 @@
-using Celeste;
-using Microsoft.Xna.Framework;
-using Celeste.Scenes;
 using System;
+using Celeste.Scenes;
 
 namespace Celeste.Input
 {
     public class QuitCommand : ICommand
     {
         private readonly Game1 _game;
+
         public QuitCommand(Game1 game) => _game = game;
+
         public void Execute() => _game.Exit();
     }
 
     public class ResetCommand : ICommand
     {
         private readonly Game1 _game;
+
         public ResetCommand(Game1 game) => _game = game;
+
         public void Execute() => _game.Reset();
     }
+
     public class PauseCommand : ICommand
     {
         private readonly Game1 _game;
@@ -35,6 +38,7 @@ namespace Celeste.Input
             }
         }
     }
+
     public class ActionCommand : ICommand
     {
         private readonly Action _action;
@@ -49,45 +53,57 @@ namespace Celeste.Input
             _action?.Invoke();
         }
     }
+
     public class CycleGameSceneCommand : ICommand
     {
         private readonly Game1 _game;
         private readonly int _direction;
+
         public CycleGameSceneCommand(Game1 game, int direction)
         {
             _game = game;
             _direction = direction;
         }
+
         public void Execute() => _game.CycleGameScene(_direction);
     }
 
     public class PreviousBgmCommand : ICommand
     {
         private readonly Game1 _game;
+
         public PreviousBgmCommand(Game1 game) => _game = game;
+
         public void Execute() => _game.PlayPreviousBgm();
     }
 
     public class NextBgmCommand : ICommand
     {
         private readonly Game1 _game;
+
         public NextBgmCommand(Game1 game) => _game = game;
+
         public void Execute() => _game.PlayNextBgm();
     }
 
     public class PauseBgmCommand : ICommand
     {
         private readonly Game1 _game;
+
         public PauseBgmCommand(Game1 game) => _game = game;
+
         public void Execute() => _game.PauseBgm();
     }
 
     public class ResumeBgmCommand : ICommand
     {
         private readonly Game1 _game;
+
         public ResumeBgmCommand(Game1 game) => _game = game;
+
         public void Execute() => _game.ResumeBgm();
     }
+
     public class PlayerMoveCommand : ICommand
     {
         private readonly Character.Madeline _player;
@@ -98,6 +114,7 @@ namespace Celeste.Input
             _player = player;
             _direction = direction;
         }
+
         public void Execute() => _player.Move(_direction);
     }
 
@@ -120,6 +137,7 @@ namespace Celeste.Input
         private readonly Character.Madeline _player;
 
         public PlayerJumpCommand(Character.Madeline player) => _player = player;
+
         public void Execute() => _player.Jump();
     }
 
@@ -128,6 +146,7 @@ namespace Celeste.Input
         private readonly Character.Madeline _player;
 
         public PlayerJumpHoldCommand(Character.Madeline player) => _player = player;
+
         public void Execute() => _player.SetJumpHeld(true);
     }
 
@@ -157,5 +176,4 @@ namespace Celeste.Input
 
         public void Execute() => _player.SetClimb(true);
     }
-
 }
