@@ -20,16 +20,16 @@ namespace Celeste.Input
 
             var keyboard = new KeyboardController();
             var mouse = new MouseController();
-            
+
             //keyboard commands registration
-            keyboard.RegisterCommand(Keys.Q,      new QuitCommand(game));
+            keyboard.RegisterCommand(Keys.Q, new QuitCommand(game));
             keyboard.RegisterCommand(Keys.Escape, new QuitCommand(game));
             keyboard.RegisterCommand(Keys.R, new ResetCommand(game));
 
             //mouse commands registration
-            mouse.RegisterCommand(MouseButton.Left , new CycleGameSceneCommand(game, -1));
+            mouse.RegisterCommand(MouseButton.Left, new CycleGameSceneCommand(game, -1));
             mouse.RegisterCommand(MouseButton.Right, new CycleGameSceneCommand(game, 1));
-            
+
             _controllers.Add(keyboard);
             _controllers.Add(mouse);
         }
