@@ -1,83 +1,64 @@
+using Celeste.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using Celeste.Input;
 
 namespace Celeste.Scenes
 {
     public class MainMenuScene : Scene
     {
+        private readonly string[] _menuOptions = { "CLIMB", "EXIT" };
         private SpriteFont _font;
-        private int _selectedIndex = 0;
-        private readonly string[] _menuOptions = { "CLIMB", "OPTIONS", "CREDITS", "EXIT" };
-        
         private KeyboardController _keyboard;
         private GamepadController _gamepad;
-       // private Texture2D _background; // need the main menu background
-        
-        public MainMenuScene(Game1 game) : base(game) { }
+        private int _selectedIndex;
+
+        public MainMenuScene(Game1 game) : base(game)
+        {
+        }
 
         public override void LoadContent()
         {
-            
             _font = Game.Content.Load<SpriteFont>("MenuFont");
-            
-            // todo _background = Game.Content.Load<Texture2D>("MenuBackground");
             _keyboard = new KeyboardController();
             _gamepad = new GamepadController();
 
-            InputMapper.ConfigureMenu(_keyboard, null, 
+            InputMapper.ConfigureMenu(
+                _keyboard,
+                _gamepad,
                 onUp: () => _selectedIndex = (_selectedIndex > 0) ? _selectedIndex - 1 : _menuOptions.Length - 1,
                 onDown: () => _selectedIndex = (_selectedIndex + 1) % _menuOptions.Length,
-                onSelect: ExecuteSelection);
+                onSelect: ExecuteSelection,
+                onQuit: () => Game.Exit());
         }
 
         public override void Update(GameTime gameTime)
         {
             _keyboard.Update();
             _gamepad.Update();
-        }
-
-        private void ExecuteSelection()
-        {
-            switch (_selectedIndex)
-            {
-                case 0: // CLIMB
-                    SceneManager.ChangeScene(new GameplayScene(Game));
-                    break;
-                case 1: // OPTIONS
-                    // Todo: SceneManager.PushScene(new OptionsScene(Game));
-                    break;
-                case 3: // EXIT
-                    Game.Exit();
-                    break;
-            }
+            Game.Window.Title = $"Celeste - Main Menu | BGM: {Game1.GetBgmStatusText()}";
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            // 1. Draw Background (Celeste often uses a dark blue gradient or mountain)
-            // spriteBatch.Draw(_background, Vector2.Zero, Color.White);
+            spriteBatch.DrawString(_font, "CELESTE", new Vector2(100, 140), Color.White, 0f, Vector2.Zero, 2.2f, SpriteEffects.None, 0f);
+            spriteBatch.DrawString(_font, "UP / DOWN TO CHOOSE", new Vector2(100, 220), Color.LightGray);
+            spriteBatch.DrawString(_font, "ENTER TO CONFIRM   Q / ESC TO EXIT", new Vector2(100, 250), Color.LightGray);
 
-            // 2. Draw Menu Options
-            Vector2 startPos = new Vector2(100, 300); // Todo: Adjust based on resolution
-            
+            Vector2 startPosition = new Vector2(100, 330);
             for (int i = 0; i < _menuOptions.Length; i++)
             {
-                Color textColor = (i == _selectedIndex) ? Color.Yellow : Color.White;
-                float scale = (i == _selectedIndex) ? 1.2f : 1.0f; // Slight pop for selected item
-                
-                // Add small selection indicator like the Celeste strawberry or bird
-                string prefix = (i == _selectedIndex) ? "> " : "  ";
+                bool isSelected = i == _selectedIndex;
+                string prefix = isSelected ? "> " : "  ";
+                Color color = isSelected ? Color.Yellow : Color.White;
+                float scale = isSelected ? 1.2f : 1f;
 
                 spriteBatch.DrawString(
-                    _font, 
-                    prefix + _menuOptions[i], 
-                    startPos + new Vector2(0, i * 50), 
-                    textColor,
+                    _font,
+                    prefix + _menuOptions[i],
+                    startPosition + new Vector2(0, i * 54),
+                    color,
                     0f,
                     Vector2.Zero,
                     scale,
@@ -86,6 +67,19 @@ namespace Celeste.Scenes
             }
 
             spriteBatch.End();
+        }
+
+        private void ExecuteSelection()
+        {
+            switch (_selectedIndex)
+            {
+                case 0:
+                    SceneManager.ChangeScene(new GameplayScene(Game));
+                    break;
+                case 1:
+                    Game.Exit();
+                    break;
+            }
         }
     }
 }

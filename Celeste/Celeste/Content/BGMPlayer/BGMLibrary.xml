@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<BGMLibrary>
+  <Track name="prologue" asset="Lena Raine - Celeste Original Soundtrack - 01 Prologue" />
+  <Track name="first-steps" asset="Lena Raine - Celeste Original Soundtrack - 02 First Steps" />
+  <Track name="resurrections" asset="Lena Raine - Celeste Original Soundtrack - 03 Resurrections" />
+</BGMLibrary>

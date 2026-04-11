@@ -33,17 +33,26 @@
 
 | Key(s) | Action |
 |--------|--------|
-| `F5` | Play Last Music |
-| `F6` | Play Next Music |
-| `F7` | Pause The Music |
-| `F8` | Keep Play the Music |
+| `F5` | Previous BGM track |
+| `F6` | Next BGM track |
+| `F7` | Pause BGM |
+| `F8` | Resume BGM |
 
 ### Other Controls
 
 | Key(s) | Action |
 |--------|--------|
-| `Q` / `Escape` | Quit |
+| `Q` | Quit |
+| `Escape` | Open pause menu during gameplay / go back in menus |
 | `R` | Reset the current room |
+
+### Menu Controls
+
+| Key(s) | Action |
+|--------|--------|
+| `Up` / `Down` | Move menu selection |
+| `Enter` | Confirm current menu option |
+| `Escape` | Back out of pause menu / exit from main menu |
 
 ### Debug Mode Controls
 

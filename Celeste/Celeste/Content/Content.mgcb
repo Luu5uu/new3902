@@ -169,6 +169,23 @@
 /processorParam:TextureFormat=Color
 /build:leftSpike.png
 
+#begin Lena Raine - Celeste Original Soundtrack - 01 Prologue.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Lena Raine - Celeste Original Soundtrack - 01 Prologue.mp3
+
+#begin Lena Raine - Celeste Original Soundtrack - 02 First Steps.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Lena Raine - Celeste Original Soundtrack - 02 First Steps.mp3
+
+#begin Lena Raine - Celeste Original Soundtrack - 03 Resurrections.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Lena Raine - Celeste Original Soundtrack - 03 Resurrections.mp3
 #begin MenuFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

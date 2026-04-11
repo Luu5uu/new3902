@@ -1,31 +1,27 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Celeste.Animation;
+using Celeste.Blocks;
+using Celeste.Blocks.Rooms;
+using Celeste.Character;
+using Celeste.Collision;
+using Celeste.DeathAnimation.Particles;
+using Celeste.DevTools;
+using Celeste.Input;
+using Celeste.Items;
+using Celeste.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-
-using Celeste.Animation;
-using Celeste.Character;
-using Celeste.Items;
-using Celeste.Blocks;
-using Celeste.Blocks.Rooms;
-using Celeste.DevTools;
-using Celeste.Input;
-using Celeste.DeathAnimation.Particles;
-using Celeste.Utils;
-using Celeste.Collision;
-using Celeste.Scenes;
 
 namespace Celeste.Scenes
 {
     public class GameplayScene : Scene
     {
-        // --- Logic and Content moved from Game1 ---
         private AnimationCatalog _catalog;
         private Madeline _player;
-        private KeyboardState _prevKb;
         private Texture2D _pixelTexture;
         private DebugOverlay _debugOverlay;
         private Texture2D _deathDotTex;
@@ -37,39 +33,37 @@ namespace Celeste.Scenes
         private RoomThree _roomThree;
         private RoomFour _roomFour;
         private RoomFive _roomFive;
-        private int _currentRoom = 0;
+        private int _currentRoom;
 
-        private List<IBlocks> _blockList;
         private readonly List<CollectibleItem> _collectibles = new();
-        private int _totalBlocks;
-
         private CollisionSystem _collisionSystem;
-        private HazardCollisioncs HazardCollisioncs;
-        private Rectangle worldBound;
+        private HazardCollisioncs _hazardCollisionSystem;
+        private Rectangle _worldBound;
 
-        public GameplayScene(Game1 game) : base(game) { }
+        public GameplayScene(Game1 game) : base(game)
+        {
+        }
 
         public override void LoadContent()
         {
-            // Use Game.Content and Game.GraphicsDevice from the base class
             _catalog = AnimationLoader.LoadAll(Game.Content);
 
             var startPos = new Vector2(
                 Game.Window.ClientBounds.Width / 2f,
                 Game.Window.ClientBounds.Height / 2f);
 
-            worldBound = new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height);
+            _worldBound = new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height);
             _player = new Madeline(Game.Content, _catalog, startPos);
 
-            // Inject DeathAnimation resources
             _deathDotTex = LoadDeathDotTexture();
 
             if (!_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathSide, out var deathSideClip)
                 || !_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathUp, out var deathUpClip)
                 || !_catalog.Clips.TryGetValue(AnimationKeys.PlayerDeathDown, out var deathDownClip))
+            {
                 throw new ContentLoadException(
-                    $"Directional death clips not found in AnimationCatalog. " +
-                    $"Available keys: {string.Join(", ", _catalog.Clips.Keys)}");
+                    $"Directional death clips not found in AnimationCatalog. Available keys: {string.Join(", ", _catalog.Clips.Keys)}");
+            }
 
             _player.ConfigureDeathAnimation(deathSideClip, deathUpClip, deathDownClip, _deathDotTex);
 
@@ -78,30 +72,17 @@ namespace Celeste.Scenes
 
             var factory = BlockFactory.GetInstance;
             factory.LoadTextures(Game.Content);
-            _blockList = new List<IBlocks>();
-            
-            var pos = new Vector2(0, 0);
-            if (factory.CreateSnowBlock(pos) is IBlocks b0) _blockList.Add(b0);
-            if (factory.CreateCementBlock(pos) is IBlocks b1) _blockList.Add(b1);
-            if (factory.CreateDirtBlock(pos) is IBlocks b2) _blockList.Add(b2);
-            if (factory.CreateGirderBlock(pos) is IBlocks b3) _blockList.Add(b3);
-            if (factory.CreateBlock("4", pos) is IBlocks b4) _blockList.Add(b4);
-            if (factory.CreateBlock("7", pos) is IBlocks b5) _blockList.Add(b5);
-            if (factory.CreateBlock("upSpike", pos) is IBlocks b6) _blockList.Add(b6);
-            if (factory.CreateBlock("top_a00", pos) is IBlocks b7) _blockList.Add(b7);
-            if (factory.CreateBlock("top_a01", pos) is IBlocks b8) _blockList.Add(b8);
-            if (factory.CreateBlock("top_a02", pos) is IBlocks b9) _blockList.Add(b9);
-            if (factory.CreateBlock("top_a03", pos) is IBlocks b10) _blockList.Add(b10);
-            _blockList.Add(new Spring(new Vector2(0, 0), _catalog));
-            _blockList.Add(new MoveBlock(new Vector2(0, 0), 80f, 60f, 0f, _catalog));
-            _blockList.Add(new CrushBlock(new Vector2(0, 0), _catalog));
-            _totalBlocks = _blockList.Count;
 
             _debugOverlay = new DebugOverlay();
             _controllerLoader = new ControllerLoader(Game, _player);
-            InputMapper.ConfigureGameplay(_controllerLoader.GetKeyboard(), Game, this);
+            InputMapper.ConfigureGameplay(
+                _controllerLoader.GetKeyboard(),
+                _controllerLoader.GetMouse(),
+                _controllerLoader.GetGamepad(),
+                Game,
+                this);
 
-            _worldMap = new MapBuilder(factory, 50, 30);
+            _worldMap = new MapBuilder(factory, _catalog, 50, 30);
             _roomOne = new RoomOne(_worldMap, factory);
             _roomTwo = new RoomTwo(_worldMap, factory);
             _roomThree = new RoomThree(_worldMap, factory);
@@ -113,50 +94,43 @@ namespace Celeste.Scenes
 
         public override void Update(GameTime gameTime)
         {
-            var kb = Keyboard.GetState();
+            KeyboardState keyboard = Keyboard.GetState();
+            _debugOverlay.HandleInput(keyboard, _player);
             _controllerLoader.Update();
 
-            // --- REGULAR GAMEPLAY UPDATE ---
-            _debugOverlay.HandleInput(kb, _player);
-
-            Vector2 prevPos = _player.position;
-            bool prevCrouching = _player.isCrouching;
+            Vector2 previousPosition = _player.position;
+            bool wasCrouching = _player.isCrouching;
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
             {
                 _player.Maddy.SetPosition(_player.position, scale: GlobalConstants.DefaultScale, faceLeft: _player.FaceLeft);
                 _player.Maddy.Update(gameTime);
+                return;
+            }
+
+            _player.Update(gameTime);
+            _worldMap.Update(gameTime);
+
+            if (_player.ConsumeLevelResetRequest())
+            {
+                RebuildCurrentRoom(resetPlayer: true);
             }
             else
             {
-                _player.Update(gameTime);
-
-                if (_player.ConsumeLevelResetRequest())
-                {
-                    RebuildCurrentRoom(resetPlayer: true);
-                }
-                else
-                {
-                    HazardCollisioncs.ResolveHazardCollision();
-                    _collisionSystem.ResolveBlockCollision(prevPos, prevCrouching);
-                    UpdateCollectibles(gameTime);
-                    _player.UpdateSprite(gameTime);
-                }
+                _hazardCollisionSystem.ResolveHazardCollision();
+                _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching);
+                UpdateCollectibles(gameTime);
+                _player.UpdateSprite(gameTime);
             }
 
-            if (_player.Bounds.Bottom > worldBound.Bottom)
+            if (_player.Bounds.Bottom > _worldBound.Bottom)
             {
                 _player.Reset();
             }
-
-            _prevKb = kb;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            // Note: Game1.cs handles GraphicsDevice.Clear
-            // We handle the actual drawing block
-            // CullNone needed: BodySprite flips via negative X scale.
             spriteBatch.Begin(
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
@@ -166,55 +140,108 @@ namespace Celeste.Scenes
             _player.Draw(spriteBatch);
 
             if (_debugOverlay.ShowDebug)
-                DrawUtils.DrawRectangleOutline(spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
-
-            // Draw current block/obstacle only when block display is on (T = previous, Y = next). Stationary, no interaction.
-            /*if (_blocksVisible && _totalBlocks > 0)
             {
-                var block = _blockList[_activeBlockIndex];
-                block.Position = new Vector2(BlockConstants.BlockDisplayX, BlockConstants.BlockDisplayY);
-                block.Draw(_spriteBatch);
-                DrawUtils.DrawRectangleOutline( _spriteBatch, _pixelTexture, block.Bounds, Color.Lime);
-            }*/
-
-            if (_debugOverlay.ShowDebug)
+                DrawUtils.DrawRectangleOutline(spriteBatch, _pixelTexture, _player.Bounds, Color.Red);
                 _debugOverlay.Draw(spriteBatch, _player, _pixelTexture, Game.Window);
+            }
             else
-
-                // to get resolution
-                Game.Window.Title = $"Celeste - {Game.Window.ClientBounds.Width}x{Game.Window.ClientBounds.Height}";
+            {
+                Game.Window.Title =
+                    $"Celeste - {Game.Window.ClientBounds.Width}x{Game.Window.ClientBounds.Height} | Room: {_currentRoom} | BGM: {Game1.GetBgmStatusText()}";
+            }
 
             spriteBatch.End();
         }
 
-        // Helper Methods
+        public void Reset()
+        {
+            RebuildCurrentRoom(resetPlayer: true);
+        }
 
         public void JumpToRoom(int roomNumber)
         {
-            _currentRoom = roomNumber;
-            RebuildCurrentRoom(resetPlayer: false);
+            if (roomNumber < 0 || roomNumber > 5)
+            {
+                return;
+            }
+
+            if (roomNumber != _currentRoom)
+            {
+                _currentRoom = roomNumber;
+                RebuildCurrentRoom(resetPlayer: false);
+            }
         }
+
+        public void CycleGameScene(int direction)
+        {
+            const int firstRoom = 1;
+            const int lastRoom = 5;
+
+            int nextRoom = _currentRoom;
+            if (nextRoom < firstRoom || nextRoom > lastRoom)
+            {
+                nextRoom = 3;
+            }
+
+            nextRoom += direction;
+            if (nextRoom < firstRoom)
+            {
+                nextRoom = lastRoom;
+            }
+            else if (nextRoom > lastRoom)
+            {
+                nextRoom = firstRoom;
+            }
+
+            if (nextRoom != _currentRoom)
+            {
+                _currentRoom = nextRoom;
+                RebuildCurrentRoom(resetPlayer: false);
+            }
+        }
+
         private void RebuildCurrentRoom(bool resetPlayer)
         {
             BuildMap();
             RebuildCollisionSystems();
             RebuildCollectibles();
-            if (resetPlayer) _player.Reset();
+
+            if (resetPlayer)
+            {
+                _player.Reset();
+            }
         }
 
         private void BuildMap()
         {
-            if (_worldMap == null) return;
+            if (_worldMap == null)
+            {
+                return;
+            }
+
             _worldMap.ClearBlocks();
 
             switch (_currentRoom)
             {
-                case 1: _roomOne.PlaceRoomOneBlocks(); break;
-                case 2: _roomTwo.PlaceRoomTwoBlocks(); break;
-                case 3: _roomThree.PlaceRoomThreeBlocks(); break;
-                case 4: _roomFour.PlaceRoomFourBlocks(); break;
-                case 5: _roomFive.PlaceRoomFiveBlocks(); break;
-                default: _roomThree.PlaceRoomThreeBlocks(); break;
+                case 1:
+                    _roomOne.PlaceRoomOneBlocks();
+                    break;
+                case 2:
+                    _roomTwo.PlaceRoomTwoBlocks();
+                    break;
+                case 3:
+                    _roomThree.PlaceRoomThreeBlocks();
+                    break;
+                case 4:
+                    _roomFour.PlaceRoomFourBlocks();
+                    break;
+                case 5:
+                    _roomFive.PlaceRoomFiveBlocks();
+                    break;
+                case 0:
+                default:
+                    _roomThree.PlaceRoomThreeBlocks();
+                    break;
             }
 
             Vector2 checkpointSpawn = GetRespawnPointForRoom(_currentRoom);
@@ -225,7 +252,7 @@ namespace Celeste.Scenes
         private void RebuildCollisionSystems()
         {
             _collisionSystem = new CollisionSystem(_worldMap._blocks, _player);
-            HazardCollisioncs = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
+            _hazardCollisionSystem = new HazardCollisioncs(_worldMap._hazards.Cast<ICollideable>().ToList(), _player);
             _player.SetWorldBlocks(_worldMap._blocks);
         }
 
@@ -262,6 +289,7 @@ namespace Celeste.Scenes
             foreach (var collectible in _collectibles)
             {
                 collectible.Update(gameTime);
+
                 if (collectible.TryCollect(_player.Bounds))
                 {
                     _player.canDash = true;
@@ -272,7 +300,10 @@ namespace Celeste.Scenes
 
         private void DrawCollectibles(SpriteBatch spriteBatch)
         {
-            foreach (var collectible in _collectibles) collectible.Draw(spriteBatch);
+            foreach (var collectible in _collectibles)
+            {
+                collectible.Draw(spriteBatch);
+            }
         }
 
         private Vector2 GetRespawnPointForRoom(int room)
@@ -288,47 +319,80 @@ namespace Celeste.Scenes
             };
         }
 
-        private void HandleRoomHotkeys(KeyboardState kb)
+        private Texture2D LoadDeathDotTexture()
         {
-            int requestedRoom = _currentRoom;
-            if (kb.IsKeyDown(Keys.D1) && _prevKb.IsKeyUp(Keys.D1)) requestedRoom = 1;
-            else if (kb.IsKeyDown(Keys.D2) && _prevKb.IsKeyUp(Keys.D2)) requestedRoom = 2;
-            else if (kb.IsKeyDown(Keys.D3) && _prevKb.IsKeyUp(Keys.D3)) requestedRoom = 3;
+            string dotPath = Path.Combine(Game.Content.RootDirectory, "DeathParticleDot.png");
 
-            if (requestedRoom != _currentRoom)
+            try
             {
-                _currentRoom = requestedRoom;
-                RebuildCurrentRoom(resetPlayer: false);
+                using Stream stream = TitleContainer.OpenStream(dotPath);
+                Texture2D loaded = Texture2D.FromStream(Game.GraphicsDevice, stream);
+                Texture2D trimmed = TrimTransparentBounds(loaded);
+
+                if (!ReferenceEquals(trimmed, loaded))
+                {
+                    loaded.Dispose();
+                }
+
+                return trimmed;
+            }
+            catch
+            {
+                return ProceduralParticleTexture.CreateHardDot(Game.GraphicsDevice, size: 3);
             }
         }
 
-        private Texture2D LoadDeathDotTexture()
+        private Texture2D TrimTransparentBounds(Texture2D texture)
         {
-            // Procedural fallback if file missing
-            return ProceduralParticleTexture.CreateHardDot(Game.GraphicsDevice, size: 3);
+            Color[] pixels = new Color[texture.Width * texture.Height];
+            texture.GetData(pixels);
+
+            int minX = texture.Width;
+            int minY = texture.Height;
+            int maxX = -1;
+            int maxY = -1;
+
+            for (int y = 0; y < texture.Height; y++)
+            {
+                for (int x = 0; x < texture.Width; x++)
+                {
+                    Color pixel = pixels[(y * texture.Width) + x];
+                    if (pixel.A == 0)
+                    {
+                        continue;
+                    }
+
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+
+            if (maxX < minX || maxY < minY)
+            {
+                return texture;
+            }
+
+            int width = maxX - minX + 1;
+            int height = maxY - minY + 1;
+            if (width == texture.Width && height == texture.Height)
+            {
+                return texture;
+            }
+
+            Color[] trimmedPixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    trimmedPixels[(y * width) + x] = pixels[((minY + y) * texture.Width) + (minX + x)];
+                }
+            }
+
+            Texture2D trimmed = new Texture2D(Game.GraphicsDevice, width, height);
+            trimmed.SetData(trimmedPixels);
+            return trimmed;
         }
-         // This fixes the Reset() error
-public void Reset() => RebuildCurrentRoom(resetPlayer: true);
-
-// This fixes the CycleGameScene error
-public void CycleGameScene(int direction)
-{
-    const int firstRoom = 1;
-    const int lastRoom = 5;
-
-    int nextRoom = _currentRoom;
-    if (nextRoom < firstRoom || nextRoom > lastRoom) nextRoom = 3;
-
-    nextRoom += direction;
-    if (nextRoom < firstRoom) nextRoom = lastRoom;
-    else if (nextRoom > lastRoom) nextRoom = firstRoom;
-
-    if (nextRoom != _currentRoom)
-    {
-        _currentRoom = nextRoom;
-        RebuildCurrentRoom(resetPlayer: false);
-    }
-}
-         
     }
 }
