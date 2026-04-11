@@ -187,6 +187,13 @@
 /processorParam:Quality=Best
 /build:Lena Raine - Celeste Original Soundtrack - 03 Resurrections.mp3
 
+#begin MenuFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:MenuFont.spritefont
+
 #begin NewContent.png
 /importer:TextureImporter
 /processor:TextureProcessor

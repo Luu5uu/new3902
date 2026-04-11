@@ -33,8 +33,19 @@
 
 | Key(s) | Action |
 |--------|--------|
-| `Q` / `Escape` | Quit |
+| `Q` | Quit |
+| `Escape` | Open pause menu during gameplay / go back in menus |
 | `R` | Reset the current room |
+| `F5` / `F6` | Previous / next BGM track |
+| `F7` / `F8` | Pause / resume BGM |
+
+### Menu Controls
+
+| Key(s) | Action |
+|--------|--------|
+| `Up` / `Down` | Move menu selection |
+| `Enter` | Confirm current menu option |
+| `Escape` | Back out of pause menu / exit from main menu |
 
 ### Debug Mode Controls
 
