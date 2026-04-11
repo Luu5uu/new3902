@@ -29,6 +29,15 @@
 | Right mouse | Next playable room |
 | `0`-`5` | Jump directly to a room for testing |
 
+### BGM Controls
+
+| Key(s) | Action |
+|--------|--------|
+| `F5` | Play Last Music |
+| `F6` | Play Next Music |
+| `F7` | Pause The Music |
+| `F8` | Keep Play the Music |
+
 ### Other Controls
 
 | Key(s) | Action |
