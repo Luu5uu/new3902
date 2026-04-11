@@ -45,6 +45,7 @@
 | `Q` | Quit |
 | `Escape` | Open pause menu during gameplay / go back in menus |
 | `R` | Reset the current room |
+| `T` | Toggle HUD elements |
 
 ### Menu Controls
 
