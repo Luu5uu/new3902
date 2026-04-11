@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace Celeste.Blocks.Rooms
 {
-public class RoomLoader
+    public class RoomLoader
     {
         private MapBuilder _mapBuilder;
         private BlockFactory _blockFactory;
@@ -18,6 +18,10 @@ public class RoomLoader
 
         public void LoadRoom(string filePath)
         {
+
+            // TODO: RETURN A LIST OF BLOCKS FOR COLLISION
+            // List<IBlocks> blocks = new List<IBlocks>(); 
+
             // reset room
             _mapBuilder.ClearBlocks();
 
