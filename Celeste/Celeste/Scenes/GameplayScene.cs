@@ -201,6 +201,10 @@ namespace Celeste.Scenes
         public void Reset()
         {
             RebuildCurrentRoom(resetPlayer: true);
+
+            _gameTimer = 0f;
+            _timerRunning = true;
+            CollectibleItem.ResetStrawberryCount();
         }
 
         public void JumpToRoom(int roomNumber)
