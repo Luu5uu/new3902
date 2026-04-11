@@ -1,22 +1,21 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Celeste.Animation;
+using Celeste.AudioSystem;
+using Celeste.Blocks;
+using Celeste.Blocks.Rooms;
+using Celeste.Character;
+using Celeste.CollectText;
+using Celeste.Collision;
+using Celeste.DeathAnimation.Particles;
+using Celeste.DevTools;
+using Celeste.Input;
+using Celeste.Items;
+using Celeste.Utils;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-using Celeste.Animation;
-using Celeste.Character;
-using Celeste.Items;
-using Celeste.Blocks;
-using Celeste.Blocks.Rooms;
-using Celeste.DevTools;
-using Celeste.Input;
-using Celeste.AudioSystem;
-
-using Celeste.DeathAnimation.Particles;
-using System.Collections.Generic;
-using Celeste.Utils;
-using Celeste.Collision;
-using System.Linq;
 
 namespace Celeste
 {
@@ -80,6 +79,7 @@ namespace Celeste
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            CollectTextPrompt.Initialize(Content);
             _catalog = AnimationLoader.LoadAll(Content);
             SoundManager.Load(Content);
 

@@ -1,4 +1,5 @@
 using System;
+using Celeste.CollectText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,6 +8,7 @@ namespace Celeste.Items
     public sealed class CollectibleItem : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable
     {
         private readonly ItemAnimation _animation;
+        private readonly CollectTextPrompt _prompt = new CollectTextPrompt();
 
         public CollectibleItem(ItemAnimation animation)
         {
@@ -26,6 +28,7 @@ namespace Celeste.Items
         }
 
         public bool Collected { get; private set; }
+        public bool CollectAnimFinished { get; private set; }
 
         public Rectangle Bounds
         {
@@ -45,7 +48,9 @@ namespace Celeste.Items
         public void Reset()
         {
             Collected = false;
+            CollectAnimFinished = false;
             _animation.Reset();
+            _prompt.Reset();
         }
 
         public bool TryCollect(Rectangle playerBounds)
@@ -56,6 +61,18 @@ namespace Celeste.Items
             }
 
             Collected = true;
+            CollectAnimFinished = false;
+
+            
+
+            _prompt.Position = new Vector2(
+                Position.X ,
+                Position.Y 
+            );
+
+            _prompt.Scale = Scale;
+            _prompt.Reset();
+
             return true;
         }
 
@@ -65,6 +82,15 @@ namespace Celeste.Items
             {
                 _animation.Update(gameTime);
             }
+            else if (!CollectAnimFinished)
+            {
+                _prompt.Update(gameTime);
+
+                if (_prompt.Finished)
+                {
+                    CollectAnimFinished = true;
+                }
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -73,6 +99,11 @@ namespace Celeste.Items
             {
                 _animation.Draw(spriteBatch);
             }
+            else if (!CollectAnimFinished)
+            {
+                _prompt.Draw(spriteBatch);
+            }
         }
     }
 }
+   
