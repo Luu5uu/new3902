@@ -176,6 +176,7 @@ namespace Celeste.Scenes
             spriteBatch.End();
         }
 
+
         private string FormatTime(float time)
         {
             int minutes = (int)(time / 60);
