@@ -1,22 +1,25 @@
+using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-
 using Celeste.Animation;
+using Celeste.AudioSystem;
+using Celeste.Blocks;
+using Celeste.DeathAnimation;
+using Celeste.DeathAnimation.Particles;
 using Celeste.Input;
 using Celeste.MadelineStates;
 using Celeste.Sprites;
 using Celeste.Blocks;
-
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Celeste.DeathAnimation;
 using Celeste.DeathAnimation.Particles;
 using Celeste.DeathAnimation.Particles.Emitters;
-
-using System;
+using Microsoft.Xna.Framework.Content;
 using static Celeste.PlayerConstants;
 using static Celeste.GlobalConstants;
 using static Celeste.DeathConstants;
+using static Celeste.GlobalConstants;
+using static Celeste.PlayerConstants;
 
 namespace Celeste.Character
 {
@@ -120,6 +123,12 @@ namespace Celeste.Character
 
         public void AddGhost(Vector2 pos, bool faceLeft) =>
             _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
+
+        // Sound Effect
+        public IBlocks CurrentGroundBlock { get; set; }
+
+        private float footstepTimer = 0f;
+        private const float FootstepInterval = 0.12f;
 
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
@@ -306,6 +315,7 @@ namespace Celeste.Character
 
         public void Jump()
         {
+            
             jumpPressed = true;
             _jumpBufferTimer = PlayerJumpBufferTime;
         }
@@ -317,6 +327,7 @@ namespace Celeste.Character
 
         public void Dash()
         {
+            
             dashPressed = true;
             _dashBufferTimer = PlayerDashBufferTime;
         }  
@@ -549,8 +560,11 @@ namespace Celeste.Character
 
         internal void StartDeathEffect(bool wasDashing, Vector2 direction)
         {
+            SoundManager.Play("death");
             if (_deathSideClip == null || _deathUpClip == null || _deathDownClip == null || _deathDotTex == null)
                 return;
+
+        
 
             AnimationClip clip = ResolveDeathClip(direction);
 
@@ -768,6 +782,7 @@ namespace Celeste.Character
         {
             _variableJumpTimer = PlayerVariableJumpTime;
             _variableJumpSpeed = velocityY;
+            SoundManager.Play("jump");
         }
 
         public void QueueDashRecovery(Vector2 dashDirection)
@@ -871,6 +886,31 @@ namespace Celeste.Character
 
             aim.Normalize();
             return aim;
+        }
+
+        public void UpdateFootstep(float dt)
+        {
+            bool shouldPlay =
+                onGround &&
+                CurrentGroundBlock != null &&
+                Math.Abs(velocityX) > 5f &&
+                !isDashing &&
+                !isClimbing &&
+                !isDangle;
+
+            if (!shouldPlay)
+            {
+                
+                return;
+            }
+
+            footstepTimer += dt;
+
+            if (footstepTimer >= FootstepInterval)
+            {
+                footstepTimer = 0f;
+                SoundManager.PlayFootstep(CurrentGroundBlock.Type);
+            }
         }
     }
 }

@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Celeste.Animation;
+using Celeste.AudioSystem;
 using Celeste.Blocks;
 using Celeste.Blocks.Rooms;
 using Celeste.Character;
+using Celeste.CollectText;
 using Celeste.Collision;
 using Celeste.DeathAnimation.Particles;
 using Celeste.DevTools;
@@ -47,6 +49,8 @@ namespace Celeste.Scenes
         public override void LoadContent()
         {
             _catalog = AnimationLoader.LoadAll(Game.Content);
+            CollectTextPrompt.Initialize(Game.Content);
+            SoundManager.Load(Game.Content);
 
             var startPos = new Vector2(
                 Game.Window.ClientBounds.Width / 2f,
@@ -119,6 +123,7 @@ namespace Celeste.Scenes
             {
                 _hazardCollisionSystem.ResolveHazardCollision();
                 _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching);
+                _player.UpdateFootstep((float)gameTime.ElapsedGameTime.TotalSeconds);
                 UpdateCollectibles(gameTime);
                 _player.UpdateSprite(gameTime);
             }
@@ -292,6 +297,7 @@ namespace Celeste.Scenes
 
                 if (collectible.TryCollect(_player.Bounds))
                 {
+                    SoundManager.Play("collect");
                     _player.canDash = true;
                     _player.Maddy.OnDashRefill();
                 }

@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SoundConfig>
+	<Effects>
+		<Effect>
+			<Key>collect</Key>
+			<Asset>Audio/collect_sound</Asset>
+		</Effect>
+		<Effect>
+			<Key>jump</Key>
+			<Asset>Audio/jump</Asset>
+		</Effect>
+		<Effect>
+			<Key>dash_left</Key>
+			<Asset>Audio/dash_left</Asset>
+		</Effect>
+		<Effect>
+			<Key>dash_right</Key>
+			<Asset>Audio/dash_right</Asset>
+		</Effect>
+		<Effect>
+			<Key>death</Key>
+			<Asset>Audio/death</Asset>
+		</Effect>
+	</Effects>
+
+	<Footsteps>
+		<Footstep>
+			<BlockType>grass</BlockType>
+			<FolderPath>Audio/footstep/grass</FolderPath>
+			<FilePrefix>grass</FilePrefix>
+			<Start>1</Start>
+			<End>7</End>
+		</Footstep>
+		<Footstep>
+			<BlockType>snow</BlockType>
+			<FolderPath>Audio/footstep/snow</FolderPath>
+			<FilePrefix>snow</FilePrefix>
+			<Start>1</Start>
+			<End>7</End>
+		</Footstep>
+		<Footstep>
+			<BlockType>dirt</BlockType>
+			<FolderPath>Audio/footstep/dirt</FolderPath>
+			<FilePrefix>dirt</FilePrefix>
+			<Start>1</Start>
+			<End>5</End>
+		</Footstep>
+		<Footstep>
+			<BlockType>girder</BlockType>
+			<FolderPath>Audio/footstep/girder</FolderPath>
+			<FilePrefix>girder</FilePrefix>
+			<Start>1</Start>
+			<End>7</End>
+		</Footstep>
+	</Footsteps>
+</SoundConfig>
