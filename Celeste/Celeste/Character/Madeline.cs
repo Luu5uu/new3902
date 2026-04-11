@@ -467,7 +467,15 @@ namespace Celeste.Character
             position.X += velocityX * dt;
             position.Y += velocityY * dt;
 
-          
+            if (IsTired)
+            {
+                _tiredFlashPhase += TiredFlashSpeed * dt;
+            }
+            else
+            {
+                _tiredFlashPhase = 0f;
+            }
+
             ClearTransientInput();
         }
 

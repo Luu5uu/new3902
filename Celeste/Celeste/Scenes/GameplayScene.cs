@@ -13,6 +13,7 @@ using Celeste.DevTools;
 using Celeste.Input;
 using Celeste.Items;
 using Celeste.Utils;
+using Celeste.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -46,7 +47,8 @@ namespace Celeste.Scenes
         private CollisionSystem _collisionSystem;
         private HazardCollisioncs _hazardCollisionSystem;
         private Rectangle _worldBound;
-
+        //stamina bar
+        private ClimbStaminaBar _climbStaminaBar;
         public GameplayScene(Game1 game) : base(game)
         {
             _previousKeyboardState = Keyboard.GetState();
@@ -82,6 +84,7 @@ namespace Celeste.Scenes
 
             _pixelTexture = new Texture2D(Game.GraphicsDevice, 1, 1);
             _pixelTexture.SetData(new[] { Color.White });
+            _climbStaminaBar = new ClimbStaminaBar(_pixelTexture, 5, 36);
 
             var factory = BlockFactory.GetInstance;
             factory.LoadTextures(Game.Content);
@@ -164,6 +167,32 @@ namespace Celeste.Scenes
             _worldMap.Draw(spriteBatch);
             DrawCollectibles(spriteBatch);
             _player.Draw(spriteBatch);
+
+            if (_player.isClimbing || _player.IsTouchingWall)
+            {
+                Vector2 barPos;
+
+                if (_player.touchingLeftWall)
+                {
+                    barPos = new Vector2(_player.position.X + 14f, _player.position.Y - 24f);
+                }
+                else if (_player.touchingRightWall)
+                {
+                    barPos = new Vector2(_player.position.X - 18f, _player.position.Y - 24f);
+                }
+                else
+                {
+                    barPos = new Vector2(_player.position.X - 18f, _player.position.Y - 24f);
+                }
+
+                _climbStaminaBar.Draw(
+                    spriteBatch,
+                    barPos,
+                    _player.ClimbStaminaPercent,
+                    _player.ClimbTiredPercent,
+                    _player.IsTired
+                );
+            }
 
             if (_debugOverlay.ShowDebug)
             {
