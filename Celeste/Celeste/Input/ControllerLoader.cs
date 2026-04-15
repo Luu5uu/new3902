@@ -178,6 +178,8 @@ namespace Celeste.Input
 
             if (mouse != null)
             {
+                // commenting  this out for debugging
+
                 mouse.RegisterCommand(MouseButton.Left, new CycleGameSceneCommand(game, -1));
                 mouse.RegisterCommand(MouseButton.Right, new CycleGameSceneCommand(game, 1));
             }

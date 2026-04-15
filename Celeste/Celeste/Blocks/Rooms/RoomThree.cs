@@ -23,29 +23,62 @@ namespace Celeste.Blocks.Rooms
             // the format: (SOURCE, IN-GAME X COORD, IN-GAME Y COORD, FRAME FROM TILESHEET)
 
             // ROW 0
-            for (int y = 0; y <= 1; y++)
-            {
-                for (int x = 27; x <= 31; x++)
-                {
-                    _mapBuilder.PlaceBlock("snow", x, y, 1);
-                }
-            }
+            _mapBuilder.PlaceBlock("snow", 27, 0, 41);
+            _mapBuilder.PlaceBlock("snow", 28, 0, 53);
+            _mapBuilder.PlaceBlock("snow", 29, 0, 47);
+            _mapBuilder.PlaceBlock("snow", 30, 0, 35);
+            _mapBuilder.PlaceBlock("snow", 31, 0, 11);
 
-            // left wall
-            for (int x = 38; x <= 39; x++)
-            {
-                for (int y = 0; y <= 11; y++)
-                {
-                    _mapBuilder.PlaceBlock("snow", x, y, 1);
-                }
-            }
-            for (int y = 12; y <= 18; y++)
-            {
-                _mapBuilder.PlaceBlock("snow", 39, y, 1);
-            }
+            _mapBuilder.PlaceBlock("snow", 38, 0, 17);
+            _mapBuilder.PlaceBlock("snow", 39, 0, 77);
+
+            // ROW 1
+            _mapBuilder.PlaceBlock("snow", 27, 1, 7);
+            _mapBuilder.PlaceBlock("snow", 28, 1, 9);
+            _mapBuilder.PlaceBlock("snow", 29, 1, 7);
+            _mapBuilder.PlaceBlock("snow", 30, 1, 8);
+            _mapBuilder.PlaceBlock("snow", 31, 1, 16);
+
+            _mapBuilder.PlaceBlock("snow", 38, 1, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 1, 1);
+
 
             // ROW 3
-            _mapBuilder.PlaceBlock("snow", 31, 2, 1);
+            _mapBuilder.PlaceBlock("snow", 31, 2, 78);
+
+            // VERTICAL SNOW ALONG RIGHT WALL (starting  y =  2, x = 38)
+
+            _mapBuilder.PlaceBlock("snow", 38, 2, 17);
+            _mapBuilder.PlaceBlock("snow", 38, 3, 29);
+            _mapBuilder.PlaceBlock("snow", 38, 4, 35);
+            _mapBuilder.PlaceBlock("snow", 38, 5, 53);
+            _mapBuilder.PlaceBlock("snow", 38, 6, 16);
+            _mapBuilder.PlaceBlock("snow", 38, 7, 12);
+            _mapBuilder.PlaceBlock("snow", 38, 8, 13);
+            _mapBuilder.PlaceBlock("snow", 38, 9, 1);
+            _mapBuilder.PlaceBlock("snow", 38, 10, 12);
+            _mapBuilder.PlaceBlock("snow", 38, 11, 1);
+            _mapBuilder.PlaceBlock("snow", 38, 912, 1);
+
+            // x = 39 wall
+            _mapBuilder.PlaceBlock("snow", 39, 2, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 3, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 4, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 5, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 6, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 7, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 8, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 9, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 10, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 11, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 12, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 13, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 14, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 15, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 16, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 17, 1);
+            _mapBuilder.PlaceBlock("snow", 39, 18, 1);
+
 
             //ROW 8 BLOCKS
             for (int y = 9; y <= 11; y++)
