@@ -22,7 +22,15 @@
 			<Asset>Audio/death</Asset>
 		</Effect>
 	</Effects>
-
+	<Sequences>
+		<Sequence>
+			<Key>climb</Key>
+			<FolderPath>Audio/climb</FolderPath>
+			<FilePrefix>climb</FilePrefix>
+			<Start>1</Start>
+			<End>5</End>
+		</Sequence>
+	</Sequences>
 	<Footsteps>
 		<Footstep>
 			<BlockType>grass</BlockType>

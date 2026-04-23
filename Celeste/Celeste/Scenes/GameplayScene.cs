@@ -46,6 +46,8 @@ namespace Celeste.Scenes
         private CollisionSystem _collisionSystem;
         private HazardCollisioncs _hazardCollisionSystem;
         private Rectangle _worldBound;
+
+        private bool _isRewinding;
         public GameplayScene(Game1 game) : base(game)
         {
             _previousKeyboardState = Keyboard.GetState();
@@ -108,6 +110,7 @@ namespace Celeste.Scenes
         public override void Update(GameTime gameTime)
         {
             KeyboardState keyboard = Keyboard.GetState();
+            
             _debugOverlay.HandleInput(keyboard, _player);
             _controllerLoader.Update();
 
@@ -127,6 +130,17 @@ namespace Celeste.Scenes
                 return;
             }
 
+            bool rewindDown = keyboard.IsKeyDown(Keys.V);
+
+            if (rewindDown && !_player.IsInDeathSequence)
+            {
+                _player.StepRewind();
+                _player.UpdateSprite(gameTime);
+                _previousKeyboardState = keyboard;
+                return;
+            }
+
+
             _player.Update(gameTime);
             _worldMap.Update(gameTime);
 
@@ -138,9 +152,12 @@ namespace Celeste.Scenes
             {
                 _hazardCollisionSystem.ResolveHazardCollision();
                 _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching);
+                _player.UpdateClimbSound((float)gameTime.ElapsedGameTime.TotalSeconds);
                 _player.UpdateFootstep((float)gameTime.ElapsedGameTime.TotalSeconds);
                 UpdateCollectibles(gameTime);
                 _player.UpdateSprite(gameTime);
+
+                _player.SaveRewindSnapshot();
             }
 
             if (_timerRunning)
@@ -152,6 +169,8 @@ namespace Celeste.Scenes
             {
                 _player.Reset();
             }
+
+            
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -259,6 +278,7 @@ namespace Celeste.Scenes
             {
                 _player.Reset();
             }
+            _player.SeedInitialRewindSnapshot();
         }
 
         private void BuildMap()
