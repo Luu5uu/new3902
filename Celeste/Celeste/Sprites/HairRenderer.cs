@@ -38,6 +38,57 @@ namespace Celeste.Sprites
             _nodes = new Vector2[nodeCount];
         }
 
+        public struct HairSnapshot
+        {
+            public Vector2[] Nodes;
+            public bool FaceLeft;
+            public int BangsFrame;
+        }
+
+        public HairSnapshot CaptureSnapshot()
+        {
+            Vector2[] copy = new Vector2[_nodes.Length];
+            for (int i = 0; i < _nodes.Length; i++)
+            {
+                copy[i] = _nodes[i];
+            }
+
+            return new HairSnapshot
+            {
+                Nodes = copy,
+                FaceLeft = _faceLeft,
+                BangsFrame = BangsFrame
+            };
+        }
+
+        public void DrawSnapshot(SpriteBatch spriteBatch, HairSnapshot snapshot, Color color, float scale = 1f)
+        {
+            if (snapshot.Nodes == null || snapshot.Nodes.Length == 0)
+            {
+                return;
+            }
+
+            Vector2 circleOrigin = new(_circleW / 2f, _circleH / 2f);
+
+            int bangFrame = snapshot.FaceLeft ? 2 : Math.Clamp(snapshot.BangsFrame, 0, _bangsFrameCount - 1);
+            Rectangle bangSrc = new(bangFrame * _bangsFrameW, 0, _bangsFrameW, _bangsFrameH);
+            Vector2 bangsOrigin = new(_bangsFrameW / 2f, _bangsFrameH / 2f);
+
+            float od = scale;
+            Vector2[] offsets = { new(od, 0), new(-od, 0), new(0, od), new(0, -od) };
+
+
+            for (int i = snapshot.Nodes.Length - 1; i >= 1; i--)
+            {
+                float taper = 0.25f + (1f - (float)i / snapshot.Nodes.Length) * 0.75f;
+                spriteBatch.Draw(_circleTexture, snapshot.Nodes[i], null, color,
+                    0f, circleOrigin, new Vector2(taper * scale), SpriteEffects.None, 0f);
+            }
+
+            spriteBatch.Draw(_bangsTexture, snapshot.Nodes[0], bangSrc, color,
+                0f, bangsOrigin, scale, SpriteEffects.None, 0f);
+        }
+
         public void LoadContent(ContentManager content)
         {
             _bangsTexture = content.Load<Texture2D>("bangs");

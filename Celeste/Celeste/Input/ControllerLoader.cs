@@ -13,7 +13,7 @@ namespace Celeste.Input
         private readonly Character.Madeline _player;
         private KeyboardState _previousKeyboardState;
         private GamePadState _previousGamepadState;
-
+        public bool RewindPressedThisFrame { get; private set; }
         public ControllerLoader(Game1 game, Character.Madeline player)
         {
             _player = player;
@@ -71,6 +71,9 @@ namespace Celeste.Input
             bool dashPressed = IsKeyboardPressed(keyboardState, Keys.X) || IsGamepadPressed(gamepadState, Buttons.B);
             bool grabHeld = keyboardState.IsKeyDown(Keys.Z) || gamepadState.IsButtonDown(Buttons.RightShoulder);
             bool deathPressed = IsKeyboardPressed(keyboardState, Keys.E);
+            bool rewindPressed = IsKeyboardPressed(keyboardState, Keys.V) || IsGamepadPressed(gamepadState, Buttons.Y);
+            
+            RewindPressedThisFrame = rewindPressed;
 
             _player.Move(MathHelper.Clamp(horizontal, -1f, 1f));
             _player.AimVertical(MathHelper.Clamp(vertical, -1f, 1f));

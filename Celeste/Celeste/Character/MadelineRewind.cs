@@ -1,7 +1,12 @@
-﻿using System.Collections.Generic;
-using Celeste.MadelineStates;
+﻿using Celeste.MadelineStates;
 using Celeste.Rewind;
+using Celeste.Sprites;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using static Celeste.GlobalConstants;
+using static Celeste.PlayerConstants;
 
 namespace Celeste.Character
 {
@@ -12,6 +17,11 @@ namespace Celeste.Character
 
         public bool CanRewind => _rewindBuffer.Count > 1;
         public bool IsInDeathSequence => _deathEffect != null || _state == deathState;
+        public bool HasRewindTrail => _rewindBuffer.Count > 1;
+        private Rectangle _startGhostSourceRect;
+        private Vector2 _startGhostOrigin;
+        private HairRenderer.HairSnapshot _startHairSnapshot;
+        private bool _hasStartHairSnapshot;
         private RewindStateKind GetCurrentRewindStateKind()
         {
             if (_state == standState) return RewindStateKind.Stand;
@@ -199,6 +209,77 @@ namespace Celeste.Character
         {
             _rewindBuffer.Clear();
             SaveRewindSnapshot();
+
+            var (src, origin) = Maddy.BodyCurrentFrame;
+            _startGhostSourceRect = src;
+            _startGhostOrigin = origin;
+
+            if (Maddy.Hair is HairRenderer hairRenderer)
+            {
+                _startHairSnapshot = hairRenderer.CaptureSnapshot();
+                _hasStartHairSnapshot = true;
+            }
+            else
+            {
+                _hasStartHairSnapshot = false;
+            }
+        }
+
+        public void DrawRewindTrail(SpriteBatch spriteBatch, Texture2D pixel)
+        {
+            Vector2 bodyOffset = new Vector2(0f, -PlayerNormalHitboxHeight * 0.5f);
+            PlayerSnapshot start = _rewindBuffer[0];
+            float startScaleX = start.FaceLeft ? -DefaultScale : DefaultScale;
+            Color startColor = new Color(173, 216, 230) * 0.55f;
+
+            if (_ghostBodyTex != null)
+            {
+                spriteBatch.Draw(
+                    _ghostBodyTex,
+                    start.Position,
+                    _startGhostSourceRect,
+                    startColor,
+                    0f,
+                    _startGhostOrigin,
+                    new Vector2(startScaleX, DefaultScale),
+                    SpriteEffects.None,
+                    0f);
+            }
+
+            if (_hasStartHairSnapshot && Maddy.Hair is HairRenderer hairRenderer)
+            {
+                hairRenderer.DrawSnapshot(spriteBatch, _startHairSnapshot, startColor, DefaultScale);
+            }
+
+            if (pixel == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _rewindBuffer.Count - 1; i++)
+            {
+                Vector2 p1 = _rewindBuffer[i].Position + bodyOffset;
+                Vector2 p2 = _rewindBuffer[i + 1].Position + bodyOffset;
+
+                DrawLine(spriteBatch, pixel, p1, p2, new Color(120, 200, 255) * 0.75f, 2f);
+            }
+        }
+        private void DrawLine(SpriteBatch spriteBatch, Texture2D pixel, Vector2 start, Vector2 end, Color color, float thickness)
+        {
+            Vector2 edge = end - start;
+            float angle = (float)System.Math.Atan2(edge.Y, edge.X);
+            float length = edge.Length();
+
+            spriteBatch.Draw(
+                pixel,
+                start,
+                null,
+                color,
+                angle,
+                Vector2.Zero,
+                new Vector2(length, thickness),
+                SpriteEffects.None,
+                0f);
         }
     }
 }

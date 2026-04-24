@@ -47,7 +47,13 @@ namespace Celeste.Scenes
         private HazardCollisioncs _hazardCollisionSystem;
         private Rectangle _worldBound;
 
+        private bool _isRecordingRewind;
         private bool _isRewinding;
+        private float _rewindRecordTimer;
+
+        private const float RewindRecordDuration = 3.0f;
+
+
         public GameplayScene(Game1 game) : base(game)
         {
             _previousKeyboardState = Keyboard.GetState();
@@ -121,7 +127,36 @@ namespace Celeste.Scenes
             {
                 _showUI = !_showUI;
             }
-            _previousKeyboardState = keyboard;
+
+
+            bool rewindPressed = _controllerLoader.RewindPressedThisFrame;
+
+            if (rewindPressed && !_player.IsInDeathSequence)
+            {
+                if (!_isRecordingRewind && !_isRewinding)
+                {
+                    _isRecordingRewind = true;
+                    _rewindRecordTimer = RewindRecordDuration;
+
+                    _player.ClearRewindHistory();
+                    _player.SeedInitialRewindSnapshot();
+                }
+                else if (_isRecordingRewind)
+                {
+                    if (_player.CanRewind)
+                    {
+                        _isRecordingRewind = false;
+                        _isRewinding = true;
+                    }
+                    else
+                    {
+                        _isRecordingRewind = false;
+                        _player.ClearRewindHistory();
+                        _player.SeedInitialRewindSnapshot();
+                    }
+                }
+            }
+
 
             if (_debugOverlay.ShowDebug && _player.Maddy.DebugPaused)
             {
@@ -130,15 +165,23 @@ namespace Celeste.Scenes
                 return;
             }
 
-            bool rewindDown = keyboard.IsKeyDown(Keys.V);
 
-            if (rewindDown && !_player.IsInDeathSequence)
+            if (_isRewinding && !_player.IsInDeathSequence)
             {
-                _player.StepRewind();
+                bool rewound = _player.StepRewind();
                 _player.UpdateSprite(gameTime);
+
+                if (!rewound)
+                {
+                    _isRewinding = false;
+                    _player.ClearRewindHistory();
+                    _player.SeedInitialRewindSnapshot();
+                }
+
                 _previousKeyboardState = keyboard;
                 return;
             }
+
 
 
             _player.Update(gameTime);
@@ -157,7 +200,25 @@ namespace Celeste.Scenes
                 UpdateCollectibles(gameTime);
                 _player.UpdateSprite(gameTime);
 
-                _player.SaveRewindSnapshot();
+                if (_isRecordingRewind)
+                {
+                    _player.SaveRewindSnapshot();
+                }
+
+            }
+
+            if (_isRecordingRewind)
+            {
+                _rewindRecordTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (_rewindRecordTimer <= 0f)
+                {
+                    _isRecordingRewind = false;
+                    _rewindRecordTimer = 0f;
+
+                    _player.ClearRewindHistory();
+                    _player.SeedInitialRewindSnapshot();
+                }
             }
 
             if (_timerRunning)
@@ -170,7 +231,7 @@ namespace Celeste.Scenes
                 _player.Reset();
             }
 
-            
+            _previousKeyboardState = keyboard;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -181,6 +242,10 @@ namespace Celeste.Scenes
 
             _worldMap.Draw(spriteBatch);
             DrawCollectibles(spriteBatch);
+            if (_isRecordingRewind || _isRewinding)
+            {
+                _player.DrawRewindTrail(spriteBatch, _pixelTexture);
+            }
             _player.Draw(spriteBatch);
 
 
@@ -220,6 +285,10 @@ namespace Celeste.Scenes
         public void Reset()
         {
             RebuildCurrentRoom(resetPlayer: true);
+
+            _isRecordingRewind = false;
+            _isRewinding = false;
+            _rewindRecordTimer = 0f;
 
             _gameTimer = 0f;
             _timerRunning = true;
