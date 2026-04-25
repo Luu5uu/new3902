@@ -26,6 +26,7 @@ namespace Celeste.Character
         public IMadelineState standState;
         public IMadelineState runState;
         public IMadelineState jumpState;
+        public IMadelineState springState;
         public IMadelineState fallState;
         public IMadelineState dashState;
         public IMadelineState dangleState;
@@ -141,6 +142,7 @@ namespace Celeste.Character
             standState = new standState();
             runState = new runState();
             jumpState = new jumpState();
+            springState = new springState();
             fallState = new fallState();
             dashState = new dashState();
             dangleState = new dangleState();
@@ -701,6 +703,23 @@ namespace Celeste.Character
             BeginVariableJump();
             FaceLeft = direction < 0;
             Maddy.JumpFast(restart: true);
+        }
+
+        public void LaunchFromSpring(float launchSpeed = PlayerSpringLaunchSpeed)
+        {
+            SetCrouching(false);
+            isClimbing = false;
+            isDangle = false;
+            isDashing = false;
+            onGround = false;
+            hitCeiling = false;
+            CurrentGroundBlock = null;
+            _dashRecoveryQueued = false;
+            _ledgeTopOutQueued = false;
+            _variableJumpTimer = 0f;
+            _variableJumpSpeed = 0f;
+            velocityY = -launchSpeed;
+            changeState(springState);
         }
 
         public void FaceTowardWall()

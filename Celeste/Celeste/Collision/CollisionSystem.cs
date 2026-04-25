@@ -38,6 +38,7 @@ namespace Celeste.Collision
             ResolveHorizontal(prevPos, prevCrouching, attemptedDx);
             ResolveVertical(prevPos, prevCrouching, attemptedDy);
             ResolveRemainingPenetration(prevPos, prevCrouching, attemptedDx, attemptedDy);
+            ActivateTouchedSprings(prevPos, prevCrouching, attemptedDy);
             UpdateWallContacts();
             ResolveLedgeTopOut(prevPos, prevCrouching, attemptedDy, wasTouchingLeftWall, wasTouchingRightWall);
             ActivateTouchedCrushBlocks();
@@ -163,17 +164,7 @@ namespace Celeste.Collision
 
             if (found)
             {
-                _player.position.Y = bestTop;
-                _player.velocityY = 0;
-                _player.onGround = true;
-
-                if (!_player.isDashing)
-                {
-                    _player.Maddy.OnDashRefill();
-                    _player.canDash = true;
-                }
-
-                _player.CurrentGroundBlock = bestBlock;
+                LandOnBlock(bestBlock, bestTop);
             }
         }
 
@@ -355,9 +346,7 @@ namespace Celeste.Collision
                             continue;
                         }
 
-                        _player.position.Y = r.Top;
-                        _player.velocityY = 0f;
-                        _player.onGround = true;
+                        LandOnBlock(blk, r.Top);
                     }
                     else if (overlapBottom < overlapTop)
                     {
@@ -372,9 +361,7 @@ namespace Celeste.Collision
                             continue;
                         }
 
-                        _player.position.Y = r.Top;
-                        _player.velocityY = 0f;
-                        _player.onGround = true;
+                        LandOnBlock(blk, r.Top);
                     }
                 }
                 else
@@ -522,6 +509,74 @@ namespace Celeste.Collision
             bool touchingRight = yOverlap && playerBounds.Left == blockBounds.Right;
 
             return touchingTop || touchingBottom || touchingLeft || touchingRight;
+        }
+
+        private void ActivateTouchedSprings(Vector2 prevPos, bool prevCrouching, float attemptedDy)
+        {
+            if (attemptedDy <= 0f)
+            {
+                return;
+            }
+
+            Rectangle prevBounds = GetBoundsAt(prevPos, prevCrouching);
+            Rectangle currentBounds = _player.Bounds;
+            Rectangle swept = Rectangle.Union(prevBounds, currentBounds);
+
+            Spring bestSpring = null;
+            int bestTop = int.MaxValue;
+
+            float prevFootY = prevPos.Y;
+            float currFootY = _player.position.Y;
+
+            for (int i = 0; i < _worldBlocks.Count; i++)
+            {
+                if (_worldBlocks[i] is not Spring spring)
+                {
+                    continue;
+                }
+
+                Rectangle trigger = spring.TriggerBounds;
+                if (trigger == Rectangle.Empty)
+                {
+                    continue;
+                }
+
+                bool xOverlap = swept.Right > trigger.Left && swept.Left < trigger.Right;
+                if (!xOverlap)
+                {
+                    continue;
+                }
+
+                if (prevFootY <= trigger.Top && currFootY >= trigger.Top && trigger.Top < bestTop)
+                {
+                    bestSpring = spring;
+                    bestTop = trigger.Top;
+                }
+            }
+
+            if (bestSpring == null)
+            {
+                return;
+            }
+
+            _player.position.Y = bestTop;
+            bestSpring.Activate();
+            _player.LaunchFromSpring();
+        }
+
+        private void LandOnBlock(IBlocks block, int top)
+        {
+            _player.position.Y = top;
+            _player.velocityY = 0f;
+            _player.onGround = true;
+
+            if (!_player.isDashing)
+            {
+                _player.Maddy.OnDashRefill();
+                _player.canDash = true;
+            }
+
+            _player.CurrentGroundBlock = block;
         }
 
         private static bool CanStandOnBlock(IBlocks block)
