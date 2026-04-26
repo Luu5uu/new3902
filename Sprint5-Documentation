@@ -1,0 +1,22 @@
+In Sprint 5, each team member was assigned a specific task bundle. Team members are responsible for writing their tasks.
+
+Henry was responsible for: 
+
+Aaron was responsible for: 
+
+Isaac was responsible for: Handling block replacement backlog, designing and creating a custom room, and adding foreground/background features/decorations to each room.
+
+Zijun was responsible for: 
+
+Sihao was responsible for: 
+
+Albert was responsible for: 
+
+--------------------------------------
+
+Code Review For Sprint 5
+Pull Requests:
+
+Adding CSV Files for Block Replacement #26-30  request by Isaac   reviewed by Albert
+Strenths: optimized room generation by converting classes into individual room csv files. Created the documentation file.
+Technical Concerns / Suggestions: In the future, add the hazard blocks to these files
