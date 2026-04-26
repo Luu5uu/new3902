@@ -105,7 +105,7 @@ namespace Celeste.Blocks
                 int fullWidth = (int)(_clip.FrameWidth * Scale);
                 int fullHeight = (int)(_clip.FrameHeight * Scale);
                 int xInset = System.Math.Max(1, (int)System.Math.Round(2f * Scale));
-                int yOffset = System.Math.Max(0, (int)System.Math.Round(4f * Scale));
+                int yOffset = 30;
                 int height = System.Math.Max(8, fullHeight - yOffset);
 
                 return new Rectangle(
