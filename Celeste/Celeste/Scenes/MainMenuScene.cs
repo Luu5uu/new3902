@@ -1,6 +1,8 @@
 using Celeste.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Media;
+using BgmAudioPlayer = Celeste.BGMPlayer.BGMPlayer;
 
 namespace Celeste.Scenes
 {
@@ -21,6 +23,7 @@ namespace Celeste.Scenes
             _font = Game.Content.Load<SpriteFont>("MenuFont");
             _keyboard = new KeyboardController();
             _gamepad = new GamepadController();
+            EnsureMenuBgm();
 
             InputMapper.ConfigureMenu(
                 _keyboard,
@@ -35,6 +38,7 @@ namespace Celeste.Scenes
         {
             _keyboard.Update();
             _gamepad.Update();
+            EnsureMenuBgm();
             Game.Window.Title = $"Celeste - Main Menu | BGM: {Game1.GetBgmStatusText()}";
         }
 
@@ -79,6 +83,19 @@ namespace Celeste.Scenes
                 case 1:
                     Game.Exit();
                     break;
+            }
+        }
+
+        private static void EnsureMenuBgm()
+        {
+            MediaPlayer.IsRepeating = true;
+            if (!string.Equals(BgmAudioPlayer.CurrentTrackName, "prologue", System.StringComparison.OrdinalIgnoreCase))
+            {
+                BgmAudioPlayer.bgmSwitchTo("prologue");
+            }
+            else
+            {
+                BgmAudioPlayer.bgmPlay();
             }
         }
     }

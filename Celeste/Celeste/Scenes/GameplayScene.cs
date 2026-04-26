@@ -17,12 +17,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+using BgmAudioPlayer = Celeste.BGMPlayer.BGMPlayer;
 
 namespace Celeste.Scenes
 {
     public class GameplayScene : Scene
     {
         private readonly record struct RoomTransitionZone(int SourceRoom, Rectangle TriggerArea, int TargetRoom);
+        private const string GameplayTrackOne = "first-steps";
+        private const string GameplayTrackTwo = "resurrections";
 
         private AnimationCatalog _catalog;
         private Madeline _player;
@@ -119,6 +123,7 @@ namespace Celeste.Scenes
             _roomFive = new RoomFive(_worldMap, factory);
 
             CollectibleItem.ResetStrawberryCount();
+            StartGameplayBgm();
             RebuildCurrentRoom(resetPlayer: false);
         }
 
@@ -196,6 +201,7 @@ namespace Celeste.Scenes
 
             _player.Update(gameTime);
             _worldMap.Update(gameTime);
+            UpdateGameplayBgm();
 
             if (!wasDashing && _player.isDashing)
             {
@@ -535,6 +541,45 @@ namespace Celeste.Scenes
                 5 => new Vector2(160f, 376f),
                 _ => new Vector2(200f, 150f),
             };
+        }
+
+        private static void StartGameplayBgm()
+        {
+            MediaPlayer.IsRepeating = false;
+            if (!string.Equals(BgmAudioPlayer.CurrentTrackName, GameplayTrackOne, System.StringComparison.OrdinalIgnoreCase))
+            {
+                BgmAudioPlayer.bgmSwitchTo(GameplayTrackOne);
+            }
+            else
+            {
+                BgmAudioPlayer.bgmPlay();
+            }
+        }
+
+        private static void UpdateGameplayBgm()
+        {
+            MediaPlayer.IsRepeating = false;
+
+            string currentTrack = BgmAudioPlayer.CurrentTrackName;
+            bool isGameplayTrack =
+                string.Equals(currentTrack, GameplayTrackOne, System.StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(currentTrack, GameplayTrackTwo, System.StringComparison.OrdinalIgnoreCase);
+
+            if (!isGameplayTrack)
+            {
+                BgmAudioPlayer.bgmSwitchTo(GameplayTrackOne);
+                return;
+            }
+
+            if (MediaPlayer.State != MediaState.Stopped)
+            {
+                return;
+            }
+
+            string nextTrack = string.Equals(currentTrack, GameplayTrackOne, System.StringComparison.OrdinalIgnoreCase)
+                ? GameplayTrackTwo
+                : GameplayTrackOne;
+            BgmAudioPlayer.bgmSwitchTo(nextTrack);
         }
 
         private Texture2D LoadDeathDotTexture()
