@@ -77,6 +77,12 @@ namespace Celeste.Blocks
             grid[gridX, gridY] = block;
         }
 
+        public void PlaceMoveBlock(Vector2 position, float distance, float speed, float angleDegrees, float scale = 2.5f)
+        {
+            IBlocks block = new MoveBlock(position, distance, speed, angleDegrees, _catalog, scale);
+            _blocks.Add(block);
+        }
+
         private static bool IsHazardType(string type)
         {
             return type == "upSpike"

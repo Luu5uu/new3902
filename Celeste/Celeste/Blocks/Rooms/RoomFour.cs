@@ -28,10 +28,10 @@ namespace Celeste.Blocks.Rooms
             string filePath = Path.Combine(AppContext.BaseDirectory, "Content", "rooms", "RoomFour.csv");
             _roomLoader.LoadRoom(filePath);
 
-
-            /* --------------- HAZARDS BLOCKS ---------------*/
-
-            // PUT DISAPPEARING PLATFORMS HERE
+            _mapBuilder.PlaceCrushBlock(30, 7);
+            _mapBuilder.PlaceCrushBlock(28, 10);
+            _mapBuilder.PlaceCrushBlock(33, 13);
+            _mapBuilder.PlaceCrushBlock(29, 16);
 
         }
     }
