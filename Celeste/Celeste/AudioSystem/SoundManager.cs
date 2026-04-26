@@ -8,6 +8,9 @@ namespace Celeste.AudioSystem
     public static class SoundManager
     {
         private static Dictionary<string, SoundEffect> effects = new Dictionary<string, SoundEffect>();
+
+        private static Dictionary<string, List<SoundEffect>> sequenceEffects = new Dictionary<string, List<SoundEffect>>();
+        private static Dictionary<string, int> sequenceIndex = new Dictionary<string, int>();
         private static Dictionary<string, List<SoundEffect>> footstepEffects = new Dictionary<string, List<SoundEffect>>();
         private static Dictionary<string, int> footstepIndex = new Dictionary<string, int>();
 
@@ -16,12 +19,17 @@ namespace Celeste.AudioSystem
         public static void Load(ContentManager content)
         {
             effects.Clear();
+
+            sequenceEffects.Clear();
+            sequenceIndex.Clear();
+
             footstepEffects.Clear();
             footstepIndex.Clear();
 
             soundConfig.Load("Content/SoundConfig.xml");
 
             LoadCharacterMovementSE(content);
+            LoadSequenceSE(content);
             LoadFootStepSE(content);
         }
 
@@ -35,6 +43,23 @@ namespace Celeste.AudioSystem
                 string asset = node["Asset"].InnerText;
 
                 effects[key] = content.Load<SoundEffect>(asset);
+            }
+        }
+
+        public static void LoadSequenceSE(ContentManager content)
+        {
+            XmlNodeList sequenceNodes = soundConfig.SelectNodes("/SoundConfig/Sequences/Sequence");
+
+            foreach (XmlNode node in sequenceNodes)
+            {
+                string key = node["Key"].InnerText;
+                string folderPath = node["FolderPath"].InnerText;
+                string filePrefix = node["FilePrefix"].InnerText;
+                int start = int.Parse(node["Start"].InnerText);
+                int end = int.Parse(node["End"].InnerText);
+
+                sequenceEffects[key] = SequentialSoundLoadHelper(content, folderPath, filePrefix, start, end);
+                sequenceIndex[key] = 0;
             }
         }
 
@@ -72,7 +97,7 @@ namespace Celeste.AudioSystem
         {
             if (effects.ContainsKey(key))
             {
-                if(key == "collect")
+                if (key == "collect")
                 {
                     var instance = effects[key].CreateInstance();
                     instance.Volume = 0.25f; // Set the desired volume
@@ -104,6 +129,40 @@ namespace Celeste.AudioSystem
                     footstepIndex[blockType] = index;
                 }
             }
+        }
+
+        public static void PlaySequence(string key)
+        {
+            
+
+            if (!sequenceEffects.ContainsKey(key))
+            {
+                System.Diagnostics.Debug.WriteLine("No sequence key found: " + key);
+                return;
+            }
+
+            List<SoundEffect> sounds = sequenceEffects[key];
+
+
+            if (sounds.Count <= 0)
+            {
+                System.Diagnostics.Debug.WriteLine("Sequence is empty: " + key);
+                return;
+            }
+
+            int index = sequenceIndex[key];
+
+
+            sounds[index].Play();
+
+            index++;
+
+            if (index >= sounds.Count)
+            {
+                index = 0;
+            }
+
+            sequenceIndex[key] = index;
         }
     }
 }

@@ -37,6 +37,36 @@
 /processorParam:TextureFormat=Color
 /build:7.png
 
+#begin Audio/climb/climb_01.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/climb/climb_01.wav
+
+#begin Audio/climb/climb_02.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/climb/climb_02.wav
+
+#begin Audio/climb/climb_03.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/climb/climb_03.wav
+
+#begin Audio/climb/climb_04.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/climb/climb_04.wav
+
+#begin Audio/climb/climb_05.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/climb/climb_05.wav
+
 #begin Audio/collect_sound.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -426,6 +456,7 @@
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:Lena Raine - Celeste Original Soundtrack - 03 Resurrections.mp3
+
 #begin MenuFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

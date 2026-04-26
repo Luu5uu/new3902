@@ -17,7 +17,7 @@ using static Celeste.DeathConstants;
 
 namespace Celeste.Character
 {
-    public class Madeline : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable, ICollider
+    public partial class Madeline : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable, ICollider
     {
         public MaddySprite Maddy { get; private set; }
 
@@ -130,6 +130,9 @@ namespace Celeste.Character
 
         private float footstepTimer = 0f;
         private const float FootstepInterval = 0.12f;
+
+        private float climbSoundTimer = 0f;
+        private const float ClimbSoundInterval = 0.35f;
 
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
@@ -825,6 +828,7 @@ namespace Celeste.Character
             _variableJumpTimer = PlayerVariableJumpTime;
             _variableJumpSpeed = velocityY;
             SoundManager.Play("jump");
+            
         }
 
         public void QueueDashRecovery(Vector2 dashDirection)
@@ -952,6 +956,32 @@ namespace Celeste.Character
             {
                 footstepTimer = 0f;
                 SoundManager.PlayFootstep(CurrentGroundBlock.Type);
+                
+            }
+        }
+
+        public void UpdateClimbSound(float dt)
+        {
+            bool shouldPlay =
+                isClimbing &&
+                IsTouchingWall &&
+                !onGround &&
+                !isDashing &&
+                !isDangle &&
+                !IsTired;
+
+            if (!shouldPlay)
+            {
+                climbSoundTimer = 0f;
+                return;
+            }
+
+            climbSoundTimer += dt;
+
+            if (climbSoundTimer >= ClimbSoundInterval)
+            {
+                climbSoundTimer = 0f;
+                SoundManager.PlaySequence("climb");
             }
         }
     }

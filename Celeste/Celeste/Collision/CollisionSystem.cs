@@ -287,6 +287,12 @@ namespace Celeste.Collision
                 _player.velocityX = 0f;
                 _player.moveX = 0;
                 _player.touchingRightWall = true;
+
+                if (!_player.isDashing)
+                {
+                    _player.Maddy.OnDashRefill();
+                    _player.canDash = true;
+                }
             }
         }
 
@@ -329,6 +335,12 @@ namespace Celeste.Collision
                 _player.velocityX = 0f;
                 _player.moveX = 0;
                 _player.touchingLeftWall = true;
+
+                if (!_player.isDashing)
+                {
+                    _player.Maddy.OnDashRefill();
+                    _player.canDash = true;
+                }
             }
         }
 
@@ -341,7 +353,6 @@ namespace Celeste.Collision
             {
                 var blk = _worldBlocks[i];
                 if (blk == null) continue;
-
                 Rectangle r = blk.Bounds;
                 if (r == Rectangle.Empty || !p.Intersects(r)) continue;
 
