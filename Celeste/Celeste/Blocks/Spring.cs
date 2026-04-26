@@ -103,9 +103,10 @@ namespace Celeste.Blocks
                 if (Texture == null) return Rectangle.Empty;
 
                 int fullWidth = (int)(_clip.FrameWidth * Scale);
+                int fullHeight = (int)(_clip.FrameHeight * Scale);
                 int xInset = System.Math.Max(1, (int)System.Math.Round(2f * Scale));
-                int yOffset = System.Math.Max(0, (int)System.Math.Round(2f * Scale));
-                int height = System.Math.Max(8, (int)System.Math.Round(4f * Scale));
+                int yOffset = System.Math.Max(0, (int)System.Math.Round(4f * Scale));
+                int height = System.Math.Max(8, fullHeight - yOffset);
 
                 return new Rectangle(
                     (int)Position.X + xInset,
