@@ -36,7 +36,7 @@ namespace Celeste.Sprites
 
         private const float MinUsedDisplayTime = 0.35f;
         private const float BaseHeadY = 12f;
-        private const float DuckHeadY = 6f;
+        private const float DuckHeadY = 7f;
         private const float TiredHeadY = 10f;
 
         public IBodySprite Body => _body;

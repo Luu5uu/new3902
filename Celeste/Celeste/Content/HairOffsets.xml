@@ -116,7 +116,7 @@
 
   <!-- duck: 1 frame -->
   <Anim name="duck">
-    <F dx="0" dy="6" />
+    <F dx="1" dy="-1" />
   </Anim>
 
   <!-- idleB: 24 frames -->

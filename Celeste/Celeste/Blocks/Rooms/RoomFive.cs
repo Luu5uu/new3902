@@ -28,10 +28,10 @@ namespace Celeste.Blocks.Rooms
             _roomLoader.LoadRoom(filePath);
 
             _mapBuilder.PlaceMoveBlock(
-                position: new Vector2(250f, 200f),
+                position: new Vector2(250f, 230f),
                 distance: 200f,
                 speed: 25f,
-                angleDegrees: 5f);
+                angleDegrees: -10f);
 
         }
     }
