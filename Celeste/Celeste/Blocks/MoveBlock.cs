@@ -2,89 +2,187 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Celeste.Animation;
-using Celeste.Items;
 
 namespace Celeste.Blocks
 {
     public class MoveBlock : IBlocks
     {
-        public Vector2 Position
+        private enum MoveBlockState
         {
-            get => _animation.Position;
-            set => _animation.Position = value;
+            ArrivedRed,
+            PrepareGreen,
+            MovingYellow,
         }
+
+        private const int RedFrameIndex = 0;
+        private const int YellowFrameIndex = 1;
+        private const int GreenFrameIndex = 2;
+        private const float RedLightSeconds = 3f;
+        private const float GreenLightSeconds = 2f;
+
+        public Vector2 Position
+        { get; set; }
+
         public Texture2D Texture
         {
-            get => _animation.Clip?.Texture;
+            get => _clip.Texture;
             set { }
         }
 
         public string Type => "moveBlock";
         public float Scale { get; set; } = 2.0f;
+        public Vector2 PreviousPosition { get; private set; }
+        public Vector2 MovementDelta { get; private set; }
+        public Rectangle PreviousBounds => GetBoundsAt(PreviousPosition);
 
-        private readonly ItemAnimation _animation;
+        private readonly AnimationClip _clip;
         private readonly Vector2 _start;
         private readonly Vector2 _end;
-        private readonly Vector2 _direction;
-        private float _speed;
-        private bool _forwardCheck = true;
+        private readonly float _speed;
+        private bool _movingTowardEnd = true;
+        private MoveBlockState _state;
+        private float _stateTimer;
+        private int _frameIndex;
 
         public MoveBlock(Vector2 start, float distance, float speed, float angleDegrees, AnimationCatalog catalog, float scale = 2.5f)
         {
-            var clip = catalog.Clips[AnimationKeys.DevicesMoveBlock];
-            _animation = new ItemAnimation(clip);
+            _clip = catalog.Clips[AnimationKeys.DevicesMoveBlock];
             float angleRad = MathHelper.ToRadians(angleDegrees);
             _speed = speed;
-            _direction = new Vector2((float)Math.Cos(angleRad), (float)Math.Sin(angleRad));
+            Vector2 direction = new Vector2((float)Math.Cos(angleRad), (float)Math.Sin(angleRad));
+            if (direction != Vector2.Zero)
+            {
+                direction.Normalize();
+            }
+
             _start = start;
-            _end = start + _direction * distance;
-            _animation.Position = _start;
+            _end = start + direction * distance;
+            Position = _start;
+            PreviousPosition = _start;
+            MovementDelta = Vector2.Zero;
+            _state = MoveBlockState.ArrivedRed;
+            _stateTimer = RedLightSeconds;
+            _frameIndex = RedFrameIndex;
             Scale = scale;
         }
 
         public void Update(GameTime gameTime)
         {
-            _animation.Update(gameTime);
-            float step = _speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (_forwardCheck)
+            PreviousPosition = Position;
+            MovementDelta = Vector2.Zero;
+
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            switch (_state)
             {
-                _animation.Position += _direction * step;
-                if (Vector2.Dot(_end - _animation.Position, _direction) < 0)
-                {
-                    _animation.Position = _end;
-                    _forwardCheck = false;
-                }
+                case MoveBlockState.ArrivedRed:
+                    UpdateArrivedRed(dt);
+                    break;
+                case MoveBlockState.PrepareGreen:
+                    UpdatePrepareGreen(dt);
+                    break;
+                case MoveBlockState.MovingYellow:
+                    UpdateMovingYellow(dt);
+                    break;
             }
-            else
-            {
-                _animation.Position -= _direction * step;
-                if (Vector2.Dot(_animation.Position - _start, _direction) < 0)
-                {
-                    _animation.Position = _start;
-                    _forwardCheck = true;
-                }
-            }
+
+            MovementDelta = Position - PreviousPosition;
         }
 
-        public void Draw(SpriteBatch spriteBatch) => _animation.Draw(spriteBatch, Position, Scale);
+        private void UpdateArrivedRed(float dt)
+        {
+            _frameIndex = RedFrameIndex;
+            _stateTimer -= dt;
+            if (_stateTimer > 0f)
+            {
+                return;
+            }
+
+            _state = MoveBlockState.PrepareGreen;
+            _stateTimer = GreenLightSeconds;
+            _frameIndex = GreenFrameIndex;
+        }
+
+        private void UpdatePrepareGreen(float dt)
+        {
+            _frameIndex = GreenFrameIndex;
+            _stateTimer -= dt;
+            if (_stateTimer > 0f)
+            {
+                return;
+            }
+
+            _state = MoveBlockState.MovingYellow;
+            _frameIndex = YellowFrameIndex;
+        }
+
+        private void UpdateMovingYellow(float dt)
+        {
+            _frameIndex = YellowFrameIndex;
+
+            Vector2 target = _movingTowardEnd ? _end : _start;
+            Vector2 remaining = target - Position;
+            float remainingDistance = remaining.Length();
+            if (remainingDistance <= float.Epsilon)
+            {
+                ArriveAt(target);
+                return;
+            }
+
+            float travelDistance = _speed * dt;
+            if (travelDistance >= remainingDistance)
+            {
+                ArriveAt(target);
+                return;
+            }
+
+            remaining /= remainingDistance;
+            Position += remaining * travelDistance;
+        }
+
+        private void ArriveAt(Vector2 target)
+        {
+            Position = target;
+            _movingTowardEnd = !_movingTowardEnd;
+            _state = MoveBlockState.ArrivedRed;
+            _stateTimer = RedLightSeconds;
+            _frameIndex = RedFrameIndex;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(
+                _clip.Texture,
+                Position,
+                _clip.GetSourceRect(_frameIndex),
+                Color.White,
+                0f,
+                Vector2.Zero,
+                Scale,
+                SpriteEffects.None,
+                0f);
+        }
 
         public Rectangle Bounds
         {
-            get
+            get => GetBoundsAt(Position);
+        }
+
+        private Rectangle GetBoundsAt(Vector2 position)
+        {
+            if (Texture == null)
             {
-                var tex = Texture;
-                if (tex == null) return Rectangle.Empty;
-
-                int w = (int)(tex.Width * Scale);
-                int h = (int)(tex.Height * Scale);
-
-                return new Rectangle(
-                    (int)Position.X,
-                    (int)Position.Y,
-                    w,
-                    h
-                );
+                return Rectangle.Empty;
             }
+
+            int w = (int)(_clip.FrameWidth * Scale);
+            int h = (int)(_clip.FrameHeight * Scale);
+
+            return new Rectangle(
+                (int)position.X,
+                (int)position.Y,
+                w,
+                h
+            );
         }
     }
 }

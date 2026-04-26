@@ -21,16 +21,8 @@ namespace Celeste.Blocks.Rooms
         public void PlaceRoomTwoBlocks()
         {
             _mapBuilder.ClearBlocks();
-
-            // SPRING -> THIS WAS MOVED TO  "NewContent.png"
-            // _mapBuilder.PlaceBlock("spring", 17, 14, 0);
-
-            // csv :
             string filePath = Path.Combine(AppContext.BaseDirectory, "Content", "rooms", "RoomTwo.csv");
             _roomLoader.LoadRoom(filePath);
-
-
-
         }
     }
 }

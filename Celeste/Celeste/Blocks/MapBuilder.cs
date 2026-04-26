@@ -11,6 +11,7 @@ namespace Celeste.Blocks
         public List<IBlocks> _blocks = new List<IBlocks>();
         public List<IHazard> _hazards = new List<IHazard>();
         private BlockFactory _blockFactory;
+        private readonly AnimationCatalog _catalog;
         private readonly PlaceCrushBlock _placeCrushBlock;
         // size * scale
         private float blockSize = 8 * 2.5f;
@@ -24,6 +25,7 @@ namespace Celeste.Blocks
         public MapBuilder(BlockFactory blockFactory, AnimationCatalog catalog, int width = 48, int height = 120)
         {
             this._blockFactory = blockFactory;
+            _catalog = catalog;
             _placeCrushBlock = new PlaceCrushBlock(catalog, blockSize);
             this.w = width;
             this.h = height;
@@ -47,9 +49,12 @@ namespace Celeste.Blocks
             }
             else
             {
-                IBlocks block = type == "crushBlock"
-                    ? _placeCrushBlock.CreateAtGrid(gridX, gridY)
-                    : _blockFactory.CreateBlock(type, position, frameNum);
+                IBlocks block = type switch
+                {
+                    "crushBlock" => _placeCrushBlock.CreateAtGrid(gridX, gridY),
+                    "spring" => new Spring(position, _catalog),
+                    _ => _blockFactory.CreateBlock(type, position, frameNum),
+                };
                 if (block != null)
                 {
                     RemoveBlock(gridX, gridY);
@@ -70,6 +75,12 @@ namespace Celeste.Blocks
             RemoveBlock(gridX, gridY);
             _blocks.Add(block);
             grid[gridX, gridY] = block;
+        }
+
+        public void PlaceMoveBlock(Vector2 position, float distance, float speed, float angleDegrees, float scale = 2.5f)
+        {
+            IBlocks block = new MoveBlock(position, distance, speed, angleDegrees, _catalog, scale);
+            _blocks.Add(block);
         }
 
         private static bool IsHazardType(string type)

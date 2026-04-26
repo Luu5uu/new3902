@@ -20,7 +20,7 @@ namespace Celeste
         public const float PlayerRunDeceleration = 400f * PlayerTileScale;
         public const float PlayerDuckDeceleration = 500f * PlayerTileScale;
         public const float PlayerAirAccelerationMultiplier = 0.65f;
-        public const float PlayerJumpSpeed = 105f * PlayerTileScale;
+        public const float PlayerJumpSpeed = 120f * PlayerTileScale;
         public const float PlayerJumpHorizontalBoost = 40f * PlayerTileScale;
         public const float PlayerWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost;
         public const float PlayerGravity = 900f * PlayerTileScale;
@@ -31,6 +31,7 @@ namespace Celeste
         public const float PlayerJumpGraceTime = 0.1f;
         public const float PlayerVariableJumpTime = 0.2f;
         public const float PlayerJumpHoldGravityMultiplier = 0.5f;
+        public const float PlayerSpringLaunchSpeed = 400f * PlayerTileScale;
         public const float PlayerDashDuration = 0.15f;
         public const float PlayerDashSpeed = 240f * PlayerTileScale;
         public const float PlayerDashEndSpeed = 160f * PlayerTileScale;

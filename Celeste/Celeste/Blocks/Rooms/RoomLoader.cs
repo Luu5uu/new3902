@@ -18,18 +18,24 @@ namespace Celeste.Blocks.Rooms
 
         public void LoadRoom(string filePath)
         {
-
-            // TODO: RETURN A LIST OF BLOCKS FOR COLLISION
-            // List<IBlocks> blocks = new List<IBlocks>(); 
-
             // reset room
             _mapBuilder.ClearBlocks();
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"Room data file was not found: {filePath}", filePath);
+            }
 
             // store and parse in array
             string[] lines = File.ReadAllLines(filePath);
 
             foreach (string line in lines)
             {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
                 string[] parts = line.Split(',');
 
                 // the format: (source, x-coord, y-coord, frame)

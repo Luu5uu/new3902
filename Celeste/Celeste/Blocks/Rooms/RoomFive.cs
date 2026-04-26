@@ -27,6 +27,12 @@ namespace Celeste.Blocks.Rooms
             string filePath = Path.Combine(AppContext.BaseDirectory, "Content", "rooms", "RoomFive.csv");
             _roomLoader.LoadRoom(filePath);
 
+            _mapBuilder.PlaceMoveBlock(
+                position: new Vector2(250f, 200f),
+                distance: 200f,
+                speed: 25f,
+                angleDegrees: 5f);
+
         }
     }
 }
