@@ -274,6 +274,11 @@ namespace Celeste.Scenes
             {
                 _player.DrawRewindTrail(spriteBatch, _pixelTexture);
             }
+
+            if (_isRewinding)
+            {
+                DrawRewindDarkOverlay(spriteBatch);
+            }
             _player.Draw(spriteBatch);
 
 
@@ -656,6 +661,17 @@ namespace Celeste.Scenes
             Texture2D trimmed = new Texture2D(Game.GraphicsDevice, width, height);
             trimmed.SetData(trimmedPixels);
             return trimmed;
+        }
+
+        private void DrawRewindDarkOverlay(SpriteBatch spriteBatch)
+        {
+            Rectangle screenRect = new Rectangle(
+                0,
+                0,
+                Game.GraphicsDevice.Viewport.Width,
+                Game.GraphicsDevice.Viewport.Height);
+
+            spriteBatch.Draw(_pixelTexture, screenRect, Color.Black * 0.6f);
         }
     }
 }
