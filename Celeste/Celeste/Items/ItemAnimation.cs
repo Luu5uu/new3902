@@ -5,7 +5,6 @@ using Celeste.Animation;
 
 namespace Celeste.Items
 {
-    // Item animation: clip + animator. IDrawable/IUpdateable; set Position/Scale or use Draw(sb, pos, scale).
     public sealed class ItemAnimation : Celeste.GamePlay.IUpdateable, Celeste.GamePlay.IDrawable
     {
         private readonly AnimationClip _clip;
@@ -29,16 +28,38 @@ namespace Celeste.Items
         public void Draw(SpriteBatch spriteBatch)
         {
             if (spriteBatch == null) throw new ArgumentNullException(nameof(spriteBatch));
-            Draw(spriteBatch, Position, Scale);
+            Draw(spriteBatch, Position, Scale, Color.White);
         }
 
-        // Draw at position/scale without setting Position/Scale.
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, float scale = 1f,
-            SpriteEffects effects = SpriteEffects.None, float layerDepth = 0f)
+        public void Draw(SpriteBatch spriteBatch, Color tint)
         {
             if (spriteBatch == null) throw new ArgumentNullException(nameof(spriteBatch));
+            Draw(spriteBatch, Position, Scale, tint);
+        }
+
+        public void Draw(
+            SpriteBatch spriteBatch,
+            Vector2 position,
+            float scale = 1f,
+            Color? tint = null,
+            SpriteEffects effects = SpriteEffects.None,
+            float layerDepth = 0f)
+        {
+            if (spriteBatch == null) throw new ArgumentNullException(nameof(spriteBatch));
+
             Rectangle src = _clip.GetSourceRect(_animator.FrameIndex);
-            spriteBatch.Draw(_clip.Texture, position, src, Color.White, 0f, Vector2.Zero, scale, effects, layerDepth);
+            Color drawColor = tint ?? Color.White;
+
+            spriteBatch.Draw(
+                _clip.Texture,
+                position,
+                src,
+                drawColor,
+                0f,
+                Vector2.Zero,
+                scale,
+                effects,
+                layerDepth);
         }
     }
 }
