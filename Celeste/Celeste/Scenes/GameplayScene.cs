@@ -210,6 +210,11 @@ namespace Celeste.Scenes
             _worldMap.Update(gameTime);
             UpdateGameplayBgm();
 
+            if (!wasDashing && _player.isDashing)
+            {
+                TriggerDashScaredCollectibles();
+            }
+
             if (_player.ConsumeLevelResetRequest())
             {
                 _sessionDeathCount++;
@@ -469,7 +474,8 @@ namespace Celeste.Scenes
                     "room0_straw_1",
                     ItemAnimationFactory.CreateFlyStaw(_catalog),
                     spawn + new Vector2(0f, -60f),
-                    CollectibleItem.ItemType.Strawberry));
+                    CollectibleItem.ItemType.Strawberry,
+                    fliesAwayOnDash: true));
 
                 _collectibles.Add(CreateCollectible(
                     "room0_crystal_0",
@@ -480,30 +486,60 @@ namespace Celeste.Scenes
                 return;
             }
 
-            _collectibles.Add(CreateCollectible(
-                $"room{_currentRoom}_straw_0",
-                ItemAnimationFactory.CreateNormalStaw(_catalog),
-                spawn + new Vector2(72f, -40f),
-                CollectibleItem.ItemType.Strawberry));
-
-            if (_currentRoom == 2 || _currentRoom == 5)
+            if (_currentRoom == 2)
             {
                 _collectibles.Add(CreateCollectible(
-                    $"room{_currentRoom}_crystal_0",
+                    "room2_straw_0",
+                    ItemAnimationFactory.CreateNormalStaw(_catalog),
+                    new Vector2(207f, 68f),
+                    CollectibleItem.ItemType.Strawberry));
+            }
+
+            if (_currentRoom == 3)
+            {
+                _collectibles.Add(CreateCollectible(
+                    "room3_straw_0",
+                    ItemAnimationFactory.CreateNormalStaw(_catalog),
+                    new Vector2(689f, 275f),
+                    CollectibleItem.ItemType.Strawberry));
+
+                _collectibles.Add(CreateCollectible(
+                    "room3_crystal_0",
                     ItemAnimationFactory.CreateCrystal(_catalog),
-                    spawn + new Vector2(120f, -56f),
+                    new Vector2(701f, 330f),
                     CollectibleItem.ItemType.Crystal));
+            }
+
+            if (_currentRoom == 4)
+            {
+                _collectibles.Add(CreateCollectible(
+                    "room4_straw_0",
+                    ItemAnimationFactory.CreateFlyStaw(_catalog),
+                    new Vector2(279f, 132f),
+                    CollectibleItem.ItemType.Strawberry,
+                    fliesAwayOnDash: true));
             }
         }
 
+        private void TriggerDashScaredCollectibles()
+        {
+            foreach (var collectible in _collectibles)
+            {
+                collectible.TriggerFlyAway();
+            }
+        }
 
-
-        private CollectibleItem CreateCollectible(string collectibleId, ItemAnimation animation, Vector2 position, CollectibleItem.ItemType itemType = CollectibleItem.ItemType.Strawberry)
+        private CollectibleItem CreateCollectible(
+            string collectibleId,
+            ItemAnimation animation,
+            Vector2 position,
+            CollectibleItem.ItemType itemType = CollectibleItem.ItemType.Strawberry,
+            bool fliesAwayOnDash = false)
         {
             animation.Position = position;
             animation.Scale = GlobalConstants.DefaultScale;
 
-            var collectible = new CollectibleItem(collectibleId, animation, itemType);
+            var collectible = new CollectibleItem(collectibleId, animation, itemType, fliesAwayOnDash);
 
             if (itemType == CollectibleItem.ItemType.Strawberry)
             {
