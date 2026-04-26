@@ -180,8 +180,8 @@ namespace Celeste.Input
             {
                 // commenting  this out for debugging
 
-                // mouse.RegisterCommand(MouseButton.Left, new CycleGameSceneCommand(game, -1));
-                // mouse.RegisterCommand(MouseButton.Right, new CycleGameSceneCommand(game, 1));
+                mouse.RegisterCommand(MouseButton.Left, new CycleGameSceneCommand(game, -1));
+                mouse.RegisterCommand(MouseButton.Right, new CycleGameSceneCommand(game, 1));
             }
 
             if (gamepad != null)
