@@ -1,4 +1,4 @@
-In Sprint 5, each team member was assigned a specific task bundle.
+In Sprint 5, each team member was assigned a specific task bundle. Team members are responsible for writing their tasks.
 
 Henry was responsible for: 
 
@@ -18,5 +18,5 @@ Code Review For Sprint 5
 Pull Requests:
 
 Adding CSV Files for Block Replacement #26-30  request by Isaac   reviewed by Albert
-Strenths: optimized room generation by converting classes into individual room csv files
+Strenths: optimized room generation by converting classes into individual room csv files. Created the documentation file.
 Technical Concerns / Suggestions: In the future, add the hazard blocks to these files
