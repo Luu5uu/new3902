@@ -22,6 +22,8 @@ namespace Celeste.Scenes
 {
     public class GameplayScene : Scene
     {
+        private readonly record struct RoomTransitionZone(int SourceRoom, Rectangle TriggerArea, int TargetRoom);
+
         private AnimationCatalog _catalog;
         private Madeline _player;
         private Texture2D _pixelTexture;
@@ -40,7 +42,7 @@ namespace Celeste.Scenes
         private RoomThree _roomThree;
         private RoomFour _roomFour;
         private RoomFive _roomFive;
-        private int _currentRoom;
+        private int _currentRoom = 1;
 
         private readonly List<CollectibleItem> _collectibles = new();
         private CollisionSystem _collisionSystem;
@@ -52,6 +54,13 @@ namespace Celeste.Scenes
         private float _rewindRecordTimer;
 
         private const float RewindRecordDuration = 3.0f;
+        private static readonly RoomTransitionZone[] RoomTransitionZones =
+        {
+            new(1, new Rectangle(620, 0, 120, 36), 2),
+            new(2, new Rectangle(680, 0, 80, 36), 3),
+            new(3, new Rectangle(660, 0, 80, 36), 4),
+            new(4, new Rectangle(400, 0, 80, 36), 5),
+        };
 
 
         public GameplayScene(Game1 game) : base(game)
@@ -122,6 +131,7 @@ namespace Celeste.Scenes
 
             Vector2 previousPosition = _player.position;
             bool wasCrouching = _player.isCrouching;
+            bool wasDashing = _player.isDashing;
 
             if (keyboard.IsKeyDown(Keys.T) && _previousKeyboardState.IsKeyUp(Keys.T))
             {
@@ -187,6 +197,11 @@ namespace Celeste.Scenes
             _player.Update(gameTime);
             _worldMap.Update(gameTime);
 
+            if (!wasDashing && _player.isDashing)
+            {
+                TriggerDashScaredCollectibles();
+            }
+
             if (_player.ConsumeLevelResetRequest())
             {
                 RebuildCurrentRoom(resetPlayer: true);
@@ -195,6 +210,13 @@ namespace Celeste.Scenes
             {
                 _hazardCollisionSystem.ResolveHazardCollision();
                 _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching);
+
+                if (TryHandleRoomTransition(gameTime))
+                {
+                    _previousKeyboardState = keyboard;
+                    return;
+                }
+
                 _player.UpdateClimbSound((float)gameTime.ElapsedGameTime.TotalSeconds);
                 _player.UpdateFootstep((float)gameTime.ElapsedGameTime.TotalSeconds);
                 UpdateCollectibles(gameTime);
@@ -297,16 +319,7 @@ namespace Celeste.Scenes
 
         public void JumpToRoom(int roomNumber)
         {
-            if (roomNumber < 0 || roomNumber > 5)
-            {
-                return;
-            }
-
-            if (roomNumber != _currentRoom)
-            {
-                _currentRoom = roomNumber;
-                RebuildCurrentRoom(resetPlayer: false);
-            }
+            ChangeRoom(roomNumber, resetPlayer: false);
         }
 
         public void CycleGameScene(int direction)
@@ -332,9 +345,42 @@ namespace Celeste.Scenes
 
             if (nextRoom != _currentRoom)
             {
-                _currentRoom = nextRoom;
-                RebuildCurrentRoom(resetPlayer: false);
+                ChangeRoom(nextRoom, resetPlayer: false);
             }
+        }
+
+        private void ChangeRoom(int roomNumber, bool resetPlayer)
+        {
+            if (roomNumber < 0 || roomNumber > 5 || roomNumber == _currentRoom)
+            {
+                return;
+            }
+
+            _currentRoom = roomNumber;
+            RebuildCurrentRoom(resetPlayer);
+        }
+
+        private bool TryHandleRoomTransition(GameTime gameTime)
+        {
+            Rectangle playerBounds = _player.Bounds;
+
+            for (int i = 0; i < RoomTransitionZones.Length; i++)
+            {
+                RoomTransitionZone zone = RoomTransitionZones[i];
+                if (zone.SourceRoom != _currentRoom || !playerBounds.Intersects(zone.TriggerArea))
+                {
+                    continue;
+                }
+
+                _isRecordingRewind = false;
+                _isRewinding = false;
+                _rewindRecordTimer = 0f;
+                ChangeRoom(zone.TargetRoom, resetPlayer: true);
+                _player.UpdateSprite(gameTime);
+                return true;
+            }
+
+            return false;
         }
 
         private void RebuildCurrentRoom(bool resetPlayer)
@@ -398,28 +444,61 @@ namespace Celeste.Scenes
         {
             _collectibles.Clear();
 
-            Vector2 spawn = _player.RespawnPoint;
             if (_currentRoom == 0)
             {
+                Vector2 spawn = _player.RespawnPoint;
                 _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(-80f, -40f), CollectibleItem.ItemType.Strawberry));
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateFlyStaw(_catalog), spawn + new Vector2(0f, -60f), CollectibleItem.ItemType.Strawberry));
+                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateFlyStaw(_catalog), spawn + new Vector2(0f, -60f), CollectibleItem.ItemType.Strawberry, fliesAwayOnDash: true));
                 _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(90f, -20f), CollectibleItem.ItemType.Crystal));
-                return;
             }
 
-            _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(72f, -40f), CollectibleItem.ItemType.Strawberry));
-
-            if (_currentRoom == 2 || _currentRoom == 5)
+            if (_currentRoom == 2)
             {
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(120f, -56f), CollectibleItem.ItemType.Crystal));
+                _collectibles.Add(CreateCollectible(
+                    ItemAnimationFactory.CreateNormalStaw(_catalog),
+                    new Vector2(207f, 68f),
+                    CollectibleItem.ItemType.Strawberry));
+            }
+
+            if (_currentRoom == 3)
+            {
+                _collectibles.Add(CreateCollectible(
+                    ItemAnimationFactory.CreateNormalStaw(_catalog),
+                    new Vector2(689f, 275f),
+                    CollectibleItem.ItemType.Strawberry));
+                _collectibles.Add(CreateCollectible(
+                    ItemAnimationFactory.CreateCrystal(_catalog),
+                    new Vector2(701f, 330f),
+                    CollectibleItem.ItemType.Crystal));
+            }
+
+            if (_currentRoom == 4)
+            {
+                _collectibles.Add(CreateCollectible(
+                    ItemAnimationFactory.CreateFlyStaw(_catalog),
+                    new Vector2(279f, 132f),
+                    CollectibleItem.ItemType.Strawberry,
+                    fliesAwayOnDash: true));
             }
         }
 
-        private static CollectibleItem CreateCollectible(ItemAnimation animation, Vector2 position, CollectibleItem.ItemType itemType = CollectibleItem.ItemType.Strawberry)
+        private void TriggerDashScaredCollectibles()
+        {
+            foreach (var collectible in _collectibles)
+            {
+                collectible.TriggerFlyAway();
+            }
+        }
+
+        private static CollectibleItem CreateCollectible(
+            ItemAnimation animation,
+            Vector2 position,
+            CollectibleItem.ItemType itemType = CollectibleItem.ItemType.Strawberry,
+            bool fliesAwayOnDash = false)
         {
             animation.Position = position;
             animation.Scale = GlobalConstants.DefaultScale;
-            return new CollectibleItem(animation, itemType);
+            return new CollectibleItem(animation, itemType, fliesAwayOnDash);
         }
 
         private void UpdateCollectibles(GameTime gameTime)
@@ -449,11 +528,11 @@ namespace Celeste.Scenes
         {
             return room switch
             {
-                1 => new Vector2(250f, 200f),
-                2 => new Vector2(150f, 300f),
-                3 => new Vector2(200f, 150f),
-                4 => new Vector2(250f, 150f),
-                5 => new Vector2(175f, 150f),
+                1 => new Vector2(45f, 336f),
+                2 => new Vector2(150f, 378f),
+                3 => new Vector2(150f, 396f),
+                4 => new Vector2(190f, 390f),
+                5 => new Vector2(160f, 376f),
                 _ => new Vector2(200f, 150f),
             };
         }

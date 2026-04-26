@@ -17,16 +17,23 @@ namespace Celeste.Items
 
         private static int _strawberryCount = 0;
         public static int StrawberryCount => _strawberryCount;
+        private const float FlyAwaySpeed = 420f;
+        private const float FlyAwayDespawnPadding = 64f;
 
         private readonly ItemAnimation _animation;
         private readonly CollectTextPrompt _prompt = new CollectTextPrompt();
 
         private readonly ItemType _itemType;
+        private readonly bool _fliesAwayOnDash;
 
-        public CollectibleItem(ItemAnimation animation, ItemType itemType = ItemType.Strawberry)
+        public CollectibleItem(
+            ItemAnimation animation,
+            ItemType itemType = ItemType.Strawberry,
+            bool fliesAwayOnDash = false)
         {
             _animation = animation ?? throw new ArgumentNullException(nameof(animation));
             _itemType = itemType;
+            _fliesAwayOnDash = fliesAwayOnDash;
         }
 
         public Vector2 Position
@@ -43,12 +50,14 @@ namespace Celeste.Items
 
         public bool Collected { get; private set; }
         public bool CollectAnimFinished { get; private set; }
+        public bool IsFlyingAway { get; private set; }
+        public bool Escaped { get; private set; }
 
         public Rectangle Bounds
         {
             get
             {
-                if (Collected)
+                if (Collected || IsFlyingAway || Escaped)
                 {
                     return Rectangle.Empty;
                 }
@@ -63,6 +72,8 @@ namespace Celeste.Items
         {
             Collected = false;
             CollectAnimFinished = false;
+            IsFlyingAway = false;
+            Escaped = false;
             _animation.Reset();
             _prompt.Reset();
         }
@@ -74,7 +85,7 @@ namespace Celeste.Items
 
         public bool TryCollect(Rectangle playerBounds)
         {
-            if (Collected || !Bounds.Intersects(playerBounds))
+            if (Collected || IsFlyingAway || Escaped || !Bounds.Intersects(playerBounds))
             {
                 return false;
             }
@@ -99,9 +110,36 @@ namespace Celeste.Items
             return true;
         }
 
+        public void TriggerFlyAway()
+        {
+            if (!_fliesAwayOnDash || Collected || IsFlyingAway || Escaped)
+            {
+                return;
+            }
+
+            IsFlyingAway = true;
+        }
+
         public void Update(GameTime gameTime)
         {
-            if (!Collected)
+            if (Escaped)
+            {
+                return;
+            }
+
+            if (IsFlyingAway)
+            {
+                float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _animation.Update(gameTime);
+                Position += new Vector2(0f, -FlyAwaySpeed * dt);
+
+                if (Position.Y + (_animation.Clip.FrameHeight * Scale) < -FlyAwayDespawnPadding)
+                {
+                    Escaped = true;
+                    IsFlyingAway = false;
+                }
+            }
+            else if (!Collected)
             {
                 _animation.Update(gameTime);
             }
@@ -118,6 +156,11 @@ namespace Celeste.Items
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            if (Escaped)
+            {
+                return;
+            }
+
             if (!Collected)
             {
                 _animation.Draw(spriteBatch);
