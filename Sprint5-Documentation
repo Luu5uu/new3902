@@ -6,17 +6,43 @@ Aaron was responsible for:
 
 Isaac was responsible for: Handling block replacement backlog, designing and creating a custom room, and adding foreground/background features/decorations to each room.
 
-Zijun was responsible for: 
+Zijun was responsible for: Complete the basic rewind function logic, optimize the climbing sound effect, and implement dash recharge after hitting the wall.
 
-Sihao was responsible for: 
+Sihao was responsible for: Add more mechanisms and shadow functions to the rewind feature, so that the rewind skill can be more reasonable. Fix the known bugs。
 
-Albert was responsible for: 
+Albert was responsible for: Responsible for implementing and placing MoveBlock, Spring, and CrushBlock, as well as completing the room transition system.
 
 --------------------------------------
 
 Code Review For Sprint 5
 Pull Requests:
+added CSV file for room 2 #28 request by Isaac Gonzales reviewed by Liuyc05
+Strengths:
+Successfully converted room 2 into a CSV file and added it to Content > rooms. This improves the project’s room data organization and makes future room editing and loading more manageable.
+Technical Concerns / Suggestions:
+The CSV conversion work is useful, but more validation may be needed to ensure all room data is correctly preserved after conversion. It is also suggested to keep the room formatting and naming conventions consistent for future room files.
 
-Adding CSV Files for Block Replacement #26-30  request by Isaac   reviewed by Albert
-Strenths: optimized room generation by converting classes into individual room csv files. Created the documentation file.
-Technical Concerns / Suggestions: In the future, add the hazard blocks to these files
+updated room 4 blocks / converted to csv #29 request by Isaac Gonzales reviewed by Liuyc05
+Strengths:
+Successfully updated the room 4 blocks and converted the room data into CSV format. This helps standardize the room structure and supports easier maintenance of level data.
+Technical Concerns / Suggestions:
+It would be helpful to verify that the new block placements exactly match the intended room design after conversion. Future improvements could include documenting the CSV structure more clearly for teammates working on level editing.
+
+level 5 blocks replaced #30 request by Isaac Gonzales reviewed by Liuyc05
+Strengths:
+Successfully replaced the level 5 blocks and added the CSV file for the fifth level. This contributes to the custom level layout workflow and keeps the room data pipeline more consistent.
+Technical Concerns / Suggestions:
+The implementation should be further tested to confirm that all replaced blocks behave correctly in gameplay. It may also be helpful to review whether the room layout remains balanced and visually consistent after the replacement.
+
+Finish the implement and place the spring, moveBlock and crushBlock #31 request by Liuyc05 reviewed by Luu5uu
+Strengths:
+Successfully completed the implementation and placement of Spring, MoveBlock, and CrushBlock. This adds important interactive gameplay elements and improves the completeness of the level design.
+Technical Concerns / Suggestions:
+Although the block placement is working well, additional testing may still be needed to ensure the interactions between these objects remain stable in different gameplay situations. It may also help to further polish object spacing and placement for smoother player experience.
+
+Madeline rewind #32 request by Luu5uu reviewed by KeenRSH
+Strengths:
+Successfully added the Madeline rewind feature and enabled dash refill after touching walls. This introduces a creative gameplay mechanic and expands the player movement system in a meaningful way.
+Technical Concerns / Suggestions:
+Since rewind directly affects player state and movement logic, more testing may be needed to ensure it works consistently with collisions, room transitions, and other mechanics. It may also be useful to further refine the balancing of dash refill behavior so the feature remains intuitive and fair in gameplay.
+
