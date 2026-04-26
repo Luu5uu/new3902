@@ -10,6 +10,7 @@ namespace Celeste.Scenes
     {
         private readonly string[] _menuOptions = { "CLIMB", "EXIT" };
         private SpriteFont _font;
+        private Texture2D _background;
         private KeyboardController _keyboard;
         private GamepadController _gamepad;
         private int _selectedIndex;
@@ -21,6 +22,7 @@ namespace Celeste.Scenes
         public override void LoadContent()
         {
             _font = Game.Content.Load<SpriteFont>("MenuFont");
+            _background = Game.Content.Load<Texture2D>("bg");
             _keyboard = new KeyboardController();
             _gamepad = new GamepadController();
             EnsureMenuBgm();
@@ -46,6 +48,7 @@ namespace Celeste.Scenes
         {
             spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
+            spriteBatch.Draw(_background, Game.GraphicsDevice.Viewport.Bounds, Color.White);
             spriteBatch.DrawString(_font, "CELESTE", new Vector2(100, 140), Color.White, 0f, Vector2.Zero, 2.2f, SpriteEffects.None, 0f);
             spriteBatch.DrawString(_font, "UP / DOWN TO CHOOSE", new Vector2(100, 220), Color.LightGray);
             spriteBatch.DrawString(_font, "ENTER TO CONFIRM   Q / ESC TO EXIT", new Vector2(100, 250), Color.LightGray);

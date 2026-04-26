@@ -18,6 +18,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using System;
 using BgmAudioPlayer = Celeste.BGMPlayer.BGMPlayer;
 
 namespace Celeste.Scenes
@@ -33,12 +34,17 @@ namespace Celeste.Scenes
         private Texture2D _pixelTexture;
         private DebugOverlay _debugOverlay;
         private Texture2D _deathDotTex;
+        private Texture2D _background;
         private ControllerLoader _controllerLoader;
         private SpriteFont _uiFont;
+
         private float _gameTimer = 0f;
         private bool _timerRunning = true;
         private bool _showUI = true;
         private KeyboardState _previousKeyboardState;
+        private static int _sessionDeathCount = 0;
+        private static int _sessionCollectedStrawberryCount = 0;
+        private static readonly HashSet<string> _sessionCollectedStrawberryIds = new();
 
         private MapBuilder _worldMap;
         private RoomOne _roomOne;
@@ -79,6 +85,7 @@ namespace Celeste.Scenes
             SoundManager.Load(Game.Content);
 
             _uiFont = Game.Content.Load<SpriteFont>("MenuFont");
+            _background = Game.Content.Load<Texture2D>("bg");
 
 
             var startPos = new Vector2(
@@ -122,7 +129,7 @@ namespace Celeste.Scenes
             _roomFour = new RoomFour(_worldMap, factory);
             _roomFive = new RoomFive(_worldMap, factory);
 
-            CollectibleItem.ResetStrawberryCount();
+
             StartGameplayBgm();
             RebuildCurrentRoom(resetPlayer: false);
         }
@@ -143,8 +150,8 @@ namespace Celeste.Scenes
                 _showUI = !_showUI;
             }
 
+            bool rewindPressed = keyboard.IsKeyDown(Keys.V) && _previousKeyboardState.IsKeyUp(Keys.V);
 
-            bool rewindPressed = _controllerLoader.RewindPressedThisFrame;
 
             if (rewindPressed && !_player.IsInDeathSequence)
             {
@@ -210,6 +217,7 @@ namespace Celeste.Scenes
 
             if (_player.ConsumeLevelResetRequest())
             {
+                _sessionDeathCount++;
                 RebuildCurrentRoom(resetPlayer: true);
             }
             else
@@ -254,9 +262,9 @@ namespace Celeste.Scenes
                 _gameTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
-            if (_player.Bounds.Bottom > _worldBound.Bottom)
+            if (_player.Bounds.Bottom > _worldBound.Bottom && !_player.IsInDeathSequence)
             {
-                _player.Reset();
+                _player.Die();
             }
 
             _previousKeyboardState = keyboard;
@@ -268,6 +276,7 @@ namespace Celeste.Scenes
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
 
+            spriteBatch.Draw(_background, Game.GraphicsDevice.Viewport.Bounds, Color.White);
             _worldMap.Draw(spriteBatch);
             DrawCollectibles(spriteBatch);
             if (_isRecordingRewind || _isRewinding)
@@ -295,11 +304,14 @@ namespace Celeste.Scenes
 
             if (_showUI)
             {
-                string strawberryText = $"Strawberries: {CollectibleItem.StrawberryCount}";
+                string strawberryText = $"Strawberries: {_sessionCollectedStrawberryCount}";
                 spriteBatch.DrawString(_uiFont, strawberryText, new Vector2(10, 10), Color.White);
 
+                string deathText = $"Deaths: {_sessionDeathCount}";
+                spriteBatch.DrawString(_uiFont, deathText, new Vector2(10, 40), Color.White);
+
                 string timerText = $"Time: {FormatTime(_gameTimer)}";
-                spriteBatch.DrawString(_uiFont, timerText, new Vector2(10, 40), Color.White);
+                spriteBatch.DrawString(_uiFont, timerText, new Vector2(10, 70), Color.White);
             }
 
             spriteBatch.End();
@@ -325,7 +337,6 @@ namespace Celeste.Scenes
 
             _gameTimer = 0f;
             _timerRunning = true;
-            CollectibleItem.ResetStrawberryCount();
         }
 
         public void JumpToRoom(int roomNumber)
@@ -455,17 +466,35 @@ namespace Celeste.Scenes
         {
             _collectibles.Clear();
 
+            Vector2 spawn = _player.RespawnPoint;
             if (_currentRoom == 0)
             {
-                Vector2 spawn = _player.RespawnPoint;
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateNormalStaw(_catalog), spawn + new Vector2(-80f, -40f), CollectibleItem.ItemType.Strawberry));
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateFlyStaw(_catalog), spawn + new Vector2(0f, -60f), CollectibleItem.ItemType.Strawberry, fliesAwayOnDash: true));
-                _collectibles.Add(CreateCollectible(ItemAnimationFactory.CreateCrystal(_catalog), spawn + new Vector2(90f, -20f), CollectibleItem.ItemType.Crystal));
+                _collectibles.Add(CreateCollectible(
+                    "room0_straw_0",
+                    ItemAnimationFactory.CreateNormalStaw(_catalog),
+                    spawn + new Vector2(-80f, -40f),
+                    CollectibleItem.ItemType.Strawberry));
+
+                _collectibles.Add(CreateCollectible(
+                    "room0_straw_1",
+                    ItemAnimationFactory.CreateFlyStaw(_catalog),
+                    spawn + new Vector2(0f, -60f),
+                    CollectibleItem.ItemType.Strawberry,
+                    fliesAwayOnDash: true));
+
+                _collectibles.Add(CreateCollectible(
+                    "room0_crystal_0",
+                    ItemAnimationFactory.CreateCrystal(_catalog),
+                    spawn + new Vector2(90f, -20f),
+                    CollectibleItem.ItemType.Crystal));
+
+                return;
             }
 
             if (_currentRoom == 2)
             {
                 _collectibles.Add(CreateCollectible(
+                    "room2_straw_0",
                     ItemAnimationFactory.CreateNormalStaw(_catalog),
                     new Vector2(207f, 68f),
                     CollectibleItem.ItemType.Strawberry));
@@ -474,10 +503,13 @@ namespace Celeste.Scenes
             if (_currentRoom == 3)
             {
                 _collectibles.Add(CreateCollectible(
+                    "room3_straw_0",
                     ItemAnimationFactory.CreateNormalStaw(_catalog),
                     new Vector2(689f, 275f),
                     CollectibleItem.ItemType.Strawberry));
+
                 _collectibles.Add(CreateCollectible(
+                    "room3_crystal_0",
                     ItemAnimationFactory.CreateCrystal(_catalog),
                     new Vector2(701f, 330f),
                     CollectibleItem.ItemType.Crystal));
@@ -486,6 +518,7 @@ namespace Celeste.Scenes
             if (_currentRoom == 4)
             {
                 _collectibles.Add(CreateCollectible(
+                    "room4_straw_0",
                     ItemAnimationFactory.CreateFlyStaw(_catalog),
                     new Vector2(279f, 132f),
                     CollectibleItem.ItemType.Strawberry,
@@ -501,7 +534,8 @@ namespace Celeste.Scenes
             }
         }
 
-        private static CollectibleItem CreateCollectible(
+        private CollectibleItem CreateCollectible(
+            string collectibleId,
             ItemAnimation animation,
             Vector2 position,
             CollectibleItem.ItemType itemType = CollectibleItem.ItemType.Strawberry,
@@ -509,7 +543,15 @@ namespace Celeste.Scenes
         {
             animation.Position = position;
             animation.Scale = GlobalConstants.DefaultScale;
-            return new CollectibleItem(animation, itemType, fliesAwayOnDash);
+
+            var collectible = new CollectibleItem(collectibleId, animation, itemType, fliesAwayOnDash);
+
+            if (itemType == CollectibleItem.ItemType.Strawberry)
+            {
+                collectible.SetPreviouslyCollected(_sessionCollectedStrawberryIds.Contains(collectibleId));
+            }
+
+            return collectible;
         }
 
         private void UpdateCollectibles(GameTime gameTime)
@@ -520,6 +562,14 @@ namespace Celeste.Scenes
 
                 if (collectible.TryCollect(_player.Bounds))
                 {
+                    if (collectible.Type == CollectibleItem.ItemType.Strawberry &&
+                        !_sessionCollectedStrawberryIds.Contains(collectible.CollectibleId))
+                    {
+                        _sessionCollectedStrawberryIds.Add(collectible.CollectibleId);
+                        _sessionCollectedStrawberryCount++;
+                        collectible.SetPreviouslyCollected(true);
+                    }
+
                     SoundManager.Play("collect");
                     _player.canDash = true;
                     _player.Maddy.OnDashRefill();
