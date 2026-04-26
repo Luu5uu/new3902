@@ -62,8 +62,10 @@ namespace Celeste.Scenes
         private bool _isRecordingRewind;
         private bool _isRewinding;
         private float _rewindRecordTimer;
+        private float _rewindCooldownTimer;
 
         private const float RewindRecordDuration = 3.0f;
+        private const float RewindCooldownDuration = 3.0f;
         private static readonly RoomTransitionZone[] RoomTransitionZones =
         {
             new(1, new Rectangle(620, 0, 120, 36), 2),
@@ -132,6 +134,7 @@ namespace Celeste.Scenes
 
             StartGameplayBgm();
             RebuildCurrentRoom(resetPlayer: false);
+            _rewindCooldownTimer = RewindCooldownDuration;
         }
 
         public override void Update(GameTime gameTime)
@@ -140,7 +143,16 @@ namespace Celeste.Scenes
             
             _debugOverlay.HandleInput(keyboard, _player);
             _controllerLoader.Update();
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            if (_rewindCooldownTimer > 0f)
+            {
+                _rewindCooldownTimer -= dt;
+                if (_rewindCooldownTimer < 0f)
+                {
+                    _rewindCooldownTimer = 0f;
+                }
+            }
             Vector2 previousPosition = _player.position;
             bool wasCrouching = _player.isCrouching;
             bool wasDashing = _player.isDashing;
@@ -152,8 +164,7 @@ namespace Celeste.Scenes
 
             bool rewindPressed = keyboard.IsKeyDown(Keys.V) && _previousKeyboardState.IsKeyUp(Keys.V);
 
-
-            if (rewindPressed && !_player.IsInDeathSequence)
+            if (rewindPressed && !_player.IsInDeathSequence && _rewindCooldownTimer <= 0f)
             {
                 if (!_isRecordingRewind && !_isRewinding)
                 {
@@ -165,17 +176,19 @@ namespace Celeste.Scenes
                 }
                 else if (_isRecordingRewind)
                 {
+                    _isRecordingRewind = false;
+
                     if (_player.CanRewind)
                     {
-                        _isRecordingRewind = false;
                         _isRewinding = true;
                     }
                     else
                     {
-                        _isRecordingRewind = false;
                         _player.ClearRewindHistory();
                         _player.SeedInitialRewindSnapshot();
                     }
+
+                    _rewindCooldownTimer = RewindCooldownDuration;
                 }
             }
 
@@ -219,6 +232,7 @@ namespace Celeste.Scenes
             {
                 _sessionDeathCount++;
                 RebuildCurrentRoom(resetPlayer: true);
+                _rewindCooldownTimer = RewindCooldownDuration;
             }
             else
             {
@@ -245,12 +259,13 @@ namespace Celeste.Scenes
 
             if (_isRecordingRewind)
             {
-                _rewindRecordTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _rewindRecordTimer -= dt;
 
                 if (_rewindRecordTimer <= 0f)
                 {
                     _isRecordingRewind = false;
                     _rewindRecordTimer = 0f;
+                    _rewindCooldownTimer = RewindCooldownDuration;
 
                     _player.ClearRewindHistory();
                     _player.SeedInitialRewindSnapshot();
@@ -334,6 +349,7 @@ namespace Celeste.Scenes
             _isRecordingRewind = false;
             _isRewinding = false;
             _rewindRecordTimer = 0f;
+            _rewindCooldownTimer = RewindCooldownDuration;
 
             _gameTimer = 0f;
             _timerRunning = true;
@@ -397,6 +413,7 @@ namespace Celeste.Scenes
                 _isRecordingRewind = false;
                 _isRewinding = false;
                 _rewindRecordTimer = 0f;
+                _rewindCooldownTimer = RewindCooldownDuration;
                 ChangeRoom(zone.TargetRoom, resetPlayer: true);
                 _player.UpdateSprite(gameTime);
                 return true;
