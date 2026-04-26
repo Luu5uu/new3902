@@ -33,6 +33,7 @@ namespace Celeste.Scenes
         private Texture2D _pixelTexture;
         private DebugOverlay _debugOverlay;
         private Texture2D _deathDotTex;
+        private Texture2D _background;
         private ControllerLoader _controllerLoader;
         private SpriteFont _uiFont;
         private float _gameTimer = 0f;
@@ -79,6 +80,7 @@ namespace Celeste.Scenes
             SoundManager.Load(Game.Content);
 
             _uiFont = Game.Content.Load<SpriteFont>("MenuFont");
+            _background = Game.Content.Load<Texture2D>("bg");
 
 
             var startPos = new Vector2(
@@ -268,6 +270,7 @@ namespace Celeste.Scenes
                 samplerState: SamplerState.PointClamp,
                 rasterizerState: RasterizerState.CullNone);
 
+            spriteBatch.Draw(_background, Game.GraphicsDevice.Viewport.Bounds, Color.White);
             _worldMap.Draw(spriteBatch);
             DrawCollectibles(spriteBatch);
             if (_isRecordingRewind || _isRewinding)
