@@ -13,6 +13,7 @@ namespace Celeste.MadelineStates
             m.ConsumeJumpGrace();
             m.velocityX += PlayerJumpHorizontalBoost * m.moveX;
             m.velocityY = -PlayerJumpSpeed;
+            m.ApplyLiftBoostToVelocity();
             m.BeginVariableJump();
             m.onGround  = false;
             m.Maddy.JumpFast();

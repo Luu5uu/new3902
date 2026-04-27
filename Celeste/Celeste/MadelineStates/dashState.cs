@@ -46,6 +46,7 @@ namespace Celeste.MadelineStates
             }
 
             Vector2 dashVelocity = _dashDirection * PlayerDashSpeed;
+            dashVelocity += m.GetStoredLiftBoost();
             if (System.Math.Sign(_horizontalSpeedBeforeDash) == System.Math.Sign(dashVelocity.X)
                 && System.Math.Abs(_horizontalSpeedBeforeDash) > System.Math.Abs(dashVelocity.X))
             {
@@ -97,6 +98,11 @@ namespace Celeste.MadelineStates
             if (!_dashStarted)
             {
                 BeginDash(m);
+            }
+
+            if (_dashDirection.Y < 0f && m.ConsumeJumpPress() && m.TrySuperWallJump())
+            {
+                return;
             }
 
             _ghostTimer -= dt;
