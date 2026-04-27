@@ -8,6 +8,7 @@
         Fall,
         Dash,
         Dangle,
+        StarFly,
         Climb,
         Crouch
     }

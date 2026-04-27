@@ -30,6 +30,7 @@ namespace Celeste.Character
             if (_state == fallState) return RewindStateKind.Fall;
             if (_state == dashState) return RewindStateKind.Dash;
             if (_state == dangleState) return RewindStateKind.Dangle;
+            if (_state == starFlyState) return RewindStateKind.StarFly;
             if (_state == climbState) return RewindStateKind.Climb;
             if (_state == crouchState) return RewindStateKind.Crouch;
 
@@ -46,6 +47,7 @@ namespace Celeste.Character
                 RewindStateKind.Fall => fallState,
                 RewindStateKind.Dash => dashState,
                 RewindStateKind.Dangle => dangleState,
+                RewindStateKind.StarFly => starFlyState,
                 RewindStateKind.Climb => climbState,
                 RewindStateKind.Crouch => crouchState,
                 _ => standState
@@ -75,6 +77,7 @@ namespace Celeste.Character
                 IsClimbing = isClimbing,
                 IsDashing = isDashing,
                 IsDangle = isDangle,
+                IsStarFlying = isStarFlying,
                 CanDash = canDash,
                 ClimbStamina = climbStamina,
 
@@ -83,6 +86,17 @@ namespace Celeste.Character
                 JumpGraceTimer = _jumpGraceTimer,
                 VariableJumpTimer = _variableJumpTimer,
                 VariableJumpSpeed = _variableJumpSpeed,
+                StoredLiftSpeed = _storedLiftSpeed,
+                StoredLiftTimer = _storedLiftTimer,
+                ClimbJumpConversionTimer = _climbJumpConversionTimer,
+                ClimbJumpConversionDirection = _climbJumpConversionDirection,
+                ClimbJumpRefundAmount = _climbJumpRefundAmount,
+                StarFlyTimer = _starFlyTimer,
+                StarFlyTransformTimer = _starFlyTransformTimer,
+                StarFlyAngle = _starFlyAngle,
+                StarFlyCurrentSpeed = _starFlyCurrentSpeed,
+                StarFlySpeedLerp = _starFlySpeedLerp,
+                StarFlyTransforming = _starFlyTransforming,
 
                 LastAim = _lastAim,
                 DashRecoveryQueued = _dashRecoveryQueued,
@@ -116,6 +130,7 @@ namespace Celeste.Character
             isClimbing = snapshot.IsClimbing;
             isDashing = snapshot.IsDashing;
             isDangle = snapshot.IsDangle;
+            isStarFlying = snapshot.IsStarFlying;
             canDash = snapshot.CanDash;
             climbStamina = snapshot.ClimbStamina;
 
@@ -124,6 +139,17 @@ namespace Celeste.Character
             _jumpGraceTimer = snapshot.JumpGraceTimer;
             _variableJumpTimer = snapshot.VariableJumpTimer;
             _variableJumpSpeed = snapshot.VariableJumpSpeed;
+            _storedLiftSpeed = snapshot.StoredLiftSpeed;
+            _storedLiftTimer = snapshot.StoredLiftTimer;
+            _climbJumpConversionTimer = snapshot.ClimbJumpConversionTimer;
+            _climbJumpConversionDirection = snapshot.ClimbJumpConversionDirection;
+            _climbJumpRefundAmount = snapshot.ClimbJumpRefundAmount;
+            _starFlyTimer = snapshot.StarFlyTimer;
+            _starFlyTransformTimer = snapshot.StarFlyTransformTimer;
+            _starFlyAngle = snapshot.StarFlyAngle;
+            _starFlyCurrentSpeed = snapshot.StarFlyCurrentSpeed;
+            _starFlySpeedLerp = snapshot.StarFlySpeedLerp;
+            _starFlyTransforming = snapshot.StarFlyTransforming;
 
             _lastAim = snapshot.LastAim;
             _dashRecoveryQueued = snapshot.DashRecoveryQueued;
@@ -170,6 +196,7 @@ namespace Celeste.Character
                     last.IsClimbing == snapshot.IsClimbing &&
                     last.IsDashing == snapshot.IsDashing &&
                     last.IsDangle == snapshot.IsDangle &&
+                    last.IsStarFlying == snapshot.IsStarFlying &&
                     last.IsCrouching == snapshot.IsCrouching &&
                     last.StateKind == snapshot.StateKind;
 
