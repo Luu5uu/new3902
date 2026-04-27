@@ -352,7 +352,10 @@ namespace Celeste.Collision
             if (found)
             {
                 _player.position.X = bestLeft - p.Width / 2f;
-                _player.moveX = 0;
+                if (!_player.isStarFlying)
+                {
+                    _player.moveX = 0;
+                }
                 _player.touchingRightWall = true;
                 if (_player.HandleStarFlyHorizontalCollision())
                 {
@@ -405,7 +408,10 @@ namespace Celeste.Collision
             if (found)
             {
                 _player.position.X = bestRight + p.Width / 2f;
-                _player.moveX = 0;
+                if (!_player.isStarFlying)
+                {
+                    _player.moveX = 0;
+                }
                 _player.touchingLeftWall = true;
                 if (_player.HandleStarFlyHorizontalCollision())
                 {

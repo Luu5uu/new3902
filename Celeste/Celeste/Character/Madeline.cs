@@ -67,9 +67,9 @@ namespace Celeste.Character
         private float _starFlyAngle;
         private float _starFlyCurrentSpeed;
         private float _starFlySpeedLerp;
-        private float _starFlyTrailTimer;
         private bool _starFlyTransforming;
         private Color _starFlyColor = StarFlyGold;
+        private Vector2 _starFlyStartDirection = new Vector2(0f, -1f);
         private float _wallJumpCooldownLeft;
         private float _wallJumpCooldownRight;
         private const float WallJumpSameSideCooldown = 0.15f;
@@ -146,11 +146,10 @@ namespace Celeste.Character
         private bool _levelResetRequested;
 
         private struct GhostFrame { public Vector2 Position; public bool FaceLeft; public float Alpha; }
-        private struct StarFlyTrailFrame { public Vector2 Position; public float Alpha; public Color Color; }
         private readonly List<GhostFrame> _ghosts = new();
-        private readonly List<StarFlyTrailFrame> _starFlyTrail = new();
         private Texture2D _ghostBodyTex;
         private Texture2D _starFlyDotTex;
+        private HairRenderer _starFlyTail;
         private ParticleSystem _dashParticles;
         private BurstEmitter _dashBurstEmitter;
         private OrbitRingEffect _dashRingEffect;
@@ -190,6 +189,9 @@ namespace Celeste.Character
             dangleState = new dangleState();
             starFlyState = new StarFlyState();
             _starFlyDotTex = content.Load<Texture2D>("hair00");
+            _starFlyTail = new HairRenderer();
+            _starFlyTail.LoadContent(content);
+            _starFlyTail.DrawScale = DefaultScale;
             _smokeFrames = new[]
             {
                 content.Load<Texture2D>("smoke0"),
@@ -312,10 +314,9 @@ namespace Celeste.Character
             _starFlyAngle = -MathHelper.PiOver2;
             _starFlyCurrentSpeed = 0f;
             _starFlySpeedLerp = 0f;
-            _starFlyTrailTimer = 0f;
             _starFlyTransforming = false;
             _starFlyColor = StarFlyGold;
-            _starFlyTrail.Clear();
+            _starFlyStartDirection = new Vector2(0f, -1f);
             _tiredFlashPhase = 0f;
             _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
             _landDustParticles?.Clear();
@@ -438,7 +439,7 @@ namespace Celeste.Character
 
             _dashParticles?.Update(dt);
             _landDustParticles?.Update(dt);
-            UpdateStarFlyTrail(dt);
+            UpdateStarFlyTrail(gameTime);
             if (_dashRingEffect != null)
             {
                 _dashRingEffect.Update(dt);
@@ -609,10 +610,11 @@ namespace Celeste.Character
             _dashRingEffect?.Draw(spriteBatch);
             _dashParticles?.Draw(spriteBatch);
             _landDustParticles?.Draw(spriteBatch);
-            DrawStarFlyTrail(spriteBatch);
             if (isStarFlying)
             {
-                DrawStarFlyBody(spriteBatch);
+                DrawStarFlyBody(spriteBatch, drawOutline: true);
+                DrawStarFlyTrail(spriteBatch);
+                DrawStarFlyBody(spriteBatch, drawOutline: false);
                 return;
             }
 
@@ -758,69 +760,28 @@ namespace Celeste.Character
             };
         }
 
-        private void UpdateStarFlyTrail(float dt)
+        private void UpdateStarFlyTrail(GameTime gameTime)
         {
-            for (int i = _starFlyTrail.Count - 1; i >= 0; i--)
+            if (!isStarFlying || _starFlyTail == null)
             {
-                StarFlyTrailFrame trail = _starFlyTrail[i];
-                trail.Alpha -= dt * 5f;
-                if (trail.Alpha <= 0f)
-                {
-                    _starFlyTrail.RemoveAt(i);
-                    continue;
-                }
-
-                _starFlyTrail[i] = trail;
-            }
-        }
-
-        private void AddStarFlyTrail()
-        {
-            Vector2 center = GetStarFlyCenter();
-            Vector2 velocity = new Vector2(velocityX, velocityY);
-            if (velocity != Vector2.Zero)
-            {
-                velocity.Normalize();
-                center -= velocity * 4f * DefaultScale;
+                return;
             }
 
-            _starFlyTrail.Add(new StarFlyTrailFrame
-            {
-                Position = center,
-                Alpha = 0.55f,
-                Color = _starFlyColor
-            });
+            _starFlyTail.DrawScale = DefaultScale;
+            _starFlyTail.UpdateFloatingTail(gameTime, GetStarFlyCenter(), GetStarFlyTailDirection());
         }
 
         private void DrawStarFlyTrail(SpriteBatch spriteBatch)
         {
-            if (_starFlyDotTex == null)
+            if (!isStarFlying)
             {
                 return;
             }
 
-            if (_starFlyTrail.Count < 2)
-            {
-                return;
-            }
-
-            for (int i = 1; i < _starFlyTrail.Count; i++)
-            {
-                StarFlyTrailFrame previous = _starFlyTrail[i - 1];
-                StarFlyTrailFrame current = _starFlyTrail[i];
-                float currentT = i / (float)(_starFlyTrail.Count - 1);
-                float previousWidth = MathHelper.Lerp(1.4f, 8f, (i - 1) / (float)(_starFlyTrail.Count - 1)) * DefaultScale;
-                float currentWidth = MathHelper.Lerp(1.4f, 8f, currentT) * DefaultScale;
-                float alpha = Math.Min(previous.Alpha, current.Alpha);
-
-                DrawStarFlyTailSegment(spriteBatch, previous.Position, current.Position, previousWidth, currentWidth, Color.Black * alpha * 0.6f, DefaultScale);
-                DrawStarFlyTailSegment(spriteBatch, previous.Position, current.Position, previousWidth, currentWidth, current.Color * alpha, 0f);
-            }
-
-            DrawStarFlyTailCap(spriteBatch, _starFlyTrail[0], 1.4f * DefaultScale);
+            _starFlyTail?.DrawTail(spriteBatch, _starFlyColor, DefaultScale);
         }
 
-        private void DrawStarFlyBody(SpriteBatch spriteBatch)
+        private void DrawStarFlyBody(SpriteBatch spriteBatch, bool drawOutline = true)
         {
             if (_starFlyDotTex == null)
             {
@@ -839,18 +800,21 @@ namespace Celeste.Character
                 new Vector2(0f, -DefaultScale)
             };
 
-            foreach (Vector2 offset in outlineOffsets)
+            if (drawOutline)
             {
-                spriteBatch.Draw(
-                    _starFlyDotTex,
-                    center + offset,
-                    null,
-                    Color.Black * 0.75f,
-                    0f,
-                    origin,
-                    scale,
-                    SpriteEffects.None,
-                    0f);
+                foreach (Vector2 offset in outlineOffsets)
+                {
+                    spriteBatch.Draw(
+                        _starFlyDotTex,
+                        center + offset,
+                        null,
+                        Color.Black * 0.75f,
+                        0f,
+                        origin,
+                        scale,
+                        SpriteEffects.None,
+                        0f);
+                }
             }
 
             spriteBatch.Draw(
@@ -865,64 +829,44 @@ namespace Celeste.Character
                 0f);
         }
 
-        private void DrawStarFlyTailSegment(
-            SpriteBatch spriteBatch,
-            Vector2 from,
-            Vector2 to,
-            float fromWidth,
-            float toWidth,
-            Color color,
-            float outlineOffset)
+        private void ResetStarFlyTail(Vector2 direction)
         {
-            Vector2 direction = to - from;
-            if (direction == Vector2.Zero)
+            if (_starFlyTail == null)
             {
                 return;
             }
 
-            direction.Normalize();
-            Vector2 normal = new Vector2(-direction.Y, direction.X);
-            from += new Vector2(outlineOffset, 0f);
-            to += new Vector2(outlineOffset, 0f);
-
-            VertexPositionColor[] vertices =
-            {
-                new(new Vector3(from + normal * fromWidth * 0.5f, 0f), color),
-                new(new Vector3(from - normal * fromWidth * 0.5f, 0f), color),
-                new(new Vector3(to + normal * toWidth * 0.5f, 0f), color),
-                new(new Vector3(to - normal * toWidth * 0.5f, 0f), color)
-            };
-
-            short[] indices = { 0, 1, 2, 2, 1, 3 };
-            spriteBatch.GraphicsDevice.DrawUserIndexedPrimitives(
-                PrimitiveType.TriangleList,
-                vertices,
-                0,
-                vertices.Length,
-                indices,
-                0,
-                2);
-        }
-
-        private void DrawStarFlyTailCap(SpriteBatch spriteBatch, StarFlyTrailFrame trail, float width)
-        {
-            Vector2 origin = new Vector2(_starFlyDotTex.Width / 2f, _starFlyDotTex.Height / 2f);
-            float scale = width / _starFlyDotTex.Width;
-            spriteBatch.Draw(
-                _starFlyDotTex,
-                trail.Position,
-                null,
-                trail.Color * trail.Alpha,
-                0f,
-                origin,
-                scale,
-                SpriteEffects.None,
-                0f);
+            _starFlyTail.DrawScale = DefaultScale;
+            _starFlyTail.ResetFloatingTail(GetStarFlyCenter(), direction);
         }
 
         private Vector2 GetStarFlyCenter()
         {
             return position + new Vector2(0f, -PlayerStarFlyHitboxHeight * 0.5f);
+        }
+
+        private Vector2 GetStarFlyTailDirection()
+        {
+            Vector2 velocity = new Vector2(velocityX, velocityY);
+            if (velocity != Vector2.Zero)
+            {
+                velocity.Normalize();
+                return velocity;
+            }
+
+            return AngleToVector(_starFlyAngle);
+        }
+
+        private Vector2 GetStarFlyInputDirection()
+        {
+            Vector2 input = new Vector2(moveX, moveY);
+            if (input.LengthSquared() > 0.0001f)
+            {
+                input.Normalize();
+                return input;
+            }
+
+            return new Vector2(0f, -1f);
         }
 
         internal Vector2 GetDeathDirection()
@@ -1232,7 +1176,8 @@ namespace Celeste.Character
 
         public void BounceAwayFrom(Vector2 source)
         {
-            Vector2 center = position + new Vector2(0f, -PlayerNormalHitboxHeight * 0.5f);
+            Rectangle bounds = Bounds;
+            Vector2 center = new Vector2(bounds.Center.X, bounds.Center.Y);
             Vector2 direction = center - source;
             if (direction == Vector2.Zero)
             {
@@ -1312,10 +1257,10 @@ namespace Celeste.Character
             _starFlyTransforming = true;
             _starFlySpeedLerp = 0f;
             _starFlyCurrentSpeed = 0f;
-            _starFlyAngle = -MathHelper.PiOver2;
-            _starFlyTrailTimer = 0f;
+            _starFlyStartDirection = GetStarFlyInputDirection();
+            _starFlyAngle = (float)Math.Atan2(_starFlyStartDirection.Y, _starFlyStartDirection.X);
             _starFlyColor = StarFlyGold;
-            _starFlyTrail.Clear();
+            ResetStarFlyTail(_starFlyStartDirection);
         }
 
         public void UpdateStarFly(float dt)
@@ -1373,7 +1318,7 @@ namespace Celeste.Character
                     : StarFlyGold;
 
             Vector2 input = new Vector2(moveX, moveY);
-            bool hasInput = input != Vector2.Zero;
+            bool hasInput = input.LengthSquared() > 0.0001f;
             if (hasInput)
             {
                 input.Normalize();
@@ -1407,13 +1352,6 @@ namespace Celeste.Character
             Vector2 velocity = AngleToVector(_starFlyAngle) * _starFlyCurrentSpeed;
             velocityX = velocity.X;
             velocityY = velocity.Y;
-
-            _starFlyTrailTimer -= dt;
-            if (_starFlyTrailTimer <= 0f)
-            {
-                AddStarFlyTrail();
-                _starFlyTrailTimer = PlayerStarFlyTrailInterval;
-            }
         }
 
         public void EndStarFly()
@@ -1421,7 +1359,6 @@ namespace Celeste.Character
             ResolveStarFlyExitHitbox();
             isStarFlying = false;
             _starFlyTransforming = false;
-            _starFlyTrailTimer = 0f;
             _starFlyColor = StarFlyGold;
         }
 
@@ -1438,14 +1375,7 @@ namespace Celeste.Character
                 return true;
             }
 
-            if (_starFlyTimer < PlayerStarFlyEndNoBounceTime)
-            {
-                velocityX = 0f;
-            }
-            else
-            {
-                velocityX *= PlayerStarFlyWallBounce;
-            }
+            velocityX = 0f;
 
             SyncStarFlyFromVelocity();
             return true;
@@ -1458,14 +1388,7 @@ namespace Celeste.Character
                 return false;
             }
 
-            if (_starFlyTimer < PlayerStarFlyEndNoBounceTime)
-            {
-                velocityY = 0f;
-            }
-            else
-            {
-                velocityY *= PlayerStarFlyWallBounce;
-            }
+            velocityY = 0f;
 
             SyncStarFlyFromVelocity();
             return true;
@@ -1473,24 +1396,19 @@ namespace Celeste.Character
 
         private void BeginStarFlyMovement()
         {
-            Vector2 input = new Vector2(moveX, moveY);
-            if (input == Vector2.Zero)
+            Vector2 direction = _starFlyStartDirection;
+            if (direction == Vector2.Zero)
             {
-                input = new Vector2(0f, -1f);
-            }
-            else
-            {
-                input.Normalize();
+                direction = new Vector2(0f, -1f);
             }
 
-            _starFlyAngle = (float)Math.Atan2(input.Y, input.X);
+            _starFlyAngle = (float)Math.Atan2(direction.Y, direction.X);
             _starFlyCurrentSpeed = PlayerStarFlyStartSpeed;
-            Vector2 velocity = input * _starFlyCurrentSpeed;
+            Vector2 velocity = direction * _starFlyCurrentSpeed;
             velocityX = velocity.X;
             velocityY = velocity.Y;
             _starFlyTransforming = false;
             _starFlyTimer = PlayerStarFlyTime;
-            AddStarFlyTrail();
         }
 
         private void FinishStarFlyTimer()

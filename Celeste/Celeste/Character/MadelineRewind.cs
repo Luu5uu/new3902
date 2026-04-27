@@ -97,6 +97,7 @@ namespace Celeste.Character
                 StarFlyCurrentSpeed = _starFlyCurrentSpeed,
                 StarFlySpeedLerp = _starFlySpeedLerp,
                 StarFlyTransforming = _starFlyTransforming,
+                StarFlyStartDirection = _starFlyStartDirection,
 
                 LastAim = _lastAim,
                 DashRecoveryQueued = _dashRecoveryQueued,
@@ -150,6 +151,13 @@ namespace Celeste.Character
             _starFlyCurrentSpeed = snapshot.StarFlyCurrentSpeed;
             _starFlySpeedLerp = snapshot.StarFlySpeedLerp;
             _starFlyTransforming = snapshot.StarFlyTransforming;
+            _starFlyStartDirection = snapshot.StarFlyStartDirection;
+            if (isStarFlying)
+            {
+                ResetStarFlyTail(_starFlyStartDirection == Vector2.Zero
+                    ? AngleToVector(_starFlyAngle)
+                    : _starFlyStartDirection);
+            }
 
             _lastAim = snapshot.LastAim;
             _dashRecoveryQueued = snapshot.DashRecoveryQueued;

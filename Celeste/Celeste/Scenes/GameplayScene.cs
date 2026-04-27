@@ -74,6 +74,7 @@ namespace Celeste.Scenes
 
         private const float RewindRecordDuration = 3.0f;
         private const float RewindCooldownDuration = 3.0f;
+        private const int RoomTransitionOutOfBoundsMargin = 160;
         private static readonly RoomTransitionZone[] RoomTransitionZones =
         {
             new(1, new Rectangle(620, 0, 120, 36), 2),
@@ -258,7 +259,7 @@ namespace Celeste.Scenes
                 _hazardCollisionSystem.ResolveHazardCollision();
                 _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching, dt);
 
-                if (TryHandleRoomTransition(gameTime))
+                if (TryHandleRoomTransition(gameTime, previousPosition, wasCrouching))
                 {
                     _previousKeyboardState = keyboard;
                     return;
@@ -421,14 +422,17 @@ namespace Celeste.Scenes
             RebuildCurrentRoom(resetPlayer);
         }
 
-        private bool TryHandleRoomTransition(GameTime gameTime)
+        private bool TryHandleRoomTransition(GameTime gameTime, Vector2 previousPosition, bool previousCrouching)
         {
             Rectangle playerBounds = _player.Bounds;
+            Rectangle previousBounds = _player.GetBoundsAt(previousPosition, previousCrouching);
+            Rectangle sweptBounds = Rectangle.Union(previousBounds, playerBounds);
 
             for (int i = 0; i < RoomTransitionZones.Length; i++)
             {
                 RoomTransitionZone zone = RoomTransitionZones[i];
-                if (zone.SourceRoom != _currentRoom || !playerBounds.Intersects(zone.TriggerArea))
+                Rectangle triggerArea = ExpandTransitionArea(zone.TriggerArea);
+                if (zone.SourceRoom != _currentRoom || !sweptBounds.Intersects(triggerArea))
                 {
                     continue;
                 }
@@ -446,6 +450,36 @@ namespace Celeste.Scenes
             }
 
             return false;
+        }
+
+        private Rectangle ExpandTransitionArea(Rectangle area)
+        {
+            int left = area.Left;
+            int top = area.Top;
+            int right = area.Right;
+            int bottom = area.Bottom;
+
+            if (area.Top <= _worldBound.Top)
+            {
+                top -= RoomTransitionOutOfBoundsMargin;
+            }
+
+            if (area.Left <= _worldBound.Left)
+            {
+                left -= RoomTransitionOutOfBoundsMargin;
+            }
+
+            if (area.Right >= _worldBound.Right)
+            {
+                right += RoomTransitionOutOfBoundsMargin;
+            }
+
+            if (area.Bottom >= _worldBound.Bottom)
+            {
+                bottom += RoomTransitionOutOfBoundsMargin;
+            }
+
+            return new Rectangle(left, top, right - left, bottom - top);
         }
 
         private void RebuildCurrentRoom(bool resetPlayer)

@@ -105,6 +105,21 @@ namespace Celeste.Sprites
                 _nodes[i] = anchor;
         }
 
+        public void ResetFloatingTail(Vector2 anchor, Vector2 direction)
+        {
+            direction = SafeNorm(direction);
+            if (direction == Vector2.Zero)
+            {
+                direction = Vector2.UnitX;
+            }
+
+            float maxDist = MaxNodeDistNative * DrawScale;
+            for (int i = 0; i < _nodes.Length; i++)
+            {
+                _nodes[i] = anchor - direction * maxDist * i;
+            }
+        }
+
         public void Update(GameTime gameTime, Vector2 anchorPosition, bool faceLeft)
         {
             _faceLeft = faceLeft;
@@ -133,6 +148,37 @@ namespace Celeste.Sprites
                     _nodes[i] = previous + SafeNorm(diff) * maxDist;
 
                 target = _nodes[i] + new Vector2(facing * stepFacing, 0f) + stepPerSeg;
+                previous = _nodes[i];
+            }
+        }
+
+        public void UpdateFloatingTail(GameTime gameTime, Vector2 anchorPosition, Vector2 direction)
+        {
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            float s = DrawScale;
+            float maxDist = MaxNodeDistNative * s;
+            float approachSpeed = StepApproachNative * s;
+            direction = SafeNorm(direction);
+            if (direction == Vector2.Zero)
+            {
+                direction = Vector2.UnitX;
+            }
+
+            _nodes[0] = anchorPosition;
+            Vector2 previous = _nodes[0];
+            Vector2 target = _nodes[0] - direction * maxDist;
+
+            for (int i = 1; i < _nodes.Length; i++)
+            {
+                float speedFactor = 1f - (float)i / _nodes.Length * 0.5f;
+                _nodes[i] = Approach(_nodes[i], target, speedFactor * approachSpeed * dt);
+
+                Vector2 diff = _nodes[i] - previous;
+                float dist = diff.Length();
+                if (dist > maxDist)
+                    _nodes[i] = previous + SafeNorm(diff) * maxDist;
+
+                target = _nodes[i] - direction * maxDist;
                 previous = _nodes[i];
             }
         }
@@ -172,6 +218,31 @@ namespace Celeste.Sprites
             }
             spriteBatch.Draw(_bangsTexture, _nodes[0], bangSrc, drawColor,
                 0f, bangsOrigin, scale, SpriteEffects.None, 0f);
+        }
+
+        public void DrawTail(SpriteBatch spriteBatch, Color color, float scale = 1f)
+        {
+            Color drawColor = (color == Color.White) ? HairColor : color;
+            Vector2 circleOrigin = new(_circleW / 2f, _circleH / 2f);
+            float od = scale;
+            Vector2[] offsets = { new(od, 0), new(-od, 0), new(0, od), new(0, -od) };
+
+            foreach (Vector2 off in offsets)
+            {
+                for (int i = _nodes.Length - 1; i >= 1; i--)
+                {
+                    float taper = HairTaperMin + (1f - (float)i / _nodes.Length) * HairTaperRange;
+                    spriteBatch.Draw(_circleTexture, _nodes[i] + off, null, Color.Black,
+                        0f, circleOrigin, new Vector2(taper * scale), SpriteEffects.None, 0f);
+                }
+            }
+
+            for (int i = _nodes.Length - 1; i >= 1; i--)
+            {
+                float taper = HairTaperMin + (1f - (float)i / _nodes.Length) * HairTaperRange;
+                spriteBatch.Draw(_circleTexture, _nodes[i], null, drawColor,
+                    0f, circleOrigin, new Vector2(taper * scale), SpriteEffects.None, 0f);
+            }
         }
 
         private static Vector2 Approach(Vector2 from, Vector2 to, float maxMove)

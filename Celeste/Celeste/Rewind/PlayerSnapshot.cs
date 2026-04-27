@@ -42,6 +42,7 @@ namespace Celeste.Rewind
         public float StarFlyCurrentSpeed;
         public float StarFlySpeedLerp;
         public bool StarFlyTransforming;
+        public Vector2 StarFlyStartDirection;
 
         // Aim / state transition helpers
         public Vector2 LastAim;

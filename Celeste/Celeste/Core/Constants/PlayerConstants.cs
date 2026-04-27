@@ -74,14 +74,11 @@ namespace Celeste
         public const float PlayerStarFlyTransformDeceleration = 1000f * PlayerTileScale;
         public const float PlayerStarFlyTurnSpeed = 5.585f;
         public const float PlayerStarFlyEndWarningTime = 0.5f;
-        public const float PlayerStarFlyEndNoBounceTime = 0.2f;
-        public const float PlayerStarFlyWallBounce = -0.5f;
         public const float PlayerStarFlyEndHorizontalSpeed = 160f * PlayerTileScale;
         public const float PlayerStarFlyEndVariableJumpTime = 0.1f;
         public const float PlayerStarFlyExitUpSpeed = -100f * PlayerTileScale;
         public const float PlayerStarFlyMaxExitY = 0f;
         public const float PlayerStarFlyMaxExitX = 140f * PlayerTileScale;
-        public const float PlayerStarFlyTrailInterval = 0.035f;
         public const float PlayerOutOfBoundsDeathGrace = 72f;
     }
 }
