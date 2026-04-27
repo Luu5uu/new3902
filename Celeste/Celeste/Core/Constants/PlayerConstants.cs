@@ -23,6 +23,16 @@ namespace Celeste
         public const float PlayerJumpSpeed = 120f * PlayerTileScale;
         public const float PlayerJumpHorizontalBoost = 40f * PlayerTileScale;
         public const float PlayerWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost;
+        public const int PlayerWallJumpCheckDistance = 2;
+        public const int PlayerSuperWallJumpCheckDistance = 5;
+        public const float PlayerSuperWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost * 2f;
+        public const float PlayerSuperWallJumpSpeed = 160f * PlayerTileScale;
+        public const float PlayerSuperWallJumpVariableTime = 0.25f;
+        public const float PlayerClimbJumpConversionTime = 0.16f;
+        public const float PlayerClimbJumpStaminaCost = 27.5f;
+        public const float PlayerLiftMomentumStorageTime = 0.08f;
+        public const float PlayerLiftSpeedXCap = 250f * PlayerTileScale;
+        public const float PlayerLiftSpeedYCap = -130f * PlayerTileScale;
         public const float PlayerGravity = 900f * PlayerTileScale;
         public const float PlayerHalfGravityThreshold = 40f * PlayerTileScale;
         public const float PlayerMaxFallSpeed = 160f * PlayerTileScale;
@@ -49,5 +59,29 @@ namespace Celeste
         public const float PlayerLedgeTopOutInset = 2f;
         public const float PlayerLedgeTopOutHeightWindow = 10f;
         public const float PlayerLedgeTopOutAnimationTime = 4f / 12f;
+        public const int PlayerStarFlyHitboxWidth = PlayerHitboxWidth;
+        public const int PlayerStarFlyHitboxHeight = 23;
+        public const int PlayerStarFlyHitboxBottomInset = 5;
+        public const float PlayerStarFlyCollisionStep = 4f;
+        public const float PlayerStarFlyTransformTime = 0.4f;
+        public const float PlayerStarFlyTime = 2f;
+        public const float PlayerStarFlyStartSpeed = 250f * PlayerTileScale;
+        public const float PlayerStarFlyTargetSpeed = 140f * PlayerTileScale;
+        public const float PlayerStarFlyMaxSpeed = 190f * PlayerTileScale;
+        public const float PlayerStarFlySlowSpeed = PlayerStarFlyTargetSpeed * 0.65f;
+        public const float PlayerStarFlyMaxLerpTime = 1f;
+        public const float PlayerStarFlyAcceleration = 1000f * PlayerTileScale;
+        public const float PlayerStarFlyTransformDeceleration = 1000f * PlayerTileScale;
+        public const float PlayerStarFlyTurnSpeed = 5.585f;
+        public const float PlayerStarFlyEndWarningTime = 0.5f;
+        public const float PlayerStarFlyEndNoBounceTime = 0.2f;
+        public const float PlayerStarFlyWallBounce = -0.5f;
+        public const float PlayerStarFlyEndHorizontalSpeed = 160f * PlayerTileScale;
+        public const float PlayerStarFlyEndVariableJumpTime = 0.1f;
+        public const float PlayerStarFlyExitUpSpeed = -100f * PlayerTileScale;
+        public const float PlayerStarFlyMaxExitY = 0f;
+        public const float PlayerStarFlyMaxExitX = 140f * PlayerTileScale;
+        public const float PlayerStarFlyTrailInterval = 0.035f;
+        public const float PlayerOutOfBoundsDeathGrace = 72f;
     }
 }
