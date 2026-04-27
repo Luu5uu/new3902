@@ -70,6 +70,9 @@ namespace Celeste.Character
         private float _starFlyTrailTimer;
         private bool _starFlyTransforming;
         private Color _starFlyColor = StarFlyGold;
+        private float _wallJumpCooldownLeft;
+        private float _wallJumpCooldownRight;
+        private const float WallJumpSameSideCooldown = 0.15f;
         private readonly List<IBlocks> _worldBlocks = new();
         //
         public float ClimbStaminaPercent => climbStamina / PlayerClimbMaxStamina;
@@ -151,8 +154,10 @@ namespace Celeste.Character
         private ParticleSystem _dashParticles;
         private BurstEmitter _dashBurstEmitter;
         private OrbitRingEffect _dashRingEffect;
+        private ParticleSystem _landDustParticles;
         private static readonly Color StarFlyGold = new Color(255, 214, 92);
         private static readonly Color StarFlyRed = new Color(255, 78, 78);
+        private static readonly Color DashTrailCyan = new Color(74, 204, 255);
 
         public void AddGhost(Vector2 pos, bool faceLeft) =>
             _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
@@ -199,6 +204,7 @@ namespace Celeste.Character
             _deathDownClip = deathDownClip;
             _deathDotTex = dotTexture;
             _dashParticles = new ParticleSystem(dotTexture);
+            _landDustParticles = new ParticleSystem(dotTexture);
             _dashBurstEmitter = new BurstEmitter(
                 count: 8,
                 minSpeed: 90f * DefaultScale,
@@ -287,6 +293,8 @@ namespace Celeste.Character
             _ledgeTopOutTimer = 0f;
             _storedLiftSpeed = Vector2.Zero;
             _storedLiftTimer = 0f;
+            _wallJumpCooldownLeft = 0f;
+            _wallJumpCooldownRight = 0f;
             _climbJumpConversionTimer = 0f;
             _climbJumpConversionDirection = 0;
             _climbJumpRefundAmount = 0f;
@@ -301,6 +309,7 @@ namespace Celeste.Character
             _starFlyTrail.Clear();
             _tiredFlashPhase = 0f;
             _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
+            _landDustParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
             _dashRingEffect = null;
 
             velocityY = 0f;
@@ -419,6 +428,7 @@ namespace Celeste.Character
             }
 
             _dashParticles?.Update(dt);
+            _landDustParticles?.Update(dt);
             UpdateStarFlyTrail(dt);
             if (_dashRingEffect != null)
             {
@@ -486,6 +496,9 @@ namespace Celeste.Character
                     _storedLiftSpeed = Vector2.Zero;
                 }
             }
+
+            if (_wallJumpCooldownLeft > 0f) _wallJumpCooldownLeft = Math.Max(0f, _wallJumpCooldownLeft - dt);
+            if (_wallJumpCooldownRight > 0f) _wallJumpCooldownRight = Math.Max(0f, _wallJumpCooldownRight - dt);
 
             if (!isDashing && !isClimbing && !isDangle && !isStarFlying)
             {
@@ -586,6 +599,7 @@ namespace Celeste.Character
 
             _dashRingEffect?.Draw(spriteBatch);
             _dashParticles?.Draw(spriteBatch);
+            _landDustParticles?.Draw(spriteBatch);
             DrawStarFlyTrail(spriteBatch);
             if (isStarFlying)
             {
@@ -619,6 +633,87 @@ namespace Celeste.Character
                 dotScale: 0.14f * DefaultScale,
                 color: DashDeathColor,
                 initialAngle: initialAngle);
+        }
+
+        public void SpawnLandDust(Vector2 pos)
+        {
+            if (_landDustParticles == null) return;
+            var rng = new Random();
+            for (int i = 0; i < 6; i++)
+            {
+                float spreadAngle = MathHelper.ToRadians(-90f + (float)(rng.NextDouble() * 120f - 60f));
+                float speed = 60f + (float)(rng.NextDouble() * 60f);
+                var p = new Particle
+                {
+                    Position = pos,
+                    Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed),
+                    Acceleration = new Vector2(0f, 300f),
+                    Age = 0f,
+                    Lifetime = 0.3f + (float)(rng.NextDouble() * 0.2f),
+                    StartSize = 0.28f * DefaultScale,
+                    EndSize = 0f,
+                    StartAlpha = 0.9f,
+                    EndAlpha = 0f,
+                    Tint = Color.White,
+                    StartTint = Color.White,
+                    EndTint = Color.White,
+                };
+                _landDustParticles.Add(p);
+            }
+        }
+
+        public void SpawnWallKickDust(Vector2 pos, int wallDir)
+        {
+            if (_landDustParticles == null) return;
+            var rng = new Random();
+            for (int i = 0; i < 4; i++)
+            {
+                float baseAngle = wallDir > 0 ? 0f : MathHelper.Pi;
+                float spreadAngle = baseAngle + MathHelper.ToRadians((float)(rng.NextDouble() * 120f - 60f));
+                float speed = 50f + (float)(rng.NextDouble() * 70f);
+                var p = new Particle
+                {
+                    Position = pos,
+                    Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed - 40f),
+                    Acceleration = new Vector2(0f, 280f),
+                    Age = 0f,
+                    Lifetime = 0.25f + (float)(rng.NextDouble() * 0.15f),
+                    StartSize = 0.24f * DefaultScale,
+                    EndSize = 0f,
+                    StartAlpha = 0.85f,
+                    EndAlpha = 0f,
+                    Tint = Color.White,
+                    StartTint = Color.White,
+                    EndTint = Color.White,
+                };
+                _landDustParticles.Add(p);
+            }
+        }
+
+        public void SpawnDashTrail(Vector2 pos, Vector2 dashDir)
+        {
+            if (_dashParticles == null) return;
+            var rng = new Random();
+            for (int i = 0; i < 10; i++)
+            {
+                float spreadAngle = (float)Math.Atan2(dashDir.Y, dashDir.X) + MathHelper.ToRadians((float)(rng.NextDouble() * 90f - 45f));
+                float speed = 20f + (float)(rng.NextDouble() * 30f);
+                var p = new Particle
+                {
+                    Position = pos,
+                    Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed),
+                    Age = 0f,
+                    Lifetime = 0.25f + (float)(rng.NextDouble() * 0.15f),
+                    StartSize = 0.22f * DefaultScale,
+                    EndSize = 0f,
+                    StartAlpha = 1.0f,
+                    EndAlpha = 0f,
+                    StartTint = DashTrailCyan,
+                    EndTint = DashTrailCyan,
+                    Tint = DashTrailCyan,
+                };
+                _dashParticles.Add(p);
+            }
         }
 
         private void UpdateStarFlyTrail(float dt)
@@ -912,19 +1007,11 @@ namespace Celeste.Character
 
         public int GetWallJumpDirection(int checkDistance = PlayerWallJumpCheckDistance)
         {
-            bool wallOnRight = touchingRightWall || IsWallNear(1, checkDistance);
-            bool wallOnLeft = touchingLeftWall || IsWallNear(-1, checkDistance);
+            bool wallOnRight = (touchingRightWall || IsWallNear(1, checkDistance)) && _wallJumpCooldownRight <= 0f;
+            bool wallOnLeft  = (touchingLeftWall  || IsWallNear(-1, checkDistance)) && _wallJumpCooldownLeft  <= 0f;
 
-            if (wallOnRight && !wallOnLeft)
-            {
-                return -1;
-            }
-
-            if (wallOnLeft && !wallOnRight)
-            {
-                return 1;
-            }
-
+            if (wallOnRight && !wallOnLeft) return -1;
+            if (wallOnLeft && !wallOnRight) return 1;
             return 0;
         }
 
@@ -1002,6 +1089,9 @@ namespace Celeste.Character
             ApplyLiftBoostToVelocity();
             BeginVariableJump();
             FaceLeft = direction < 0;
+            if (direction > 0) _wallJumpCooldownLeft  = WallJumpSameSideCooldown;
+            else               _wallJumpCooldownRight = WallJumpSameSideCooldown;
+            SpawnWallKickDust(position, -direction);
             Maddy.JumpFast(restart: true);
             ForceAirJumpState();
         }

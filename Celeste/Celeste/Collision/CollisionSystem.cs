@@ -753,8 +753,13 @@ namespace Celeste.Collision
                 return;
             }
 
+            bool wasAirborne = !_player.onGround;
             _player.velocityY = 0f;
             _player.onGround = true;
+            if (wasAirborne)
+            {
+                _player.SpawnLandDust(_player.position);
+            }
 
             if (!_player.isDashing)
             {
