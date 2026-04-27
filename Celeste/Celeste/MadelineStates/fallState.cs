@@ -29,9 +29,8 @@ namespace Celeste.MadelineStates
                 }
             }
 
-            if (m.canDash && m.ConsumeDashPress())
+            if (m.TryHandleDashPress())
             {
-                m.changeState(m.dashState);
                 return;
             }
             if (m.CanGrabWall())

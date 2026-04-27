@@ -364,11 +364,6 @@ namespace Celeste.Collision
 
                 _player.velocityX = 0f;
 
-                if (!_player.isDashing)
-                {
-                    _player.Maddy.OnDashRefill();
-                    _player.canDash = true;
-                }
             }
         }
 
@@ -420,11 +415,6 @@ namespace Celeste.Collision
 
                 _player.velocityX = 0f;
 
-                if (!_player.isDashing)
-                {
-                    _player.Maddy.OnDashRefill();
-                    _player.canDash = true;
-                }
             }
         }
 

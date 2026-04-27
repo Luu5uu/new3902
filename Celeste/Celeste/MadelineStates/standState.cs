@@ -52,7 +52,7 @@ namespace Celeste.MadelineStates
             }
 
             // --- State transitions ---
-            if (m.canDash && m.ConsumeDashPress())           { m.changeState(m.dashState); return; }
+            if (m.TryHandleDashPress())                      { return; }
             if (m.CanUseJumpGrace() && m.ConsumeJumpPress()) { m.changeState(m.jumpState); return; }
             if (m.WantsToCrouch())                           { m.changeState(m.crouchState); return; }
             if (m.CanGrabWall())                 { m.BeginWallGrab(); return; }

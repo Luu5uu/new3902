@@ -23,16 +23,11 @@ namespace Celeste.MadelineStates
                 {
                     m.PerformWallJump();
                 }
-                else
-                {
-                    m.changeState(m.jumpState);
-                }
                 return;
             }
 
-            if (m.canDash && m.ConsumeDashPress())
+            if (m.TryHandleDashPress())
             {
-                m.changeState(m.dashState);
                 return;
             }
 

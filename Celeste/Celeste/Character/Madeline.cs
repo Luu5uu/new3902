@@ -1341,9 +1341,8 @@ namespace Celeste.Character
                 return;
             }
 
-            if (canDash && ConsumeDashPress())
+            if (TryHandleDashPress())
             {
-                changeState(dashState);
                 return;
             }
 
@@ -1711,6 +1710,39 @@ namespace Celeste.Character
             _dashBufferTimer = 0f;
             dashPressed = false;
             return true;
+        }
+
+        public bool TryHandleDashPress()
+        {
+            if (!canDash || !ConsumeDashPress())
+            {
+                return false;
+            }
+
+            if (ShouldBlockDashIntoGrabbedWall())
+            {
+                return true;
+            }
+
+            changeState(dashState);
+            return true;
+        }
+
+        private bool ShouldBlockDashIntoGrabbedWall()
+        {
+            if (!climbHeld || !IsTouchingWall)
+            {
+                return false;
+            }
+
+            Vector2 dashDirection = GetDashDirection();
+            if (dashDirection == Vector2.Zero)
+            {
+                dashDirection = FaceLeft ? new Vector2(-1f, 0f) : Vector2.UnitX;
+            }
+
+            return (touchingLeftWall && dashDirection.X < 0f)
+                || (touchingRightWall && dashDirection.X > 0f);
         }
 
         public bool CanUseJumpGrace()

@@ -29,9 +29,8 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
-            if (m.canDash && m.ConsumeDashPress())
+            if (m.TryHandleDashPress())
             {
-                m.changeState(m.dashState);
                 return;
             }
 
