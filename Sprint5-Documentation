@@ -10,7 +10,7 @@ Zijun was responsible for: Complete the basic rewind function logic, optimize th
 
 Sihao was responsible for: Add more mechanisms and shadow functions to the rewind feature, session-based strawberry/death counting, visual change for already collected strawberries and out-of-bounds deaths.
 
-Albert was responsible for: Responsible for implementing and placing MoveBlock, Spring, and CrushBlock, as well as completing the room transition system.
+Albert was responsible for: Responsible for implementing and placing MoveBlock, Spring, and CrushBlock, as well as completing the room transition system, BGM auto switch and place the background.
 
 --------------------------------------
 
