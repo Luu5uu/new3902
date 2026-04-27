@@ -16,6 +16,7 @@ namespace Celeste.Collision
     {
         private readonly List<IBlocks> _worldBlocks;
         private readonly Madeline _player;
+        private bool _playerWasOnGround;
 
         public CollisionSystem(List<IBlocks> worldBlocks, Madeline player)
         {
@@ -27,6 +28,8 @@ namespace Celeste.Collision
 
         public void ResolveBlockCollision(Vector2 prevPos, bool prevCrouching, float dt)
         {
+            _playerWasOnGround = _player.onGround;
+
             if (_player.isStarFlying)
             {
                 ResolveStarFlyCollision(prevPos, prevCrouching);
@@ -753,10 +756,9 @@ namespace Celeste.Collision
                 return;
             }
 
-            bool wasAirborne = !_player.onGround;
             _player.velocityY = 0f;
             _player.onGround = true;
-            if (wasAirborne)
+            if (!_playerWasOnGround)
             {
                 _player.SpawnLandDust(_player.position);
             }
