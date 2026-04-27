@@ -32,6 +32,9 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("wood", 35, 17, 1);
             _mapBuilder.PlaceBlock("wood", 36, 17, 2);
 
+            _mapBuilder.PlaceBlock("wood", 20, 4, 2);
+            _mapBuilder.PlaceBlock("wood", 19, 4, 1);
+
             /* 
             // CEMENT 
 

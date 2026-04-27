@@ -291,6 +291,7 @@ namespace Celeste.Scenes
 
             if (_player.Bounds.Bottom > _worldBound.Bottom && !_player.IsInDeathSequence)
             {
+
                 _player.Die();
             }
 
@@ -424,7 +425,8 @@ namespace Celeste.Scenes
                     continue;
                 }
 
-                SceneManager.PushScene(new ScreenWipeScene(Game, () =>{
+                SceneManager.PushScene(new ScreenWipeScene(Game, () =>
+                {
                     _isRecordingRewind = false;
                     _isRewinding = false;
                     _rewindRecordTimer = 0f;
@@ -432,7 +434,7 @@ namespace Celeste.Scenes
                     ChangeRoom(zone.TargetRoom, resetPlayer: true);
                     _player.UpdateSprite(gameTime);
                 }));
-                
+
                 return true;
             }
 
@@ -442,7 +444,7 @@ namespace Celeste.Scenes
         private void RebuildCurrentRoom(bool resetPlayer)
         {
             BuildMap();
-            CurrentRoomDecorSetup();
+            CurrentRoomDecorBackground();
             RebuildCollisionSystems();
             RebuildCollectibles();
 
@@ -470,10 +472,25 @@ namespace Celeste.Scenes
         {
             _decorTextures["constructionSign"] = Game.Content.Load<Texture2D>("constructionSign");
             _decorTextures["top_a01"] = Game.Content.Load<Texture2D>("top_a01");
+            _decorTextures["top_a02"] = Game.Content.Load<Texture2D>("top_a02");
 
             _decorTextures["signGreenForward"] = Game.Content.Load<Texture2D>("signGreenForward");
             _decorTextures["boxAndBottle"] = Game.Content.Load<Texture2D>("boxAndBottle");
+            _decorTextures["paintBuckets"] = Game.Content.Load<Texture2D>("paintBuckets");
+            _decorTextures["ladder"] = Game.Content.Load<Texture2D>("ladder");
 
+            _decorTextures["signE"] = Game.Content.Load<Texture2D>("signE");
+            _decorTextures["trafficLightBroken"] = Game.Content.Load<Texture2D>("trafficLightBroken");
+            _decorTextures["box"] = Game.Content.Load<Texture2D>("box");
+
+            _decorTextures["signNoUp"] = Game.Content.Load<Texture2D>("signNoUp");
+            _decorTextures["signNoDash"] = Game.Content.Load<Texture2D>("signNoDash");
+
+
+            _decorTextures["trafficLight"] = Game.Content.Load<Texture2D>("trafficLight");
+
+            _decorTextures["signUp"] = Game.Content.Load<Texture2D>("signUp");
+            _decorTextures["cookPot"] = Game.Content.Load<Texture2D>("cookPot");
         }
 
         private void AddDecor(string textureType, Vector2 position, float scale = 1f)
@@ -482,7 +499,7 @@ namespace Celeste.Scenes
             _currentDecor.Add(new DecorItem(texture, position, scale));
         }
 
-        private void CurrentRoomDecorSetup()
+        private void CurrentRoomDecorBackground()
         {
             _currentDecor.Clear();
 
@@ -491,10 +508,32 @@ namespace Celeste.Scenes
                 case 1:
                     AddDecor("constructionSign", new Vector2(194, 215), 2.2f);
                     AddDecor("top_a01", new Vector2(82, 343), 2.0f);
+                    AddDecor("top_a02", new Vector2(202, 303), 2.0f);
                     break;
                 case 2:
                     AddDecor("signGreenForward", new Vector2(170, 336), 2.0f);
                     AddDecor("boxAndBottle", new Vector2(220, 353), 2.0f);
+                    AddDecor("paintBuckets", new Vector2(95, 368), 2.0f);
+                    AddDecor("ladder", new Vector2(110, 335), 2.0f);
+                    break;
+                case 3:
+                    AddDecor("signE", new Vector2(355, 184), 2.2f);
+                    AddDecor("trafficLightBroken", new Vector2(94, 81), 2.2f);
+                    AddDecor("box", new Vector2(61, 367), 2.2f);
+                    AddDecor("box", new Vector2(48, 346), 2.2f);
+                    AddDecor("box", new Vector2(34, 367), 2.2f);
+                    break;
+                case 4:
+                    AddDecor("signNoDash", new Vector2(220, 355), 2.2f);
+                    AddDecor("signNoUp", new Vector2(326, 344), 2.2f);
+                    break;
+                case 5:
+                    AddDecor("trafficLight", new Vector2(575, 238), 2.2f);
+                    AddDecor("box", new Vector2(165, 126), 2.2f);
+                    break;
+                case 6:
+                    AddDecor("signUp", new Vector2(635, 248), 2.2f);
+                    AddDecor("cookPot", new Vector2(385, 37), 2.2f);
                     break;
             }
         }
@@ -555,7 +594,6 @@ namespace Celeste.Scenes
             _player.position = checkpointSpawn;
             _player.RespawnPoint = checkpointSpawn;
         }
-
 
 
         private void RebuildCollisionSystems()
