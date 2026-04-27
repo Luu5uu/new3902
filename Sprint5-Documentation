@@ -1,6 +1,6 @@
 In Sprint 5, each team member was assigned a specific task bundle. Team members are responsible for writing their tasks.
 
-Henry was responsible for: 
+Henry was responsible for: Implementing the background snow system, reworking player movement and physics (including wall jump fixes and lift momentum), and adding the FlyFeather item with associated StarFly animations. Also implemented visual polish through landing, wall-kick, and dash particle effects.
 
 Aaron was responsible for: 
 
@@ -45,4 +45,10 @@ Strengths:
 Successfully added the Madeline rewind feature and enabled dash refill after touching walls. This introduces a creative gameplay mechanic and expands the player movement system in a meaningful way.
 Technical Concerns / Suggestions:
 Since rewind directly affects player state and movement logic, more testing may be needed to ensure it works consistently with collisions, room transitions, and other mechanics. It may also be useful to further refine the balancing of dash refill behavior so the feature remains intuitive and fair in gameplay.
+
+Feather movement #37 request by hfritz34 reviewed by Luu5uu
+Strengths:
+Successfully implemented a comprehensive flight system via the FlyFeather item and StarFly state, fully integrated with the rewind system. Introduced polished environmental and movement particles, fixed wall jump mechanics, and refactored the collision system to support lift momentum.
+Technical Concerns / Suggestions:
+Given the significant volume of changes (15 commits, ~1,700 lines) to core physics and collision logic, extensive regression testing is recommended to ensure stability across all rooms. Continued monitoring of particle system performance is advised for long-term playability.
 
