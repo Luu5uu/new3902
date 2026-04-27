@@ -150,6 +150,7 @@ namespace Celeste.Character
         private Texture2D _starFlyDotTex;
         private HairRenderer _starFlyTail;
         private ParticleSystem _dashParticles;
+        private Texture2D _dashParticleTex;
         private SmokeParticleSystem _landDustParticles;
         private Texture2D[] _smokeFrames;
         private static readonly Color StarFlyGold = new Color(255, 214, 92);
@@ -211,7 +212,14 @@ namespace Celeste.Character
             _deathUpClip = deathUpClip;
             _deathDownClip = deathDownClip;
             _deathDotTex = dotTexture;
-            _dashParticles = new ParticleSystem(dotTexture);
+
+            if (_dashParticleTex == null)
+            {
+                _dashParticleTex = new Texture2D(dotTexture.GraphicsDevice, 2, 2);
+                _dashParticleTex.SetData(new[] { Color.White, Color.White, Color.White, Color.White });
+            }
+
+            _dashParticles = new ParticleSystem(_dashParticleTex);
             _landDustParticles = new SmokeParticleSystem(_smokeFrames);
             BuildGhostTexture();
         }
@@ -306,7 +314,7 @@ namespace Celeste.Character
             _starFlyColor = StarFlyGold;
             _starFlyStartDirection = new Vector2(0f, -1f);
             _tiredFlashPhase = 0f;
-            _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
+            _dashParticles = _dashParticleTex != null ? new ParticleSystem(_dashParticleTex) : null;
             _landDustParticles?.Clear();
 
             velocityY = 0f;
@@ -707,8 +715,8 @@ namespace Celeste.Character
                     Velocity = behind * speed + perpendicular * sideSpeed,
                     Acceleration = Vector2.Zero,
                     Age = 0f,
-                    Lifetime = RandomRange(0.24f, 0.38f),
-                    StartSize = RandomRange(0.12f, 0.18f) * DefaultScale,
+                    Lifetime = RandomRange(0.6f, 0.8f),
+                    StartSize = RandomRange(1.2f, 2.0f),
                     EndSize = 0f,
                     StartAlpha = 0.9f,
                     EndAlpha = 0f,
