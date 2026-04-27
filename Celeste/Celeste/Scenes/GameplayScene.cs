@@ -27,6 +27,7 @@ namespace Celeste.Scenes
     public class GameplayScene : Scene
     {
         private readonly record struct RoomTransitionZone(int SourceRoom, Rectangle TriggerArea, int TargetRoom);
+        private readonly record struct EndingZone(int SourceRoom, Rectangle TriggerArea);
         private const string GameplayTrackOne = "first-steps";
         private const string GameplayTrackTwo = "resurrections";
 
@@ -84,6 +85,9 @@ namespace Celeste.Scenes
             new(1, new Rectangle(0,41, 21, 41), 6),
             new(6, new Rectangle(788, 0, 800, 84), 1)
         };
+
+        private static readonly EndingZone FinalEndingZone = new(5, new Rectangle(330, 0, 120, 60));
+        private bool _endingStarted;
 
 
         public GameplayScene(Game1 game) : base(game)
@@ -258,6 +262,12 @@ namespace Celeste.Scenes
             {
                 _hazardCollisionSystem.ResolveHazardCollision();
                 _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching, dt);
+
+                if (TryHandleEnding(gameTime))
+                {
+                    _previousKeyboardState = keyboard;
+                    return;
+                }
 
                 if (TryHandleRoomTransition(gameTime, previousPosition, wasCrouching))
                 {
@@ -452,6 +462,44 @@ namespace Celeste.Scenes
             }
 
             return false;
+        }
+
+        private bool TryHandleEnding(GameTime gameTime)
+        {
+            if (_endingStarted)
+            {
+                return true;
+            }
+
+            if (_currentRoom != FinalEndingZone.SourceRoom)
+            {
+                return false;
+            }
+
+            if (!_player.Bounds.Intersects(FinalEndingZone.TriggerArea))
+            {
+                return false;
+            }
+
+            _endingStarted = true;
+            _timerRunning = false;
+            _showUI = false;
+
+            _isRecordingRewind = false;
+            _isRewinding = false;
+            _rewindRecordTimer = 0f;
+            _rewindCooldownTimer = RewindCooldownDuration;
+
+            SceneManager.PushScene(new ScreenWipeScene(Game, () =>
+            {
+                SceneManager.PushScene(new EndingScene(
+                    Game,
+                    _gameTimer,
+                    _sessionDeathCount,
+                    _sessionCollectedStrawberryCount));
+            }));
+
+            return true;
         }
 
         private Rectangle ExpandTransitionArea(Rectangle area)
