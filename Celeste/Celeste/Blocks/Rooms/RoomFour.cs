@@ -28,6 +28,11 @@ namespace Celeste.Blocks.Rooms
             string filePath = Path.Combine(AppContext.BaseDirectory, "Content", "rooms", "RoomFour.csv");
             _roomLoader.LoadRoom(filePath);
 
+            _mapBuilder.PlaceBlock("wood", 4, 21, 0);
+            _mapBuilder.PlaceBlock("wood", 5, 21, 1);
+            _mapBuilder.PlaceBlock("wood", 6, 21, 1);
+            _mapBuilder.PlaceBlock("wood", 7, 21, 2);
+
             _mapBuilder.PlaceCrushBlock(30, 7);
             _mapBuilder.PlaceCrushBlock(28, 10);
             _mapBuilder.PlaceCrushBlock(33, 13);
