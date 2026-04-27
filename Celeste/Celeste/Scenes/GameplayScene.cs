@@ -45,7 +45,7 @@ namespace Celeste.Scenes
         private KeyboardState _previousKeyboardState;
         private static int _sessionDeathCount = 0;
         private static int _sessionCollectedStrawberryCount = 0;
-        private static readonly HashSet<string> _sessionCollectedStrawberryIds = new();
+        private static HashSet<string> _sessionCollectedStrawberryIds = new();
 
         private MapBuilder _worldMap;
         private RoomOne _roomOne;
@@ -71,6 +71,9 @@ namespace Celeste.Scenes
         private bool _isRewinding;
         private float _rewindRecordTimer;
         private float _rewindCooldownTimer;
+
+        private int _checkpointStrawberryCount = 0;
+        private HashSet<string> _checkpointStrawberryIds = new();
 
         private bool _endingStarted;
 
@@ -129,6 +132,9 @@ namespace Celeste.Scenes
             _decorTextures = new Dictionary<string, Texture2D>();
             _currentDecor = new List<DecorItem>();
             LoadDecorTextures();
+
+            _checkpointStrawberryCount = 0;
+            _checkpointStrawberryIds = new HashSet<string>();
 
 
             _worldMap = new MapBuilder(factory, _catalog, WorldMapColumns, WorldMapRows);
@@ -240,6 +246,9 @@ namespace Celeste.Scenes
             if (_player.ConsumeLevelResetRequest())
             {
                 _sessionDeathCount++;
+                _sessionCollectedStrawberryCount = _checkpointStrawberryCount;
+                _sessionCollectedStrawberryIds = new HashSet<string>(_checkpointStrawberryIds);
+
                 RebuildCurrentRoom(resetPlayer: true);
                 _rewindCooldownTimer = RewindCooldownDuration;
             }
@@ -288,6 +297,8 @@ namespace Celeste.Scenes
             if (_player.position.Y > _worldBound.Bottom + PlayerConstants.PlayerOutOfBoundsDeathGrace
                 && !_player.IsInDeathSequence)
             {
+                _sessionCollectedStrawberryCount = _checkpointStrawberryCount;
+                _sessionCollectedStrawberryIds = new HashSet<string>(_checkpointStrawberryIds);
 
                 _player.Die();
             }
@@ -403,6 +414,9 @@ namespace Celeste.Scenes
             {
                 return;
             }
+
+            _checkpointStrawberryCount = _sessionCollectedStrawberryCount;
+            _checkpointStrawberryIds = new HashSet<string>(_sessionCollectedStrawberryIds);
 
             _currentRoom = roomNumber;
             RebuildCurrentRoom(resetPlayer);
