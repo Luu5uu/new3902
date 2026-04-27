@@ -69,15 +69,14 @@ namespace Celeste.Character
         private bool _starFlyTransforming;
         private Color _starFlyColor = StarFlyGold;
         private Vector2 _starFlyStartDirection = new Vector2(0f, -1f);
-        private float _wallJumpCooldownLeft;
-        private float _wallJumpCooldownRight;
-        private const float WallJumpSameSideCooldown = 0.15f;
+        private int _wallJumpLockedWallSide;
+        private int _wallJumpForceMoveDirection;
+        private float _wallJumpForceMoveTimer;
         private readonly List<IBlocks> _worldBlocks = new();
         //
         public float ClimbStaminaPercent => climbStamina / PlayerClimbMaxStamina;
         public float ClimbTiredPercent => PlayerClimbTiredThreshold / PlayerClimbMaxStamina;
         private float _tiredFlashPhase;
-        private const float TiredFlashSpeed = 12f;
 
 
         // Position & facing
@@ -151,9 +150,6 @@ namespace Celeste.Character
         private Texture2D _dashParticleTex;
         private SmokeParticleSystem _landDustParticles;
         private Texture2D[] _smokeFrames;
-        private static readonly Color StarFlyGold = new Color(255, 214, 92);
-        private static readonly Color StarFlyRed = new Color(255, 78, 78);
-        private static readonly Color DashTrailCyan = new Color(74, 204, 255);
         private static readonly Random ParticleRng = new();
 
         public void AddGhost(Vector2 pos, bool faceLeft) =>
@@ -163,10 +159,6 @@ namespace Celeste.Character
         public IBlocks CurrentGroundBlock { get; set; }
 
         private float footstepTimer = 0f;
-        private const float FootstepInterval = 0.12f;
-
-        private float climbSoundTimer = 0f;
-        private const float ClimbSoundInterval = 0.35f;
 
         public Madeline(ContentManager content, AnimationCatalog catalog, Vector2 startPos)
         {
@@ -262,6 +254,8 @@ namespace Celeste.Character
             climbStamina = PlayerClimbMaxStamina;
             _tiredFlashPhase = 0f;
             changeState(standState);
+            Maddy.SetPosition(position, scale: DefaultScale, faceLeft: FaceLeft);
+            Maddy.MoveHairToCurrentAnchor();
         }
 
         public void RequestLevelReset()
@@ -298,8 +292,9 @@ namespace Celeste.Character
             _ledgeTopOutTimer = 0f;
             _storedLiftSpeed = Vector2.Zero;
             _storedLiftTimer = 0f;
-            _wallJumpCooldownLeft = 0f;
-            _wallJumpCooldownRight = 0f;
+            _wallJumpLockedWallSide = WallSideNone;
+            _wallJumpForceMoveDirection = 0;
+            _wallJumpForceMoveTimer = 0f;
             _climbJumpConversionTimer = 0f;
             _climbJumpConversionDirection = 0;
             _climbJumpRefundAmount = 0f;
@@ -371,6 +366,12 @@ namespace Celeste.Character
             _state.SetState(this);
         }
 
+        public void BeginWallGrab()
+        {
+            SoundManager.PlaySequence("climb");
+            changeState(climbState);
+        }
+
         // Called by input layer each frame before Update.
         public void Move(float direction)
         {
@@ -439,6 +440,7 @@ namespace Celeste.Character
                 changeState(deathState);
             }
 
+            ApplyWallJumpForceMove(dt);
             RefreshLastAim();
             climbHeldForCollision = climbHeld;
             if (ApplyQueuedTopOut(dt))
@@ -492,8 +494,7 @@ namespace Celeste.Character
                 }
             }
 
-            if (_wallJumpCooldownLeft > 0f) _wallJumpCooldownLeft = Math.Max(0f, _wallJumpCooldownLeft - dt);
-            if (_wallJumpCooldownRight > 0f) _wallJumpCooldownRight = Math.Max(0f, _wallJumpCooldownRight - dt);
+            RefreshWallJumpLock();
 
             if (!isDashing && !isClimbing && !isDangle && !isStarFlying)
             {
@@ -619,7 +620,7 @@ namespace Celeste.Character
         {
             if (_landDustParticles == null) return;
 
-            Vector2 origin = pos + new Vector2(0f, -2f);
+            Vector2 origin = pos + LandDustVisualOffset;
             for (int i = 0; i < 8; i++)
             {
                 float spreadAngle = MathHelper.ToRadians(-90f + RandomRange(-75f, 75f));
@@ -628,10 +629,10 @@ namespace Celeste.Character
                 {
                     Position = origin + new Vector2(RandomRange(-2f, 2f), RandomRange(-1f, 1f)),
                     Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed),
-                    Acceleration = new Vector2(0f, 5f),
-                    Damping = RandomRange(21.5f, 22.5f),
+                    Acceleration = new Vector2(0f, LandDustAccelerationY),
+                    Damping = RandomRange(LandDustDampingMin, LandDustDampingMax),
                     Age = 0f,
-                    Lifetime = 0.5f,
+                    Lifetime = LandDustLifetime,
                     StartScale = RandomRange(0.25f, 0.65f) * DefaultScale,
                     EndScale = 0f,
                     StartAlpha = 1.0f,
@@ -656,7 +657,7 @@ namespace Celeste.Character
                 wallSide = FaceLeft ? -1f : 1f;
             }
 
-            Vector2 origin = pos + new Vector2(wallSide * 7f, -PlayerNormalHitboxHeight * 0.55f);
+            Vector2 origin = pos + new Vector2(wallSide * WallKickDustOffsetX, -PlayerNormalHitboxHeight * WallKickDustHeightMultiplier);
             for (int i = 0; i < 6; i++)
             {
                 float baseAngle = wallSide > 0f ? MathHelper.Pi : 0f;
@@ -666,10 +667,10 @@ namespace Celeste.Character
                 {
                     Position = origin + new Vector2(RandomRange(-1f, 1f), RandomRange(-3f, 3f)),
                     Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed - 8f),
-                    Acceleration = new Vector2(0f, 5f),
-                    Damping = RandomRange(21.5f, 22.5f),
+                    Acceleration = new Vector2(0f, LandDustAccelerationY),
+                    Damping = RandomRange(LandDustDampingMin, LandDustDampingMax),
                     Age = 0f,
-                    Lifetime = 0.45f,
+                    Lifetime = WallKickDustLifetime,
                     StartScale = RandomRange(0.25f, 0.6f) * DefaultScale,
                     EndScale = 0f,
                     StartAlpha = 1.0f,
@@ -713,10 +714,10 @@ namespace Celeste.Character
                     Velocity = behind * speed + perpendicular * sideSpeed,
                     Acceleration = Vector2.Zero,
                     Age = 0f,
-                    Lifetime = RandomRange(0.6f, 0.8f),
-                    StartSize = RandomRange(1.2f, 2.0f),
+                    Lifetime = RandomRange(DashTrailLifetimeMin, DashTrailLifetimeMax),
+                    StartSize = RandomRange(DashTrailSizeMin, DashTrailSizeMax),
                     EndSize = 0f,
-                    StartAlpha = 0.9f,
+                    StartAlpha = DashTrailAlphaStart,
                     EndAlpha = 0f,
                     StartTint = DashTrailCyan,
                     EndTint = DashTrailCyan,
@@ -967,7 +968,12 @@ namespace Celeste.Character
 
         public bool CanGrabWall()
         {
-            return climbHeld && IsTouchingWall && !IsTired && !isCrouching;
+            RefreshWallJumpLock();
+            return climbHeld
+                && !IsTired
+                && !isCrouching
+                && ((touchingLeftWall && !IsWallJumpSideLocked(WallSideLeft))
+                    || (touchingRightWall && !IsWallJumpSideLocked(WallSideRight)));
         }
 
         public bool CanWallJump()
@@ -977,8 +983,12 @@ namespace Celeste.Character
 
         public int GetWallJumpDirection(int checkDistance = PlayerWallJumpCheckDistance)
         {
-            bool wallOnRight = (touchingRightWall || IsWallNear(1, checkDistance)) && _wallJumpCooldownRight <= 0f;
-            bool wallOnLeft  = (touchingLeftWall  || IsWallNear(-1, checkDistance)) && _wallJumpCooldownLeft  <= 0f;
+            RefreshWallJumpLock();
+
+            bool wallOnRight = (touchingRightWall || IsWallNear(WallSideRight, checkDistance))
+                && !IsWallJumpSideLocked(WallSideRight);
+            bool wallOnLeft  = (touchingLeftWall  || IsWallNear(WallSideLeft, checkDistance))
+                && !IsWallJumpSideLocked(WallSideLeft);
 
             if (wallOnRight && !wallOnLeft) return -1;
             if (wallOnLeft && !wallOnRight) return 1;
@@ -1009,6 +1019,7 @@ namespace Celeste.Character
             ApplyLiftBoostToVelocity();
             BeginVariableJump(PlayerSuperWallJumpVariableTime);
             FaceLeft = direction < 0;
+            LockWallJumpSideForDirection(direction);
             Maddy.JumpFast(restart: true);
             ForceAirJumpState();
             return true;
@@ -1017,6 +1028,7 @@ namespace Celeste.Character
         public void PerformClimbJump()
         {
             int conversionDirection = GetWallJumpDirection();
+            bool wasClimbing = isClimbing;
 
             SetCrouching(false);
             isClimbing = false;
@@ -1024,11 +1036,26 @@ namespace Celeste.Character
             ClearClimbJumpConversion();
             ConsumeJumpGrace();
 
-            float staminaCost = Math.Min(climbStamina, PlayerClimbJumpStaminaCost);
-            climbStamina = Math.Max(0f, climbStamina - staminaCost);
+            bool costsStamina = wasClimbing || !onGround;
+            if (costsStamina && climbStamina <= 0f)
+            {
+                changeState(fallState);
+                return;
+            }
+
+            float staminaCost = 0f;
+            if (costsStamina)
+            {
+                staminaCost = Math.Min(climbStamina, PlayerClimbJumpStaminaCost);
+                climbStamina = Math.Max(0f, climbStamina - staminaCost);
+            }
             _climbJumpConversionTimer = conversionDirection != 0 ? PlayerClimbJumpConversionTime : 0f;
             _climbJumpConversionDirection = conversionDirection;
             _climbJumpRefundAmount = staminaCost;
+            if (conversionDirection != 0)
+            {
+                LockWallJumpSideForDirection(conversionDirection);
+            }
 
             velocityX += PlayerJumpHorizontalBoost * moveX;
             velocityY = -PlayerJumpSpeed;
@@ -1060,11 +1087,63 @@ namespace Celeste.Character
             ApplyLiftBoostToVelocity();
             BeginVariableJump(resetVerticalSpeed ? PlayerWallJumpVariableTime : PlayerVariableJumpTime);
             FaceLeft = direction < 0;
-            if (direction > 0) _wallJumpCooldownLeft  = WallJumpSameSideCooldown;
-            else               _wallJumpCooldownRight = WallJumpSameSideCooldown;
+            LockWallJumpSideForDirection(direction);
             SpawnWallKickDust(position, -direction);
             Maddy.JumpFast(restart: true);
             ForceAirJumpState();
+        }
+
+        private void RefreshWallJumpLock()
+        {
+            if (_wallJumpLockedWallSide == WallSideNone)
+            {
+                _wallJumpLockedWallSide = WallSideNone;
+                return;
+            }
+
+            bool touchingLockedWall =
+                (_wallJumpLockedWallSide == WallSideLeft && touchingLeftWall)
+                || (_wallJumpLockedWallSide == WallSideRight && touchingRightWall);
+
+            if (onGround && !touchingLockedWall)
+            {
+                _wallJumpLockedWallSide = WallSideNone;
+                return;
+            }
+
+            bool touchedOppositeWall =
+                (_wallJumpLockedWallSide == WallSideLeft && touchingRightWall)
+                || (_wallJumpLockedWallSide == WallSideRight && touchingLeftWall);
+
+            if (touchedOppositeWall && !touchingLockedWall)
+            {
+                _wallJumpLockedWallSide = WallSideNone;
+            }
+        }
+
+        private bool IsWallJumpSideLocked(int wallSide)
+        {
+            return _wallJumpLockedWallSide == wallSide;
+        }
+
+        private void LockWallJumpSideForDirection(int direction)
+        {
+            int forceDirection = Math.Sign(direction);
+            _wallJumpLockedWallSide = -forceDirection;
+            _wallJumpForceMoveDirection = forceDirection;
+            _wallJumpForceMoveTimer = PlayerWallJumpForceMoveTime;
+        }
+
+        private void ApplyWallJumpForceMove(float dt)
+        {
+            if (_wallJumpForceMoveTimer <= 0f)
+            {
+                _wallJumpForceMoveDirection = 0;
+                return;
+            }
+
+            _wallJumpForceMoveTimer = Math.Max(0f, _wallJumpForceMoveTimer - dt);
+            moveX = _wallJumpForceMoveDirection;
         }
 
         private bool IsWallNear(int side, int checkDistance)
@@ -1270,7 +1349,7 @@ namespace Celeste.Character
 
             if (climbHeld && GetWallJumpDirection() != 0)
             {
-                changeState(climbState);
+                BeginWallGrab();
                 return;
             }
 
@@ -1356,7 +1435,7 @@ namespace Celeste.Character
 
             if (climbHeldForCollision && !IsTired)
             {
-                changeState(climbState);
+                BeginWallGrab();
                 return true;
             }
 
@@ -1727,7 +1806,7 @@ namespace Celeste.Character
 
             if (CanGrabWall())
             {
-                changeState(climbState);
+                BeginWallGrab();
             }
             else if (onGround)
             {
@@ -1782,29 +1861,5 @@ namespace Celeste.Character
             }
         }
 
-        public void UpdateClimbSound(float dt)
-        {
-            bool shouldPlay =
-                isClimbing &&
-                IsTouchingWall &&
-                !onGround &&
-                !isDashing &&
-                !isDangle &&
-                !IsTired;
-
-            if (!shouldPlay)
-            {
-                climbSoundTimer = 0f;
-                return;
-            }
-
-            climbSoundTimer += dt;
-
-            if (climbSoundTimer >= ClimbSoundInterval)
-            {
-                climbSoundTimer = 0f;
-                SoundManager.PlaySequence("climb");
-            }
-        }
     }
 }

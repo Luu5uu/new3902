@@ -701,11 +701,6 @@ namespace Celeste.Collision
 
         private void ActivateTouchedSprings(Vector2 prevPos, bool prevCrouching, float attemptedDy)
         {
-            if (attemptedDy <= 0f)
-            {
-                return;
-            }
-
             Rectangle prevBounds = GetBoundsAt(prevPos, prevCrouching);
             Rectangle currentBounds = _player.Bounds;
             Rectangle swept = Rectangle.Union(prevBounds, currentBounds);
@@ -735,7 +730,14 @@ namespace Celeste.Collision
                     continue;
                 }
 
-                if (prevFootY <= trigger.Top && currFootY >= trigger.Top && trigger.Top < bestTop)
+                bool crossedTriggerTop = attemptedDy > 0f
+                    && prevFootY <= trigger.Top
+                    && currFootY >= trigger.Top;
+                bool feetInsideTrigger = currentBounds.Bottom >= trigger.Top
+                    && currentBounds.Bottom <= trigger.Bottom + BlockConstants.SpringFootTriggerTolerancePixels
+                    && currentBounds.Top < trigger.Bottom;
+
+                if ((crossedTriggerTop || feetInsideTrigger) && trigger.Top < bestTop)
                 {
                     bestSpring = spring;
                     bestTop = trigger.Top;

@@ -49,9 +49,25 @@ namespace Celeste.Sprites
         /// </summary>
         public void ResetHairToCurrentAnchor()
         {
-            // If LastHairAnchor hasn't been computed yet, approximate anchor from current position.
-            Vector2 anchor = LastHairAnchor != Vector2.Zero ? LastHairAnchor : _lastPosition;
-            _hair.Reset(anchor);
+            Vector2 anchor = GetCurrentHairAnchor();
+            LastHairAnchor = anchor;
+            _hair.BangsFrame = BangsFrameData.GetFrame(_currentAnimName, _body.CurrentFrame);
+            _hair.Reset(anchor, _faceLeft);
+        }
+
+        public void MoveHairToCurrentAnchor()
+        {
+            Vector2 anchor = GetCurrentHairAnchor();
+            if (LastHairAnchor == Vector2.Zero)
+            {
+                ResetHairToCurrentAnchor();
+                return;
+            }
+
+            Vector2 delta = anchor - LastHairAnchor;
+            LastHairAnchor = anchor;
+            _hair.BangsFrame = BangsFrameData.GetFrame(_currentAnimName, _body.CurrentFrame);
+            _hair.MoveBy(delta);
         }
     }
 }

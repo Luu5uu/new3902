@@ -38,7 +38,7 @@ namespace Celeste.MadelineStates
 
             if (m.CanGrabWall())
             {
-                m.changeState(m.climbState);
+                m.BeginWallGrab();
                 return;
             }
 

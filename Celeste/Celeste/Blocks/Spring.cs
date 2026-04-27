@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Celeste.Animation;
+using static Celeste.BlockConstants;
 
 namespace Celeste.Blocks
 {
@@ -104,9 +105,10 @@ namespace Celeste.Blocks
 
                 int fullWidth = (int)(_clip.FrameWidth * Scale);
                 int fullHeight = (int)(_clip.FrameHeight * Scale);
-                int xInset = System.Math.Max(1, (int)System.Math.Round(2f * Scale));
-                int yOffset = 30;
-                int height = System.Math.Max(8, fullHeight - yOffset);
+                int xInset = System.Math.Max(1, (int)System.Math.Round(SpringTriggerInsetNative * Scale));
+                int yOffset = (int)System.Math.Round(SpringTriggerTopOffsetNative * Scale);
+                int minHeight = System.Math.Max(1, (int)System.Math.Round(SpringTriggerMinHeightNative * Scale));
+                int height = System.Math.Max(minHeight, fullHeight - yOffset);
 
                 return new Rectangle(
                     (int)Position.X + xInset,

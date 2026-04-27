@@ -1,10 +1,10 @@
-﻿using Celeste.MadelineStates;
-using Celeste.Rewind;
-using Celeste.Sprites;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Celeste.MadelineStates;
+using Celeste.Rewind;
+using Celeste.Sprites;
 using static Celeste.GlobalConstants;
 using static Celeste.PlayerConstants;
 
@@ -12,16 +12,14 @@ namespace Celeste.Character
 {
     public partial class Madeline
     {
-        private const int MaxRewindSnapshots = 300;
         private readonly List<PlayerSnapshot> _rewindBuffer = new();
 
         public bool CanRewind => _rewindBuffer.Count > 1;
         public bool IsInDeathSequence => _deathEffect != null || _state == deathState;
         public bool HasRewindTrail => _rewindBuffer.Count > 1;
-        private Rectangle _startGhostSourceRect;
-        private Vector2 _startGhostOrigin;
         private HairRenderer.HairSnapshot _startHairSnapshot;
         private bool _hasStartHairSnapshot;
+
         private RewindStateKind GetCurrentRewindStateKind()
         {
             if (_state == standState) return RewindStateKind.Stand;
@@ -88,6 +86,9 @@ namespace Celeste.Character
                 VariableJumpSpeed = _variableJumpSpeed,
                 StoredLiftSpeed = _storedLiftSpeed,
                 StoredLiftTimer = _storedLiftTimer,
+                WallJumpLockedWallSide = _wallJumpLockedWallSide,
+                WallJumpForceMoveDirection = _wallJumpForceMoveDirection,
+                WallJumpForceMoveTimer = _wallJumpForceMoveTimer,
                 ClimbJumpConversionTimer = _climbJumpConversionTimer,
                 ClimbJumpConversionDirection = _climbJumpConversionDirection,
                 ClimbJumpRefundAmount = _climbJumpRefundAmount,
@@ -108,7 +109,6 @@ namespace Celeste.Character
                 LedgeTopOutTimer = _ledgeTopOutTimer,
 
                 FootstepTimer = footstepTimer,
-                ClimbSoundTimer = climbSoundTimer,
                 TiredFlashPhase = _tiredFlashPhase,
 
                 StateKind = GetCurrentRewindStateKind()
@@ -142,6 +142,9 @@ namespace Celeste.Character
             _variableJumpSpeed = snapshot.VariableJumpSpeed;
             _storedLiftSpeed = snapshot.StoredLiftSpeed;
             _storedLiftTimer = snapshot.StoredLiftTimer;
+            _wallJumpLockedWallSide = snapshot.WallJumpLockedWallSide;
+            _wallJumpForceMoveDirection = snapshot.WallJumpForceMoveDirection;
+            _wallJumpForceMoveTimer = snapshot.WallJumpForceMoveTimer;
             _climbJumpConversionTimer = snapshot.ClimbJumpConversionTimer;
             _climbJumpConversionDirection = snapshot.ClimbJumpConversionDirection;
             _climbJumpRefundAmount = snapshot.ClimbJumpRefundAmount;
@@ -168,7 +171,6 @@ namespace Celeste.Character
             _ledgeTopOutTimer = snapshot.LedgeTopOutTimer;
 
             footstepTimer = snapshot.FootstepTimer;
-            climbSoundTimer = snapshot.ClimbSoundTimer;
             _tiredFlashPhase = snapshot.TiredFlashPhase;
 
             SetStateFromRewindKind(snapshot.StateKind);
@@ -177,9 +179,21 @@ namespace Celeste.Character
             jumpHeld = false;
             dashPressed = false;
             deathPressed = false;
-            climbHeld = false;
-            moveX = 0f;
-            moveY = 0f;
+        }
+
+        public void SeedInitialRewindSnapshot()
+        {
+            if (_rewindBuffer.Count == 0)
+            {
+                _rewindBuffer.Add(CaptureSnapshot());
+            }
+
+            SnapshotHairForRewind();
+        }
+
+        public void ClearRewindHistory()
+        {
+            _rewindBuffer.Clear();
         }
 
         public void SaveRewindSnapshot()
@@ -229,92 +243,54 @@ namespace Celeste.Character
                 return false;
             }
 
+            ApplySnapshot(_rewindBuffer[_rewindBuffer.Count - 1]);
             _rewindBuffer.RemoveAt(_rewindBuffer.Count - 1);
-            PlayerSnapshot previous = _rewindBuffer[_rewindBuffer.Count - 1];
-            ApplySnapshot(previous);
             return true;
-        }
-
-        public void ClearRewindHistory()
-        {
-            _rewindBuffer.Clear();
-        }
-
-        public void SeedInitialRewindSnapshot()
-        {
-            _rewindBuffer.Clear();
-            SaveRewindSnapshot();
-
-            var (src, origin) = Maddy.BodyCurrentFrame;
-            _startGhostSourceRect = src;
-            _startGhostOrigin = origin;
-
-            if (Maddy.Hair is HairRenderer hairRenderer)
-            {
-                _startHairSnapshot = hairRenderer.CaptureSnapshot();
-                _hasStartHairSnapshot = true;
-            }
-            else
-            {
-                _hasStartHairSnapshot = false;
-            }
         }
 
         public void DrawRewindTrail(SpriteBatch spriteBatch, Texture2D pixel)
         {
-            Vector2 bodyOffset = new Vector2(0f, -PlayerNormalHitboxHeight * 0.5f);
-            PlayerSnapshot start = _rewindBuffer[0];
-            float startScaleX = start.FaceLeft ? -DefaultScale : DefaultScale;
-            Color startColor = new Color(173, 216, 230) * 0.55f;
-
-            if (_ghostBodyTex != null)
-            {
-                spriteBatch.Draw(
-                    _ghostBodyTex,
-                    start.Position,
-                    _startGhostSourceRect,
-                    startColor,
-                    0f,
-                    _startGhostOrigin,
-                    new Vector2(startScaleX, DefaultScale),
-                    SpriteEffects.None,
-                    0f);
-            }
-
-            if (_hasStartHairSnapshot && Maddy.Hair is HairRenderer hairRenderer)
-            {
-                hairRenderer.DrawSnapshot(spriteBatch, _startHairSnapshot, startColor, DefaultScale);
-            }
-
-            if (pixel == null)
-            {
-                return;
-            }
+            if (_rewindBuffer.Count < 2 || pixel == null || _ghostBodyTex == null) return;
 
             for (int i = 0; i < _rewindBuffer.Count - 1; i++)
             {
-                Vector2 p1 = _rewindBuffer[i].Position + bodyOffset;
-                Vector2 p2 = _rewindBuffer[i + 1].Position + bodyOffset;
+                Vector2 p1 = _rewindBuffer[i].Position;
+                Vector2 p2 = _rewindBuffer[i + 1].Position;
+                float alpha = (float)i / _rewindBuffer.Count * GhostRewindTrailAlphaFactor;
+                DrawLine(spriteBatch, pixel, p1, p2, GhostTrailColor * alpha, RewindTrailThickness);
+            }
 
-                DrawLine(spriteBatch, pixel, p1, p2, new Color(120, 200, 255) * 0.75f, 2f);
+            PlayerSnapshot start = _rewindBuffer[0];
+            float scaleX = start.FaceLeft ? -DefaultScale : DefaultScale;
+            var (src, origin) = Maddy.BodyCurrentFrame;
+            spriteBatch.Draw(_ghostBodyTex, start.Position, src, GhostTrailColor * GhostStartAlpha,
+                0f, origin, new Vector2(scaleX, DefaultScale), SpriteEffects.None, 0f);
+
+            if (_hasStartHairSnapshot && Maddy.Hair is HairRenderer hairRenderer)
+            {
+                hairRenderer.DrawSnapshot(spriteBatch, _startHairSnapshot, GhostTrailColor * GhostStartAlpha, DefaultScale);
             }
         }
-        private void DrawLine(SpriteBatch spriteBatch, Texture2D pixel, Vector2 start, Vector2 end, Color color, float thickness)
+
+        public void SnapshotHairForRewind()
+        {
+            if (Maddy.Hair is HairRenderer hairRenderer)
+            {
+                _startHairSnapshot = hairRenderer.CaptureSnapshot();
+                _hasStartHairSnapshot = true;
+                return;
+            }
+
+            _hasStartHairSnapshot = false;
+        }
+
+        private void DrawLine(SpriteBatch spriteBatch, Texture2D pixel, Vector2 start, Vector2 end, Color color, int thickness)
         {
             Vector2 edge = end - start;
-            float angle = (float)System.Math.Atan2(edge.Y, edge.X);
-            float length = edge.Length();
-
-            spriteBatch.Draw(
-                pixel,
-                start,
-                null,
-                color,
-                angle,
-                Vector2.Zero,
-                new Vector2(length, thickness),
-                SpriteEffects.None,
-                0f);
+            float angle = (float)Math.Atan2(edge.Y, edge.X);
+            spriteBatch.Draw(pixel,
+                new Rectangle((int)start.X, (int)start.Y, (int)edge.Length(), thickness),
+                null, color, angle, new Vector2(0f, RewindTrailOriginY), SpriteEffects.None, 0f);
         }
     }
 }

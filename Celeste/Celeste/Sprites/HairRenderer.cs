@@ -101,8 +101,50 @@ namespace Celeste.Sprites
 
         public void Reset(Vector2 anchor)
         {
+            Reset(anchor, _faceLeft);
+        }
+
+        public void Reset(Vector2 anchor, bool faceLeft)
+        {
             for (int i = 0; i < _nodes.Length; i++)
+            {
                 _nodes[i] = anchor;
+            }
+
+            _faceLeft = faceLeft;
+            float s = DrawScale;
+            float maxDist = MaxNodeDistNative * s;
+            Vector2 stepPerSeg = StepPerSegNative * s;
+            float stepFacing = StepFacingNative * s;
+            float facing = faceLeft ? 1f : -1f;
+
+            Vector2 previous = anchor;
+            Vector2 target = previous + new Vector2(facing * stepFacing * 2f, 0f) + stepPerSeg;
+
+            for (int i = 1; i < _nodes.Length; i++)
+            {
+                Vector2 diff = target - previous;
+                float dist = diff.Length();
+                _nodes[i] = dist > maxDist
+                    ? previous + SafeNorm(diff) * maxDist
+                    : target;
+
+                previous = _nodes[i];
+                target = previous + new Vector2(facing * stepFacing, 0f) + stepPerSeg;
+            }
+        }
+
+        public void MoveBy(Vector2 delta)
+        {
+            if (delta == Vector2.Zero)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _nodes.Length; i++)
+            {
+                _nodes[i] += delta;
+            }
         }
 
         public void ResetFloatingTail(Vector2 anchor, Vector2 direction)

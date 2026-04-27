@@ -23,9 +23,10 @@ namespace Celeste
         public const float PlayerJumpSpeed = 120f * PlayerTileScale;
         public const float PlayerJumpHorizontalBoost = 40f * PlayerTileScale;
         public const float PlayerWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost;
-        public const float PlayerWallJumpSpeed = PlayerJumpSpeed * 0.70f;
+        public const float PlayerWallJumpSpeed = PlayerJumpSpeed;
         public const float PlayerNeutralWallJumpSpeed = PlayerJumpSpeed * 0.50f;
         public const float PlayerWallJumpVariableTime = 0.12f;
+        public const float PlayerWallJumpForceMoveTime = 0.16f;
         public const int PlayerWallJumpCheckDistance = 2;
         public const int PlayerSuperWallJumpCheckDistance = 5;
         public const float PlayerSuperWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost * 2f;
@@ -83,5 +84,46 @@ namespace Celeste
         public const float PlayerStarFlyMaxExitY = 0f;
         public const float PlayerStarFlyMaxExitX = 140f * PlayerTileScale;
         public const float PlayerOutOfBoundsDeathGrace = 72f;
+
+        public const int WallSideNone = 0;
+        public const int WallSideLeft = -1;
+        public const int WallSideRight = 1;
+        public const int MaxRewindSnapshots = 300;
+
+        // Visual Colors
+        public static readonly Microsoft.Xna.Framework.Color StarFlyGold = new Microsoft.Xna.Framework.Color(255, 214, 92);
+        public static readonly Microsoft.Xna.Framework.Color StarFlyRed = new Microsoft.Xna.Framework.Color(255, 78, 78);
+        public static readonly Microsoft.Xna.Framework.Color DashTrailCyan = new Microsoft.Xna.Framework.Color(74, 204, 255);
+        public static readonly Microsoft.Xna.Framework.Color TiredFlashColor = new Microsoft.Xna.Framework.Color(255, 90, 90);
+        public static readonly Microsoft.Xna.Framework.Color GhostTrailColor = new Microsoft.Xna.Framework.Color(44, 183, 255);
+
+        // Sound / Interval constants
+        public const float FootstepInterval = 0.12f;
+        public const float TiredFlashSpeed = 12f;
+        public const float DashGhostFadeSpeed = 4f;
+        public const float GhostInitialAlpha = 0.6f;
+        public const float GhostRewindTrailAlphaFactor = 0.5f;
+        public const float GhostStartAlpha = 0.3f;
+        public const int RewindTrailThickness = 2;
+        public const float RewindTrailOriginY = 0.5f;
+
+        // Particle Effects - Landing
+        public static readonly Microsoft.Xna.Framework.Vector2 LandDustVisualOffset = new Microsoft.Xna.Framework.Vector2(0f, -2f);
+        public const float LandDustAccelerationY = 5f;
+        public const float LandDustLifetime = 0.5f;
+        public const float LandDustDampingMin = 21.5f;
+        public const float LandDustDampingMax = 22.5f;
+
+        // Particle Effects - Wall Kick
+        public const float WallKickDustHeightMultiplier = 0.55f;
+        public const float WallKickDustOffsetX = 7f;
+        public const float WallKickDustLifetime = 0.45f;
+
+        // Particle Effects - Dash Trail
+        public const float DashTrailLifetimeMin = 0.6f;
+        public const float DashTrailLifetimeMax = 0.8f;
+        public const float DashTrailSizeMin = 1.2f;
+        public const float DashTrailSizeMax = 2.0f;
+        public const float DashTrailAlphaStart = 0.9f;
     }
 }

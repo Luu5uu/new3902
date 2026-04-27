@@ -6,5 +6,7 @@ namespace Celeste
     public static class GlobalConstants
     {
         public const float DefaultScale = 2f;
+        public const int BackBufferWidth = 800;
+        public const int BackBufferHeight = 440;
     }
 }

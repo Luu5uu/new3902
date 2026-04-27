@@ -21,13 +21,12 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
 using BgmAudioPlayer = Celeste.BGMPlayer.BGMPlayer;
+using static Celeste.LevelConstants;
 
 namespace Celeste.Scenes
 {
     public class GameplayScene : Scene
     {
-        private readonly record struct RoomTransitionZone(int SourceRoom, Rectangle TriggerArea, int TargetRoom);
-        private readonly record struct EndingZone(int SourceRoom, Rectangle TriggerArea);
         private const string GameplayTrackOne = "first-steps";
         private const string GameplayTrackTwo = "resurrections";
 
@@ -73,20 +72,6 @@ namespace Celeste.Scenes
         private float _rewindRecordTimer;
         private float _rewindCooldownTimer;
 
-        private const float RewindRecordDuration = 3.0f;
-        private const float RewindCooldownDuration = 3.0f;
-        private const int RoomTransitionOutOfBoundsMargin = 160;
-        private static readonly RoomTransitionZone[] RoomTransitionZones =
-        {
-            new(1, new Rectangle(620, 0, 120, 36), 2),
-            new(2, new Rectangle(680, 0, 80, 36), 3),
-            new(3, new Rectangle(660, 0, 80, 36), 4),
-            new(4, new Rectangle(400, 0, 80, 36), 5),
-            new(1, new Rectangle(0,41, 21, 41), 6),
-            new(6, new Rectangle(788, 0, 800, 84), 1)
-        };
-
-        private static readonly EndingZone FinalEndingZone = new(5, new Rectangle(330, 0, 120, 60));
         private bool _endingStarted;
 
 
@@ -146,7 +131,7 @@ namespace Celeste.Scenes
             LoadDecorTextures();
 
 
-            _worldMap = new MapBuilder(factory, _catalog, 50, 30);
+            _worldMap = new MapBuilder(factory, _catalog, WorldMapColumns, WorldMapRows);
             _roomOne = new RoomOne(_worldMap, factory);
             _roomTwo = new RoomTwo(_worldMap, factory);
             _roomThree = new RoomThree(_worldMap, factory);
@@ -263,19 +248,12 @@ namespace Celeste.Scenes
                 _hazardCollisionSystem.ResolveHazardCollision();
                 _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching, dt);
 
-                if (TryHandleEnding(gameTime))
-                {
-                    _previousKeyboardState = keyboard;
-                    return;
-                }
-
                 if (TryHandleRoomTransition(gameTime, previousPosition, wasCrouching))
                 {
                     _previousKeyboardState = keyboard;
                     return;
                 }
 
-                _player.UpdateClimbSound((float)gameTime.ElapsedGameTime.TotalSeconds);
                 _player.UpdateFootstep((float)gameTime.ElapsedGameTime.TotalSeconds);
                 UpdateCollectibles(gameTime);
                 _player.UpdateSprite(gameTime);
@@ -397,23 +375,20 @@ namespace Celeste.Scenes
 
         public void CycleGameScene(int direction)
         {
-            const int firstRoom = 1;
-            const int lastRoom = 6;
-
             int nextRoom = _currentRoom;
-            if (nextRoom < firstRoom || nextRoom > lastRoom)
+            if (nextRoom < FirstRoom || nextRoom > LastRoom)
             {
-                nextRoom = 3;
+                nextRoom = DefaultRoom;
             }
 
             nextRoom += direction;
-            if (nextRoom < firstRoom)
+            if (nextRoom < FirstRoom)
             {
-                nextRoom = lastRoom;
+                nextRoom = LastRoom;
             }
-            else if (nextRoom > lastRoom)
+            else if (nextRoom > LastRoom)
             {
-                nextRoom = firstRoom;
+                nextRoom = FirstRoom;
             }
 
             if (nextRoom != _currentRoom)
@@ -424,7 +399,7 @@ namespace Celeste.Scenes
 
         private void ChangeRoom(int roomNumber, bool resetPlayer)
         {
-            if (roomNumber < 0 || roomNumber > 6 || roomNumber == _currentRoom)
+            if (roomNumber < FirstRoom || roomNumber > LastRoom || roomNumber == _currentRoom)
             {
                 return;
             }
@@ -439,11 +414,13 @@ namespace Celeste.Scenes
             Rectangle previousBounds = _player.GetBoundsAt(previousPosition, previousCrouching);
             Rectangle sweptBounds = Rectangle.Union(previousBounds, playerBounds);
 
-            for (int i = 0; i < RoomTransitionZones.Length; i++)
+            for (int i = 0; i < TransitionZones.Count; i++)
             {
-                RoomTransitionZone zone = RoomTransitionZones[i];
+                var zone = TransitionZones[i];
                 Rectangle triggerArea = ExpandTransitionArea(zone.TriggerArea);
-                if (zone.SourceRoom != _currentRoom || !sweptBounds.Intersects(triggerArea))
+                if (zone.SourceRoom != _currentRoom
+                    || !sweptBounds.Intersects(triggerArea)
+                    || !HasFullyCrossedTransitionEdge(zone.TriggerArea, playerBounds))
                 {
                     continue;
                 }
@@ -461,43 +438,52 @@ namespace Celeste.Scenes
                 return true;
             }
 
-            return false;
-        }
-
-        private bool TryHandleEnding(GameTime gameTime)
-        {
-            if (_endingStarted)
+            if (!_endingStarted && FinalEndingZone.SourceRoom == _currentRoom && sweptBounds.Intersects(FinalEndingZone.TriggerArea))
             {
+                _endingStarted = true;
+                _timerRunning = false;
+                _showUI = false;
+
+                _isRecordingRewind = false;
+                _isRewinding = false;
+                _rewindRecordTimer = 0f;
+                _rewindCooldownTimer = RewindCooldownDuration;
+
+                SceneManager.PushScene(new ScreenWipeScene(Game, () =>
+                {
+                    SceneManager.ChangeScene(new EndingScene(
+                        Game,
+                        _gameTimer,
+                        _sessionDeathCount,
+                        _sessionCollectedStrawberryCount));
+                }));
                 return true;
             }
 
-            if (_currentRoom != FinalEndingZone.SourceRoom)
+            return false;
+        }
+
+        private bool HasFullyCrossedTransitionEdge(Rectangle area, Rectangle playerBounds)
+        {
+            if (area.Left <= _worldBound.Left + RoomTransitionEdgeBand)
             {
-                return false;
+                return playerBounds.Right <= _worldBound.Left;
             }
 
-            if (!_player.Bounds.Intersects(FinalEndingZone.TriggerArea))
+            if (area.Left >= _worldBound.Right - RoomTransitionEdgeBand)
             {
-                return false;
+                return playerBounds.Left >= _worldBound.Right;
             }
 
-            _endingStarted = true;
-            _timerRunning = false;
-            _showUI = false;
-
-            _isRecordingRewind = false;
-            _isRewinding = false;
-            _rewindRecordTimer = 0f;
-            _rewindCooldownTimer = RewindCooldownDuration;
-
-            SceneManager.PushScene(new ScreenWipeScene(Game, () =>
+            if (area.Top <= _worldBound.Top + RoomTransitionEdgeBand)
             {
-                SceneManager.PushScene(new EndingScene(
-                    Game,
-                    _gameTimer,
-                    _sessionDeathCount,
-                    _sessionCollectedStrawberryCount));
-            }));
+                return playerBounds.Bottom <= _worldBound.Top;
+            }
+
+            if (area.Bottom >= _worldBound.Bottom - RoomTransitionEdgeBand)
+            {
+                return playerBounds.Top >= _worldBound.Bottom;
+            }
 
             return true;
         }
@@ -855,16 +841,11 @@ namespace Celeste.Scenes
 
         private Vector2 GetRespawnPointForRoom(int room)
         {
-            return room switch
+            if (RoomRespawnPoints.TryGetValue(room, out Vector2 respawn))
             {
-                1 => new Vector2(45f, 336f),
-                2 => new Vector2(70f, 378f),
-                3 => new Vector2(78f, 396f),
-                4 => new Vector2(120f, 390f),
-                5 => new Vector2(120f, 376f),
-                6 => new Vector2(700f, 320f),
-                _ => new Vector2(200f, 150f),
-            };
+                return respawn;
+            }
+            return DefaultRespawnPoint;
         }
 
         private static void StartGameplayBgm()
@@ -990,7 +971,7 @@ namespace Celeste.Scenes
                 Game.GraphicsDevice.Viewport.Width,
                 Game.GraphicsDevice.Viewport.Height);
 
-            spriteBatch.Draw(_pixelTexture, screenRect, Color.Black * 0.6f);
+            spriteBatch.Draw(_pixelTexture, screenRect, Color.Black * RewindDarkOverlayAlpha);
         }
     }
 }

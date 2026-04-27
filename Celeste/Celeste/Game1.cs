@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using BgmAudioPlayer = Celeste.BGMPlayer.BGMPlayer;
+using static Celeste.GlobalConstants;
 
 namespace Celeste
 {
@@ -20,8 +21,8 @@ namespace Celeste
         {
             _graphics = new GraphicsDeviceManager(this);
 
-            _graphics.PreferredBackBufferWidth = 800;
-            _graphics.PreferredBackBufferHeight = 440;
+            _graphics.PreferredBackBufferWidth = BackBufferWidth;
+            _graphics.PreferredBackBufferHeight = BackBufferHeight;
             _graphics.ApplyChanges();
 
             Content.RootDirectory = "Content";

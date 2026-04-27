@@ -33,6 +33,9 @@ namespace Celeste.Rewind
         public float VariableJumpSpeed;
         public Vector2 StoredLiftSpeed;
         public float StoredLiftTimer;
+        public int WallJumpLockedWallSide;
+        public int WallJumpForceMoveDirection;
+        public float WallJumpForceMoveTimer;
         public float ClimbJumpConversionTimer;
         public int ClimbJumpConversionDirection;
         public float ClimbJumpRefundAmount;
@@ -55,7 +58,6 @@ namespace Celeste.Rewind
 
         // Small runtime timers
         public float FootstepTimer;
-        public float ClimbSoundTimer;
         public float TiredFlashPhase;
 
         // State machine

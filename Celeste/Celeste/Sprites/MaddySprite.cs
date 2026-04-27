@@ -297,18 +297,7 @@ namespace Celeste.Sprites
                     _hair.HairColor = _dashUsed ? UsedHairColor : NormalHairColor;
             }
 
-            _hair.DrawScale = _lastScale;
-            Vector2 hairDelta = HairOffsetData.GetOffset(_currentAnimName, _body.CurrentFrame);
-            DebugDelta = hairDelta;
-            hairDelta += DebugNudge;
-
-            float facing = _faceLeft ? -1f : 1f;
-            hairDelta.X *= facing;
-
-            Vector2 hairAnchor = _lastPosition
-                + new Vector2(0f, -GetBaseHeadY() * _lastScale)
-                + hairDelta * _lastScale;
-
+            Vector2 hairAnchor = GetCurrentHairAnchor();
             LastHairAnchor = hairAnchor;
             _hair.BangsFrame = BangsFrameData.GetFrame(_currentAnimName, _body.CurrentFrame);
             _hair.Update(gameTime, hairAnchor, _faceLeft);
@@ -338,6 +327,21 @@ namespace Celeste.Sprites
                 "tired" or "tiredstill" => TiredHeadY,
                 _ => BaseHeadY,
             };
+        }
+
+        private Vector2 GetCurrentHairAnchor()
+        {
+            _hair.DrawScale = _lastScale;
+            Vector2 hairDelta = HairOffsetData.GetOffset(_currentAnimName, _body.CurrentFrame);
+            DebugDelta = hairDelta;
+            hairDelta += DebugNudge;
+
+            float facing = _faceLeft ? -1f : 1f;
+            hairDelta.X *= facing;
+
+            return _lastPosition
+                + new Vector2(0f, -GetBaseHeadY() * _lastScale)
+                + hairDelta * _lastScale;
         }
     }
 }

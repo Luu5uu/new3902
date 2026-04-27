@@ -55,7 +55,7 @@ namespace Celeste.MadelineStates
             if (m.canDash && m.ConsumeDashPress())           { m.changeState(m.dashState); return; }
             if (m.CanUseJumpGrace() && m.ConsumeJumpPress()) { m.changeState(m.jumpState); return; }
             if (m.WantsToCrouch())                           { m.changeState(m.crouchState); return; }
-            if (m.CanGrabWall())                 { m.changeState(m.climbState); return; }
+            if (m.CanGrabWall())                 { m.BeginWallGrab(); return; }
             if (m.moveX != 0f)                     { m.changeState(m.runState);  return; }
 
         }

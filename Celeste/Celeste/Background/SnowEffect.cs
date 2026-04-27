@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using static Celeste.BackgroundConstants;
 
 namespace Celeste.Background
 {
@@ -52,8 +53,13 @@ namespace Celeste.Background
             _screenWidth  = screenWidth;
             _screenHeight = screenHeight;
 
-            _dot = new Texture2D(gd, 2, 2);
-            _dot.SetData(new[] { Color.White, Color.White, Color.White, Color.White });
+            _dot = new Texture2D(gd, SnowDotTextureSize, SnowDotTextureSize);
+            Color[] dotData = new Color[SnowDotTexturePixelCount];
+            for (int i = 0; i < dotData.Length; i++)
+            {
+                dotData[i] = Color.White;
+            }
+            _dot.SetData(dotData);
 
             foreach (var layer in Layers)
             {
@@ -71,9 +77,9 @@ namespace Celeste.Background
                 SnowParticle p = _particles[i];
                 p.Age += dt;
                 p.Position.X += p.SpeedX * dt;
-                p.Position.Y += p.SpeedY * dt + (float)Math.Sin(p.Age * 2.5f) * 6f * dt;
+                p.Position.Y += p.SpeedY * dt + (float)Math.Sin(p.Age * SnowSineFrequency) * SnowSineAmplitude * dt;
 
-                bool exitedLeft = p.Position.X < -4f;
+                bool exitedLeft = p.Position.X < SnowExitedLeftThreshold;
                 bool expired    = p.Age >= p.Lifetime;
                 if (exitedLeft || expired)
                 {
@@ -93,12 +99,12 @@ namespace Celeste.Background
             foreach (SnowParticle p in _particles)
             {
                 float t = p.Age / p.Lifetime;
-                float alpha = t < 0.1f ? t / 0.1f : (t > 0.85f ? (1f - t) / 0.15f : 1f);
+                float alpha = t < SnowFadeInDuration ? t / SnowFadeInDuration : (t > (1f - SnowFadeOutDuration) ? (1f - t) / SnowFadeOutDuration : 1f);
                 spriteBatch.Draw(
                     _dot,
                     p.Position,
                     null,
-                    p.Color * (alpha * 0.75f),
+                    p.Color * (alpha * SnowAlphaMax),
                     0f,
                     Vector2.Zero,
                     p.Size,
@@ -109,10 +115,10 @@ namespace Celeste.Background
 
         private SnowParticle SpawnParticle(SnowLayer layer, bool scattered, bool randomizeAge = false)
         {
-            float x = scattered ? (float)(_rng.NextDouble() * _screenWidth) : _screenWidth + 4f;
+            float x = scattered ? (float)(_rng.NextDouble() * _screenWidth) : _screenWidth + SnowRespawnXOffset;
             float y = (float)(_rng.NextDouble() * _screenHeight);
             float speedX = -(layer.MinSpeed + (float)(_rng.NextDouble() * (layer.MaxSpeed - layer.MinSpeed)));
-            float spreadY = (float)(_rng.NextDouble() * 20f - 10f);
+            float spreadY = (float)(_rng.NextDouble() * SnowVerticalSpread - SnowVerticalSpread / 2f);
             float age     = randomizeAge ? (float)(_rng.NextDouble() * layer.Lifetime) : 0f;
             return new SnowParticle
             {

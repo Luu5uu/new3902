@@ -22,6 +22,12 @@ namespace Celeste.MadelineStates
 
         public void Update(Madeline m, float dt)
         {
+            if (m.climbStamina <= 0f)
+            {
+                m.changeState(m.fallState);
+                return;
+            }
+
             if (m.ConsumeJumpPress())
             {
                 int wallJumpDirection = m.GetWallJumpDirection();
@@ -56,12 +62,6 @@ namespace Celeste.MadelineStates
 
             m.FaceTowardWall();
 
-            if (m.climbStamina <= 0f)
-            {
-                m.changeState(m.fallState);
-                return;
-            }
-
             if (m.onGround && m.moveY >= 0f)
             {
                 m.changeState(m.standState);
@@ -70,14 +70,7 @@ namespace Celeste.MadelineStates
 
             if (m.moveY < 0f)
             {
-                if (m.IsTired)
-                {
-                    m.Maddy.Tired();
-                }
-                else
-                {
-                    m.Maddy.ClimbUp();
-                }
+                m.Maddy.ClimbUp();
                 m.Maddy.SetClimbSweat(climbingUp: true, tired: m.IsTired, onGround: m.onGround);
                 m.velocityY = -PlayerClimbUpSpeed;
                 m.climbStamina = Math.Max(0f, m.climbStamina - PlayerClimbUpCostPerSecond * dt);
@@ -90,14 +83,7 @@ namespace Celeste.MadelineStates
             }
             else
             {
-                if (m.IsTired)
-                {
-                    m.Maddy.TiredStill();
-                }
-                else
-                {
-                    m.Maddy.WallSlide();
-                }
+                m.Maddy.WallSlide();
                 m.Maddy.SetClimbSweat(climbingUp: false, tired: m.IsTired, onGround: m.onGround);
                 m.velocityY = 0f;
                 if (!m.onGround)
