@@ -2,7 +2,7 @@ In Sprint 5, each team member was assigned a specific task bundle. Team members 
 
 Henry was responsible for: Implementing the background snow system, reworking player movement and physics (including wall jump fixes and lift momentum), and adding the FlyFeather item with associated StarFly animations. Also implemented visual polish through landing, wall-kick, and dash particle effects.
 
-Aaron was responsible for: 
+Aaron was responsible for: Handling of room transitions.
 
 Isaac was responsible for: Handling block replacement backlog, designing and creating a custom room, adding foreground/background features/decorations to each room and fixing screen ratio.
 
