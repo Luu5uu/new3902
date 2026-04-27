@@ -59,6 +59,7 @@ namespace Celeste.Scenes
         private List<DecorItem> _currentDecor;
 
         private readonly List<CollectibleItem> _collectibles = new();
+        private readonly List<FlyFeatherItem> _feathers = new();
         private CollisionSystem _collisionSystem;
         private HazardCollisioncs _hazardCollisionSystem;
         private Rectangle _worldBound;
@@ -249,7 +250,7 @@ namespace Celeste.Scenes
             else
             {
                 _hazardCollisionSystem.ResolveHazardCollision();
-                _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching);
+                _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching, dt);
 
                 if (TryHandleRoomTransition(gameTime))
                 {
@@ -289,7 +290,8 @@ namespace Celeste.Scenes
                 _gameTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
-            if (_player.Bounds.Bottom > _worldBound.Bottom && !_player.IsInDeathSequence)
+            if (_player.position.Y > _worldBound.Bottom + PlayerConstants.PlayerOutOfBoundsDeathGrace
+                && !_player.IsInDeathSequence)
             {
                 _player.Die();
             }
@@ -568,6 +570,7 @@ namespace Celeste.Scenes
         private void RebuildCollectibles()
         {
             _collectibles.Clear();
+            _feathers.Clear();
 
             Vector2 spawn = _player.RespawnPoint;
             if (_currentRoom == 0)
@@ -626,6 +629,8 @@ namespace Celeste.Scenes
                     new Vector2(279f, 132f),
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
+
+                _feathers.Add(CreateFlyFeather(new Vector2(520f, 220f)));
             }
 
             if (_currentRoom == 6)
@@ -636,6 +641,8 @@ namespace Celeste.Scenes
                     new Vector2(37f, 365f),
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
+
+                _feathers.Add(CreateFlyFeather(new Vector2(610f, 245f)));
             }
         }
 
@@ -667,6 +674,14 @@ namespace Celeste.Scenes
             return collectible;
         }
 
+        private FlyFeatherItem CreateFlyFeather(Vector2 position, bool shielded = false)
+        {
+            ItemAnimation animation = ItemAnimationFactory.CreateFlyFeather(_catalog);
+            animation.Position = position;
+            animation.Scale = GlobalConstants.DefaultScale;
+            return new FlyFeatherItem(animation, position, shielded);
+        }
+
         private void UpdateCollectibles(GameTime gameTime)
         {
             foreach (var collectible in _collectibles)
@@ -688,6 +703,16 @@ namespace Celeste.Scenes
                     _player.Maddy.OnDashRefill();
                 }
             }
+
+            foreach (FlyFeatherItem feather in _feathers)
+            {
+                feather.Update(gameTime);
+                if (feather.TryCollect(_player))
+                {
+                    SoundManager.Play("collect");
+                    _player.StartStarFly();
+                }
+            }
         }
 
         private void DrawCollectibles(SpriteBatch spriteBatch)
@@ -695,6 +720,11 @@ namespace Celeste.Scenes
             foreach (var collectible in _collectibles)
             {
                 collectible.Draw(spriteBatch);
+            }
+
+            foreach (FlyFeatherItem feather in _feathers)
+            {
+                feather.Draw(spriteBatch);
             }
         }
 

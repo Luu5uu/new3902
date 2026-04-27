@@ -30,6 +30,7 @@
   <Clip key="Item/NormalStaw"    x="0"   y="384" w="32" h="32" frames="7" fps="8"  loop="true"  framesPerRow="7" />
   <Clip key="Item/FlyStaw"       x="0"   y="416" w="40" h="40" frames="10" fps="8"  loop="true"  framesPerRow="10" />
   <Clip key="Item/Crystal"       x="0"   y="456" w="20" h="20" frames="14" fps="8"  loop="true"  framesPerRow="14" />
+  <Clip key="Item/FlyFeather"    x="0"   y="996" w="32" h="32" frames="21" fps="16.6667" loop="true" framesPerRow="21" />
   <!-- Devices -->
   <Clip key="Devices/Spring"     x="0"   y="476" w="16" h="16" frames="7" fps="4"  loop="true"  framesPerRow="7" />
   <Clip key="Devices/MoveBlock"  x="0"   y="492" w="24" h="24" frames="3" fps="4"  loop="true"  framesPerRow="3" />
