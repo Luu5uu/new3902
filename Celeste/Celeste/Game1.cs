@@ -1,4 +1,4 @@
-using Celeste.Input;
+﻿using Celeste.Input;
 using Celeste.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -45,7 +45,7 @@ namespace Celeste
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
             SceneManager.Draw(SpriteBatch);
             base.Draw(gameTime);
         }

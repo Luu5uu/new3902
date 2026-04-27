@@ -52,6 +52,7 @@ namespace Celeste.Scenes
         private RoomThree _roomThree;
         private RoomFour _roomFour;
         private RoomFive _roomFive;
+        private RoomCustom _roomCustom;
         private int _currentRoom = 1;
 
         private readonly List<CollectibleItem> _collectibles = new();
@@ -130,6 +131,7 @@ namespace Celeste.Scenes
             _roomThree = new RoomThree(_worldMap, factory);
             _roomFour = new RoomFour(_worldMap, factory);
             _roomFive = new RoomFive(_worldMap, factory);
+            _roomCustom = new RoomCustom(_worldMap, factory);
 
 
             StartGameplayBgm();
@@ -140,7 +142,7 @@ namespace Celeste.Scenes
         public override void Update(GameTime gameTime)
         {
             KeyboardState keyboard = Keyboard.GetState();
-            
+
             _debugOverlay.HandleInput(keyboard, _player);
             _controllerLoader.Update();
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -363,7 +365,7 @@ namespace Celeste.Scenes
         public void CycleGameScene(int direction)
         {
             const int firstRoom = 1;
-            const int lastRoom = 5;
+            const int lastRoom = 6;
 
             int nextRoom = _currentRoom;
             if (nextRoom < firstRoom || nextRoom > lastRoom)
@@ -389,7 +391,7 @@ namespace Celeste.Scenes
 
         private void ChangeRoom(int roomNumber, bool resetPlayer)
         {
-            if (roomNumber < 0 || roomNumber > 5 || roomNumber == _currentRoom)
+            if (roomNumber < 0 || roomNumber > 6 || roomNumber == _currentRoom)
             {
                 return;
             }
@@ -460,6 +462,9 @@ namespace Celeste.Scenes
                     break;
                 case 5:
                     _roomFive.PlaceRoomFiveBlocks();
+                    break;
+                case 6:
+                    _roomCustom.PlaceRoomCustomBlocks();
                     break;
                 case 0:
                 default:
@@ -541,6 +546,16 @@ namespace Celeste.Scenes
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
             }
+
+             if (_currentRoom == 6)
+            {
+                _collectibles.Add(CreateCollectible(
+                    "roomCustom_straw_0",
+                    ItemAnimationFactory.CreateFlyStaw(_catalog),
+                    new Vector2(37f, 365f),
+                    CollectibleItem.ItemType.Strawberry,
+                    fliesAwayOnDash: true));
+            }
         }
 
         private void TriggerDashScaredCollectibles()
@@ -611,6 +626,7 @@ namespace Celeste.Scenes
                 3 => new Vector2(150f, 396f),
                 4 => new Vector2(190f, 390f),
                 5 => new Vector2(160f, 376f),
+                6 => new Vector2(700f, 300f),
                 _ => new Vector2(200f, 150f),
             };
         }
