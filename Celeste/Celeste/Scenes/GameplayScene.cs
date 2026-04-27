@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Celeste.Animation;
 using Celeste.AudioSystem;
+using Celeste.Background;
 using Celeste.Blocks;
 using Celeste.Blocks.Rooms;
 using Celeste.Character;
@@ -64,6 +65,8 @@ namespace Celeste.Scenes
         private HazardCollisioncs _hazardCollisionSystem;
         private Rectangle _worldBound;
 
+        private SnowEffect _snow;
+
         private bool _isRecordingRewind;
         private bool _isRewinding;
         private float _rewindRecordTimer;
@@ -96,6 +99,8 @@ namespace Celeste.Scenes
             _uiFont = Game.Content.Load<SpriteFont>("MenuFont");
             _background = Game.Content.Load<Texture2D>("bg");
 
+            _snow = new SnowEffect();
+            _snow.Initialize(Game.GraphicsDevice, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height);
 
             var startPos = new Vector2(
                 Game.Window.ClientBounds.Width / 2f,
@@ -234,6 +239,7 @@ namespace Celeste.Scenes
 
             _player.Update(gameTime);
             _worldMap.Update(gameTime);
+            if (_currentRoom != 6) _snow.Update(dt);
             UpdateGameplayBgm();
 
             if (!wasDashing && _player.isDashing)
@@ -306,6 +312,7 @@ namespace Celeste.Scenes
                 rasterizerState: RasterizerState.CullNone);
 
             spriteBatch.Draw(_background, Game.GraphicsDevice.Viewport.Bounds, Color.White);
+            if (_currentRoom != 6) _snow.Draw(spriteBatch);
             DrawDecor(spriteBatch);
 
             _worldMap.Draw(spriteBatch);
