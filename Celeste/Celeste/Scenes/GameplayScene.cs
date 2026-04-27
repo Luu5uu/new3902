@@ -412,12 +412,15 @@ namespace Celeste.Scenes
                     continue;
                 }
 
-                _isRecordingRewind = false;
-                _isRewinding = false;
-                _rewindRecordTimer = 0f;
-                _rewindCooldownTimer = RewindCooldownDuration;
-                ChangeRoom(zone.TargetRoom, resetPlayer: true);
-                _player.UpdateSprite(gameTime);
+                SceneManager.PushScene(new ScreenWipeScene(Game, () =>{
+                    _isRecordingRewind = false;
+                    _isRewinding = false;
+                    _rewindRecordTimer = 0f;
+                    _rewindCooldownTimer = RewindCooldownDuration;
+                    ChangeRoom(zone.TargetRoom, resetPlayer: true);
+                    _player.UpdateSprite(gameTime);
+                }));
+                
                 return true;
             }
 

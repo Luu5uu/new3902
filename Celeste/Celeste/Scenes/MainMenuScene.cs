@@ -81,7 +81,10 @@ namespace Celeste.Scenes
             switch (_selectedIndex)
             {
                 case 0:
-                    SceneManager.ChangeScene(new GameplayScene(Game));
+                    SceneManager.PushScene(new ScreenWipeScene(Game, () =>
+                    {
+                        SceneManager.ChangeScene(new GameplayScene(Game));
+                    }));
                     break;
                 case 1:
                     Game.Exit();
