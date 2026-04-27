@@ -118,7 +118,7 @@ namespace Celeste.MadelineStates
             _trailTimer -= dt;
             if (_trailTimer <= 0f)
             {
-                m.SpawnDashTrail(m.position, _dashDirection);
+                m.SpawnDashTrail(m.position, _dashDirection, count: 1);
                 _trailTimer = DashTrailInterval;
             }
 

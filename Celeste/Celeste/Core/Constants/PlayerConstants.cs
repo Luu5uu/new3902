@@ -23,6 +23,9 @@ namespace Celeste
         public const float PlayerJumpSpeed = 120f * PlayerTileScale;
         public const float PlayerJumpHorizontalBoost = 40f * PlayerTileScale;
         public const float PlayerWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost;
+        public const float PlayerWallJumpSpeed = PlayerJumpSpeed * 0.70f;
+        public const float PlayerNeutralWallJumpSpeed = PlayerJumpSpeed * 0.50f;
+        public const float PlayerWallJumpVariableTime = 0.12f;
         public const int PlayerWallJumpCheckDistance = 2;
         public const int PlayerSuperWallJumpCheckDistance = 5;
         public const float PlayerSuperWallJumpHorizontalSpeed = PlayerRunSpeed + PlayerJumpHorizontalBoost * 2f;
