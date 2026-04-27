@@ -83,10 +83,16 @@ namespace Celeste.Scenes
                     break;
                 case 1:
                     SceneManager.PopScene();
-                    Game.Reset();
+                    SceneManager.PushScene(new ScreenWipeScene(Game, () =>
+                    {
+                        Game.Reset();
+                    }));
                     break;
                 case 2:
-                    SceneManager.ChangeScene(new MainMenuScene(Game));
+                    SceneManager.PushScene(new ScreenWipeScene(Game, () =>
+                    {
+                        SceneManager.ChangeScene(new MainMenuScene(Game));
+                    }));
                     break;
                 case 3:
                     Game.Exit();

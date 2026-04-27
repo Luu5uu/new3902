@@ -25,9 +25,7 @@
 
 | Input | Action |
 |-------|--------|
-| Left mouse | Previous playable room |
-| Right mouse | Next playable room |
-| `0`-`5` | Jump directly to a room for testing |
+| `0`-`6` | Jump directly to a room for testing |
 
 ### BGM Controls
 
