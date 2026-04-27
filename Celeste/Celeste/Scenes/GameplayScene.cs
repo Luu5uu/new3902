@@ -55,6 +55,9 @@ namespace Celeste.Scenes
         private RoomCustom _roomCustom;
         private int _currentRoom = 1;
 
+        private Dictionary<string, Texture2D> _decorTextures;
+        private List<DecorItem> _currentDecor;
+
         private readonly List<CollectibleItem> _collectibles = new();
         private CollisionSystem _collisionSystem;
         private HazardCollisioncs _hazardCollisionSystem;
@@ -71,6 +74,8 @@ namespace Celeste.Scenes
             new(2, new Rectangle(680, 0, 80, 36), 3),
             new(3, new Rectangle(660, 0, 80, 36), 4),
             new(4, new Rectangle(400, 0, 80, 36), 5),
+            new(1, new Rectangle(0,41, 21, 41), 6),
+            new(6, new Rectangle(788, 0, 800, 84), 1)
         };
 
 
@@ -122,6 +127,11 @@ namespace Celeste.Scenes
                 _controllerLoader.GetGamepad(),
                 Game,
                 this);
+
+            _decorTextures = new Dictionary<string, Texture2D>();
+            _currentDecor = new List<DecorItem>();
+            LoadDecorTextures();
+
 
             _worldMap = new MapBuilder(factory, _catalog, 50, 30);
             _roomOne = new RoomOne(_worldMap, factory);
@@ -279,6 +289,8 @@ namespace Celeste.Scenes
                 rasterizerState: RasterizerState.CullNone);
 
             spriteBatch.Draw(_background, Game.GraphicsDevice.Viewport.Bounds, Color.White);
+            DrawDecor(spriteBatch);
+
             _worldMap.Draw(spriteBatch);
             DrawCollectibles(spriteBatch);
             if (_isRecordingRewind || _isRewinding)
@@ -405,6 +417,7 @@ namespace Celeste.Scenes
         private void RebuildCurrentRoom(bool resetPlayer)
         {
             BuildMap();
+            CurrentRoomDecorSetup();
             RebuildCollisionSystems();
             RebuildCollectibles();
 
@@ -413,6 +426,60 @@ namespace Celeste.Scenes
                 _player.Reset();
             }
             _player.SeedInitialRewindSnapshot();
+        }
+
+        private class DecorItem
+        {
+            public Texture2D Texture;
+            public Vector2 Position;
+            public float Scale;
+            public DecorItem(Texture2D texture, Vector2 position, float scale = 1f)
+            {
+                Texture = texture;
+                Position = position;
+                Scale = scale;
+            }
+        }
+
+        private void LoadDecorTextures()
+        {
+            _decorTextures["constructionSign"] = Game.Content.Load<Texture2D>("constructionSign");
+
+        }
+
+        private void AddDecor(string textureType, Vector2 position, float scale = 1f)
+        {
+            Texture2D texture = _decorTextures[textureType];
+            _currentDecor.Add(new DecorItem(texture, position, scale));
+        }
+
+        private void CurrentRoomDecorSetup()
+        {
+            _currentDecor.Clear();
+
+            switch (_currentRoom)
+            {
+                case 1:
+                    AddDecor("constructionSign", new Vector2(194, 215), 2.2f);
+                    break;
+            }
+        }
+
+        private void DrawDecor(SpriteBatch spriteBatch)
+        {
+            foreach (var decor in _currentDecor)
+            {
+                spriteBatch.Draw(
+                decor.Texture,
+                decor.Position,
+                null,
+                Color.White,
+                0f,
+                Vector2.Zero,
+                decor.Scale,
+                SpriteEffects.None,
+                0f);
+            }
         }
 
         private void BuildMap()
@@ -454,6 +521,8 @@ namespace Celeste.Scenes
             _player.position = checkpointSpawn;
             _player.RespawnPoint = checkpointSpawn;
         }
+
+
 
         private void RebuildCollisionSystems()
         {
@@ -525,7 +594,7 @@ namespace Celeste.Scenes
                     fliesAwayOnDash: true));
             }
 
-             if (_currentRoom == 6)
+            if (_currentRoom == 6)
             {
                 _collectibles.Add(CreateCollectible(
                     "roomCustom_straw_0",

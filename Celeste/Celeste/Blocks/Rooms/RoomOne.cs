@@ -27,6 +27,8 @@ namespace Celeste.Blocks.Rooms
             string filePath = Path.Combine(AppContext.BaseDirectory, "Content", "rooms", "RoomOne.csv");
             _roomLoader.LoadRoom(filePath);
 
+            
+
         }
     }
 }
