@@ -6,6 +6,20 @@
 
 ---
 
+## Overview
+
+This project is a Celeste-inspired MonoGame platformer focused on tight movement, room-based progression, collectibles, rewind, and polished feedback effects. Sprint 5 finalized the main movement polish pass: wall jump/kick behavior, dash particles, climb stamina feedback, room transitions, spring activation, landing/wall-kick dust, and FlyFeather / StarFly movement.
+
+The final gameplay rules emphasize Celeste-like readability:
+
+- Dash is spent when used and refills from landing, collectibles/refill items, and feather collection.
+- Grabbing or touching a wall does not refill dash.
+- Holding grab while touching a wall blocks dashes aimed directly into that wall to avoid clipping.
+- Same-wall jump spam is blocked, while alternating between left and right wall surfaces remains valid for climbing.
+- Rewind restores player state, movement timers, dash state, and visual trail context.
+
+---
+
 ## Controls
 
 ### Player Controls
@@ -13,21 +27,31 @@
 | Key(s) | Action |
 |--------|--------|
 | `←` / `→` | Move left / right |
+| `W` / `A` / `S` / `D` | Alternate movement / aim input |
 | `↑` / `↓` | Aim dash vertically / climb up or down while grabbing / crouch while grounded |
 | `Z` (hold) | Grab / climb |
 | `X` | Dash |
 | `C` | Jump |
 | `C` while sliding on wall | Wall jump / kick off the wall |
 | `V` | Rewind |
-| `W` / `A` / `S` / `D` | Testing fallback for directional input |
 | `E` | Trigger death sequence (test / demo only) |
 
+### Gamepad Controls
+
+| Input | Action |
+|-------|--------|
+| Left stick / D-pad | Move and aim |
+| `A` | Jump |
+| `B` | Dash |
+| Right shoulder | Grab / climb |
+| `Y` | Rewind |
+| Start | Pause |
 
 ### Room / Testing Controls
 
 | Input | Action |
 |-------|--------|
-| `0`-`6` | Jump directly to a room for testing |
+| `0`-`6` / numpad `0`-`6` | Jump directly to a room for testing |
 
 ### BGM Controls
 
@@ -75,7 +99,7 @@ Debug mode is for developer use only (hair anchor tuning, animation inspection).
 
 ## Known Bugs
 
-Known bugs are tracked in the team Discord server.
+Known bugs, playtest notes, task delegation, and review follow-ups are tracked in the team Discord server.
 
 ---
 
@@ -94,10 +118,14 @@ Current layout after the organizational refactor (moves/renames only; no functio
 Celeste/Celeste/
   Core/
     Constants/
-      GlobalConstants.cs     # Global scale
+      GlobalConstants.cs     # Global scale and display dimensions
       PlayerConstants.cs     # Player frame size, movement, physics
+      HairConstants.cs       # Hair rendering, colors, and anchor tuning
       ItemConstants.cs       # Item display positions
-      BlockConstants.cs      # Block display position
+      BlockConstants.cs      # Block display position and spring trigger tuning
+      LevelConstants.cs      # Room ranges, transitions, respawns, rewind timings
+      BackgroundConstants.cs # Snow/background tuning
+      DeathConstants.cs      # Death animation and particle tuning
     GameLoopInterfaces.cs    # IUpdateable, IDrawable
   Character/
     Madeline.cs              # Player entity (sprite, state machine, physics, death)

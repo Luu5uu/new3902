@@ -12,18 +12,15 @@ namespace Celeste.Sprites
     // 1px black outline pass before colored fill pass.
     public sealed class HairRenderer : IHairSprite
     {
-        private const int DefaultNodeCount = 4;            
-        private const float MaxNodeDistNative = 3f;        // PlayerHair.cs clamp
-        private const float StepApproachNative = 64f;      // PlayerHair.cs approach speed
-        private static readonly Vector2 StepPerSegNative = new(0f, 2f); // matches Celeste PlayerHair default
-        private const float StepFacingNative = 0.5f;
-
         public float DrawScale { get; set; } = 1f;
 
         private Texture2D _bangsTexture;
-        private int _bangsFrameW = 8, _bangsFrameH = 8, _bangsFrameCount = 3;
+        private int _bangsFrameW = DefaultBangsFrameWidth;
+        private int _bangsFrameH = DefaultBangsFrameHeight;
+        private int _bangsFrameCount = BangsFrameCount;
         private Texture2D _circleTexture;
-        private int _circleW = 8, _circleH = 8;
+        private int _circleW = DefaultBangsFrameWidth;
+        private int _circleH = DefaultBangsFrameHeight;
 
         public int BangsFrame { get; set; } = 0;
 
@@ -33,7 +30,7 @@ namespace Celeste.Sprites
         public Color HairColor { get; set; } = DefaultHairColor;
         public int NodeCount => _nodes.Length;
 
-        public HairRenderer(int nodeCount = DefaultNodeCount)
+        public HairRenderer(int nodeCount = DefaultHairNodeCount)
         {
             _nodes = new Vector2[nodeCount];
         }
@@ -80,7 +77,7 @@ namespace Celeste.Sprites
 
             for (int i = snapshot.Nodes.Length - 1; i >= 1; i--)
             {
-                float taper = 0.25f + (1f - (float)i / snapshot.Nodes.Length) * 0.75f;
+                float taper = HairTaperMin + (1f - (float)i / snapshot.Nodes.Length) * HairTaperRange;
                 spriteBatch.Draw(_circleTexture, snapshot.Nodes[i], null, color,
                     0f, circleOrigin, new Vector2(taper * scale), SpriteEffects.None, 0f);
             }
@@ -113,9 +110,9 @@ namespace Celeste.Sprites
 
             _faceLeft = faceLeft;
             float s = DrawScale;
-            float maxDist = MaxNodeDistNative * s;
-            Vector2 stepPerSeg = StepPerSegNative * s;
-            float stepFacing = StepFacingNative * s;
+            float maxDist = HairMaxNodeDistanceNative * s;
+            Vector2 stepPerSeg = HairStepPerSegmentNative * s;
+            float stepFacing = HairStepFacingNative * s;
             float facing = faceLeft ? 1f : -1f;
 
             Vector2 previous = anchor;
@@ -155,7 +152,7 @@ namespace Celeste.Sprites
                 direction = Vector2.UnitX;
             }
 
-            float maxDist = MaxNodeDistNative * DrawScale;
+            float maxDist = HairMaxNodeDistanceNative * DrawScale;
             for (int i = 0; i < _nodes.Length; i++)
             {
                 _nodes[i] = anchor - direction * maxDist * i;
@@ -168,10 +165,10 @@ namespace Celeste.Sprites
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             float s = DrawScale;
 
-            float maxDist = MaxNodeDistNative * s;
-            float approachSpeed = StepApproachNative * s;
-            Vector2 stepPerSeg = StepPerSegNative * s;
-            float stepFacing = StepFacingNative * s;
+            float maxDist = HairMaxNodeDistanceNative * s;
+            float approachSpeed = HairStepApproachNative * s;
+            Vector2 stepPerSeg = HairStepPerSegmentNative * s;
+            float stepFacing = HairStepFacingNative * s;
 
             _nodes[0] = anchorPosition;
             float facing = faceLeft ? 1f : -1f;
@@ -198,8 +195,8 @@ namespace Celeste.Sprites
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             float s = DrawScale;
-            float maxDist = MaxNodeDistNative * s;
-            float approachSpeed = StepApproachNative * s;
+            float maxDist = HairMaxNodeDistanceNative * s;
+            float approachSpeed = HairStepApproachNative * s;
             direction = SafeNorm(direction);
             if (direction == Vector2.Zero)
             {
@@ -254,7 +251,7 @@ namespace Celeste.Sprites
             // --- Fill pass: colored hair on top ---
             for (int i = _nodes.Length - 1; i >= 1; i--)
             {
-                float taper = 0.25f + (1f - (float)i / _nodes.Length) * 0.75f;
+                float taper = HairTaperMin + (1f - (float)i / _nodes.Length) * HairTaperRange;
                 spriteBatch.Draw(_circleTexture, _nodes[i], null, drawColor,
                     0f, circleOrigin, new Vector2(taper * scale), SpriteEffects.None, 0f);
             }

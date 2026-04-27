@@ -1,12 +1,14 @@
 In Sprint 5, each team member was assigned a specific task bundle. Team members are responsible for writing their tasks.
 
+Team communication, task delegation, review requests, and follow-up testing notes were coordinated through the team Discord server. Discord was used as the primary place to divide work, ask implementation questions, request peer reviews, report bugs found during playtesting, and confirm when changes were ready to merge.
+
 Henry was responsible for: Implementing the background snow system, reworking player movement and physics (including wall jump fixes and lift momentum), and adding the FlyFeather item with associated StarFly animations. Also implemented visual polish through landing, wall-kick, and dash particle effects.
 
 Aaron was responsible for: Handling of room transitions.
 
 Isaac was responsible for: Handling block replacement backlog, designing and creating a custom room, adding foreground/background features/decorations to each room and fixing screen ratio.
 
-Zijun was responsible for: Complete the basic rewind function logic, optimize the climbing sound effect, and implement dash recharge after hitting the wall.
+Zijun was responsible for: Complete the basic rewind function logic, optimize the climbing sound effect, and work on dash recharge behavior.
 
 Sihao was responsible for: Add more mechanisms and shadow functions to the rewind feature, session-based strawberry/death counting, visual change for already collected strawberries and out-of-bounds deaths.
 
@@ -15,6 +17,9 @@ Albert was responsible for: Responsible for implementing and placing MoveBlock, 
 --------------------------------------
 
 Code Review For Sprint 5
+Review workflow:
+Sprint 5 reviews were coordinated through Discord. Team members posted pull requests, requested reviewers, discussed feedback, and confirmed fixes in the server so implementation, review, and testing context stayed visible to the group.
+
 Pull Requests:
 added CSV file for room 2 #28 request by Isaac Gonzales reviewed by Liuyc05
 Strengths:
@@ -42,13 +47,12 @@ Although the block placement is working well, additional testing may still be ne
 
 Madeline rewind #32 request by Luu5uu reviewed by KeenRSH
 Strengths:
-Successfully added the Madeline rewind feature and enabled dash refill after touching walls. This introduces a creative gameplay mechanic and expands the player movement system in a meaningful way.
+Successfully added the Madeline rewind feature and contributed to dash recharge behavior. This introduces a creative gameplay mechanic and expands the player movement system in a meaningful way.
 Technical Concerns / Suggestions:
-Since rewind directly affects player state and movement logic, more testing may be needed to ensure it works consistently with collisions, room transitions, and other mechanics. It may also be useful to further refine the balancing of dash refill behavior so the feature remains intuitive and fair in gameplay.
+Since rewind directly affects player state and movement logic, more testing may be needed to ensure it works consistently with collisions, room transitions, and other mechanics. Dash refill behavior was later refined so wall grab/contact alone does not restore dash, keeping the feature more intuitive and fair in gameplay.
 
 Feather movement #37 request by hfritz34 reviewed by Luu5uu
 Strengths:
 Successfully implemented a comprehensive flight system via the FlyFeather item and StarFly state, fully integrated with the rewind system. Introduced polished environmental and movement particles, fixed wall jump mechanics, and refactored the collision system to support lift momentum.
 Technical Concerns / Suggestions:
 Given the significant volume of changes (15 commits, ~1,700 lines) to core physics and collision logic, extensive regression testing is recommended to ensure stability across all rooms. Continued monitoring of particle system performance is advised for long-term playability.
-

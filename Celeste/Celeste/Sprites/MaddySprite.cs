@@ -3,6 +3,7 @@ using Celeste.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using static Celeste.HairConstants;
 
 namespace Celeste.Sprites
 {
@@ -23,9 +24,6 @@ namespace Celeste.Sprites
         private readonly HairRenderer _hair;
         private readonly AnimationController<SweatState> _sweatController;
 
-        private static readonly Color NormalHairColor = new Color(0xAC, 0x32, 0x32);
-        private static readonly Color UsedHairColor = new Color(0x44, 0xB7, 0xFF);
-
         private bool _dashUsed = false;
         private float _hairFlashTimer = 0f;
         private float _hairUsedDisplayTimer = 0f;
@@ -33,11 +31,6 @@ namespace Celeste.Sprites
         private bool _sweatVisible;
         private string _currentAnimName = "idled";
         private readonly List<(PlayerState state, string name)> _allAnims = new();
-
-        private const float MinUsedDisplayTime = 0.35f;
-        private const float BaseHeadY = 12f;
-        private const float DuckHeadY = 7f;
-        private const float TiredHeadY = 10f;
 
         public IBodySprite Body => _body;
         public IHairSprite Hair => _hair;
@@ -133,7 +126,7 @@ namespace Celeste.Sprites
         {
             var clip = catalog.Clips[clipKey];
             var anim = AutoAnimation.FromClip(clip);
-            anim.Origin = new Vector2(16, 32);
+            anim.Origin = PlayerBodyOrigin;
             controller.Register(state, anim, setAsDefault: setAsDefault);
         }
 
@@ -252,8 +245,8 @@ namespace Celeste.Sprites
         {
             _dashUsed = true;
             _hairFlashTimer = 0f;
-            _hairUsedDisplayTimer = MinUsedDisplayTime;
-            _hair.HairColor = UsedHairColor;
+            _hairUsedDisplayTimer = DashHairUsedDisplayTime;
+            _hair.HairColor = DashUsedHairColor;
         }
 
         public void OnDashRefill()
@@ -262,7 +255,7 @@ namespace Celeste.Sprites
                 return;
 
             _dashUsed = false;
-            _hairFlashTimer = 0.12f;
+            _hairFlashTimer = DashHairRefillFlashTime;
         }
 
         public void SetPosition(Vector2 position, float scale = 1f, bool faceLeft = false)
@@ -294,7 +287,7 @@ namespace Celeste.Sprites
                 _hair.HairColor = Color.White;
                 _hairFlashTimer -= dt;
                 if (_hairFlashTimer <= 0f)
-                    _hair.HairColor = _dashUsed ? UsedHairColor : NormalHairColor;
+                    _hair.HairColor = _dashUsed ? DashUsedHairColor : DefaultHairColor;
             }
 
             Vector2 hairAnchor = GetCurrentHairAnchor();
