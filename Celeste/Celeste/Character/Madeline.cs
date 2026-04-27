@@ -9,7 +9,6 @@ using Celeste.MadelineStates;
 using Celeste.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Celeste.DeathAnimation.Particles.Emitters;
 using Microsoft.Xna.Framework.Content;
 using static Celeste.PlayerConstants;
 using static Celeste.GlobalConstants;
@@ -151,8 +150,7 @@ namespace Celeste.Character
         private Texture2D _starFlyDotTex;
         private HairRenderer _starFlyTail;
         private ParticleSystem _dashParticles;
-        private BurstEmitter _dashBurstEmitter;
-        private OrbitRingEffect _dashRingEffect;
+        private Texture2D _dashParticleTex;
         private SmokeParticleSystem _landDustParticles;
         private Texture2D[] _smokeFrames;
         private static readonly Color StarFlyGold = new Color(255, 214, 92);
@@ -214,17 +212,15 @@ namespace Celeste.Character
             _deathUpClip = deathUpClip;
             _deathDownClip = deathDownClip;
             _deathDotTex = dotTexture;
-            _dashParticles = new ParticleSystem(dotTexture);
+
+            if (_dashParticleTex == null)
+            {
+                _dashParticleTex = new Texture2D(dotTexture.GraphicsDevice, 2, 2);
+                _dashParticleTex.SetData(new[] { Color.White, Color.White, Color.White, Color.White });
+            }
+
+            _dashParticles = new ParticleSystem(_dashParticleTex);
             _landDustParticles = new SmokeParticleSystem(_smokeFrames);
-            _dashBurstEmitter = new BurstEmitter(
-                count: 8,
-                minSpeed: 90f * DefaultScale,
-                maxSpeed: 170f * DefaultScale,
-                minLife: 0.08f,
-                maxLife: 0.18f,
-                minSize: 0.12f * DefaultScale,
-                maxSize: 0.18f * DefaultScale,
-                tint: DashDeathColor);
             BuildGhostTexture();
         }
 
@@ -318,9 +314,8 @@ namespace Celeste.Character
             _starFlyColor = StarFlyGold;
             _starFlyStartDirection = new Vector2(0f, -1f);
             _tiredFlashPhase = 0f;
-            _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
+            _dashParticles = _dashParticleTex != null ? new ParticleSystem(_dashParticleTex) : null;
             _landDustParticles?.Clear();
-            _dashRingEffect = null;
 
             velocityY = 0f;
             velocityX = 0f;
@@ -440,14 +435,6 @@ namespace Celeste.Character
             _dashParticles?.Update(dt);
             _landDustParticles?.Update(dt);
             UpdateStarFlyTrail(gameTime);
-            if (_dashRingEffect != null)
-            {
-                _dashRingEffect.Update(dt);
-                if (_dashRingEffect.IsFinished)
-                {
-                    _dashRingEffect = null;
-                }
-            }
 
             if (deathPressed && _deathSideClip != null && _deathUpClip != null && _deathDownClip != null && _deathDotTex != null && _deathEffect == null)
             {
@@ -607,7 +594,6 @@ namespace Celeste.Character
                 }
             }
 
-            _dashRingEffect?.Draw(spriteBatch);
             _dashParticles?.Draw(spriteBatch);
             _landDustParticles?.Draw(spriteBatch);
             if (isStarFlying)
@@ -623,27 +609,12 @@ namespace Celeste.Character
 
         internal void TriggerDashVisual(Vector2 dashDirection)
         {
-            if (_deathDotTex == null || _dashParticles == null || _dashBurstEmitter == null)
+            if (_dashParticles == null)
             {
                 return;
             }
 
-            Vector2 center = position + new Vector2(0f, -PlayerNormalHitboxHeight * 0.5f);
-            _dashBurstEmitter.Emit(_dashParticles, center);
-
-            float initialAngle = dashDirection == Vector2.Zero
-                ? 0f
-                : (float)Math.Atan2(dashDirection.Y, dashDirection.X);
-            _dashRingEffect = new OrbitRingEffect(
-                _deathDotTex,
-                center,
-                count: 8,
-                radius: 7f * DefaultScale,
-                angularSpeed: 18f,
-                lifetime: 0.10f,
-                dotScale: 0.14f * DefaultScale,
-                color: DashDeathColor,
-                initialAngle: initialAngle);
+            SpawnDashTrail(position, dashDirection, count: 4);
         }
 
         public void SpawnLandDust(Vector2 pos)
@@ -715,22 +686,37 @@ namespace Celeste.Character
             }
         }
 
-        public void SpawnDashTrail(Vector2 pos, Vector2 dashDir)
+        public void SpawnDashTrail(Vector2 pos, Vector2 dashDir, int count = 1)
         {
-            if (_dashParticles == null) return;
-            var rng = new Random();
-            float baseAngle = (float)Math.Atan2(dashDir.Y, dashDir.X);
-            for (int i = 0; i < 2; i++)
+            if (_dashParticles == null || count <= 0) return;
+
+            if (dashDir.LengthSquared() < 0.0001f)
             {
-                float spreadAngle = baseAngle + MathHelper.ToRadians((float)(rng.NextDouble() * 30f - 15f));
-                float speed = 12f + (float)(rng.NextDouble() * 18f);
+                dashDir = FaceLeft ? new Vector2(-1f, 0f) : new Vector2(1f, 0f);
+            }
+            else
+            {
+                dashDir.Normalize();
+            }
+
+            Vector2 center = pos + new Vector2(0f, -PlayerNormalHitboxHeight * 0.5f);
+            Vector2 behind = -dashDir;
+            Vector2 perpendicular = new Vector2(-dashDir.Y, dashDir.X);
+
+            for (int i = 0; i < count; i++)
+            {
+                float backOffset = RandomRange(1f, 9f);
+                float sideOffset = RandomRange(-3f, 3f);
+                float speed = RandomRange(16f, 36f);
+                float sideSpeed = RandomRange(-10f, 10f);
                 var p = new Particle
                 {
-                    Position = pos,
-                    Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed),
+                    Position = center - dashDir * backOffset + perpendicular * sideOffset,
+                    Velocity = behind * speed + perpendicular * sideSpeed,
+                    Acceleration = Vector2.Zero,
                     Age = 0f,
-                    Lifetime = 0.2f + (float)(rng.NextDouble() * 0.1f),
-                    StartSize = 0.35f,
+                    Lifetime = RandomRange(0.6f, 0.8f),
+                    StartSize = RandomRange(1.2f, 2.0f),
                     EndSize = 0f,
                     StartAlpha = 0.9f,
                     EndAlpha = 0f,
@@ -1070,10 +1056,11 @@ namespace Celeste.Character
             velocityX = PlayerWallJumpHorizontalSpeed * direction;
             if (resetVerticalSpeed)
             {
-                velocityY = -PlayerJumpSpeed;
+                bool neutralWallJump = Math.Abs(moveX) < 0.01f;
+                velocityY = -(neutralWallJump ? PlayerNeutralWallJumpSpeed : PlayerWallJumpSpeed);
             }
             ApplyLiftBoostToVelocity();
-            BeginVariableJump();
+            BeginVariableJump(resetVerticalSpeed ? PlayerWallJumpVariableTime : PlayerVariableJumpTime);
             FaceLeft = direction < 0;
             if (direction > 0) _wallJumpCooldownLeft  = WallJumpSameSideCooldown;
             else               _wallJumpCooldownRight = WallJumpSameSideCooldown;

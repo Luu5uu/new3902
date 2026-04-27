@@ -18,8 +18,10 @@
 | `X` | Dash |
 | `C` | Jump |
 | `C` while sliding on wall | Wall jump / kick off the wall |
+| `V` | Rewind |
 | `W` / `A` / `S` / `D` | Testing fallback for directional input |
 | `E` | Trigger death sequence (test / demo only) |
+
 
 ### Room / Testing Controls
 

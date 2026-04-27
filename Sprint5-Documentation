@@ -8,7 +8,7 @@ Isaac was responsible for: Handling block replacement backlog, designing and cre
 
 Zijun was responsible for: Complete the basic rewind function logic, optimize the climbing sound effect, and implement dash recharge after hitting the wall.
 
-Sihao was responsible for: Add more mechanisms and shadow functions to the rewind feature, so that the rewind skill can be more reasonable. Fix the known bugs。
+Sihao was responsible for: Add more mechanisms and shadow functions to the rewind feature, session-based strawberry/death counting, visual change for already collected strawberries and out-of-bounds deaths.
 
 Albert was responsible for: Responsible for implementing and placing MoveBlock, Spring, and CrushBlock, as well as completing the room transition system.
 
