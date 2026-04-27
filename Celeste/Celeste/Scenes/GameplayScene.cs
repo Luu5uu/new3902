@@ -444,6 +444,10 @@ namespace Celeste.Scenes
         private void LoadDecorTextures()
         {
             _decorTextures["constructionSign"] = Game.Content.Load<Texture2D>("constructionSign");
+            _decorTextures["top_a01"] = Game.Content.Load<Texture2D>("top_a01");
+
+            _decorTextures["signGreenForward"] = Game.Content.Load<Texture2D>("signGreenForward");
+            _decorTextures["boxAndBottle"] = Game.Content.Load<Texture2D>("boxAndBottle");
 
         }
 
@@ -461,6 +465,11 @@ namespace Celeste.Scenes
             {
                 case 1:
                     AddDecor("constructionSign", new Vector2(194, 215), 2.2f);
+                    AddDecor("top_a01", new Vector2(82, 343), 2.0f);
+                    break;
+                case 2:
+                    AddDecor("signGreenForward", new Vector2(170, 336), 2.0f);
+                    AddDecor("boxAndBottle", new Vector2(220, 353), 2.0f);
                     break;
             }
         }
@@ -669,10 +678,10 @@ namespace Celeste.Scenes
             return room switch
             {
                 1 => new Vector2(45f, 336f),
-                2 => new Vector2(150f, 378f),
-                3 => new Vector2(150f, 396f),
-                4 => new Vector2(190f, 390f),
-                5 => new Vector2(160f, 376f),
+                2 => new Vector2(70f, 378f),
+                3 => new Vector2(78f, 396f),
+                4 => new Vector2(120f, 390f),
+                5 => new Vector2(120f, 376f),
                 6 => new Vector2(700f, 300f),
                 _ => new Vector2(200f, 150f),
             };
