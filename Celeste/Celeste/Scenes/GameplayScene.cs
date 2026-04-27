@@ -240,7 +240,7 @@ namespace Celeste.Scenes
 
             _player.Update(gameTime);
             _worldMap.Update(gameTime);
-            if (_currentRoom != 6) _snow.Update(dt);
+            _snow.Update(dt);
             UpdateGameplayBgm();
 
             if (!wasDashing && _player.isDashing)
@@ -314,7 +314,7 @@ namespace Celeste.Scenes
                 rasterizerState: RasterizerState.CullNone);
 
             spriteBatch.Draw(_background, Game.GraphicsDevice.Viewport.Bounds, Color.White);
-            if (_currentRoom != 6) _snow.Draw(spriteBatch);
+            _snow.Draw(spriteBatch);
             DrawDecor(spriteBatch);
 
             _worldMap.Draw(spriteBatch);
@@ -709,7 +709,7 @@ namespace Celeste.Scenes
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
 
-                _feathers.Add(CreateFlyFeather(new Vector2(520f, 220f)));
+                _feathers.Add(CreateFlyFeather(new Vector2(700f, 200f)));
             }
 
             if (_currentRoom == 6)
@@ -721,7 +721,7 @@ namespace Celeste.Scenes
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
 
-                _feathers.Add(CreateFlyFeather(new Vector2(610f, 245f)));
+                _feathers.Add(CreateFlyFeather(new Vector2(665f, 205f)));
             }
         }
 
@@ -816,7 +816,7 @@ namespace Celeste.Scenes
                 3 => new Vector2(78f, 396f),
                 4 => new Vector2(120f, 390f),
                 5 => new Vector2(120f, 376f),
-                6 => new Vector2(700f, 300f),
+                6 => new Vector2(700f, 320f),
                 _ => new Vector2(200f, 150f),
             };
         }
