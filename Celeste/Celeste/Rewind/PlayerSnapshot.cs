@@ -21,6 +21,7 @@ namespace Celeste.Rewind
         public bool IsClimbing;
         public bool IsDashing;
         public bool IsDangle;
+        public bool IsStarFlying;
         public bool CanDash;
         public float ClimbStamina;
 
@@ -30,6 +31,18 @@ namespace Celeste.Rewind
         public float JumpGraceTimer;
         public float VariableJumpTimer;
         public float VariableJumpSpeed;
+        public Vector2 StoredLiftSpeed;
+        public float StoredLiftTimer;
+        public float ClimbJumpConversionTimer;
+        public int ClimbJumpConversionDirection;
+        public float ClimbJumpRefundAmount;
+        public float StarFlyTimer;
+        public float StarFlyTransformTimer;
+        public float StarFlyAngle;
+        public float StarFlyCurrentSpeed;
+        public float StarFlySpeedLerp;
+        public bool StarFlyTransforming;
+        public Vector2 StarFlyStartDirection;
 
         // Aim / state transition helpers
         public Vector2 LastAim;

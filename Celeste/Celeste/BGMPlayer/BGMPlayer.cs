@@ -35,7 +35,7 @@ namespace Celeste.BGMPlayer
             _currentTrackName = null;
             _currentTrackIndex = -1;
 
-            string fullPath = Path.Combine(content.RootDirectory, xmlRelativePath);
+            string fullPath = ResolveContentFilePath(content.RootDirectory, xmlRelativePath);
 
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"BGM library xml not found: {fullPath}");
@@ -63,6 +63,23 @@ namespace Celeste.BGMPlayer
             MediaPlayer.Volume = MathHelper.Clamp(volume, 0f, 1f);
 
             _initialized = true;
+        }
+
+        private static string ResolveContentFilePath(string rootDirectory, string relativePath)
+        {
+            string cwdPath = Path.Combine(rootDirectory, relativePath);
+            if (File.Exists(cwdPath))
+            {
+                return cwdPath;
+            }
+
+            string outputPath = Path.Combine(AppContext.BaseDirectory, rootDirectory, relativePath);
+            if (File.Exists(outputPath))
+            {
+                return outputPath;
+            }
+
+            return cwdPath;
         }
 
         /// <summary>

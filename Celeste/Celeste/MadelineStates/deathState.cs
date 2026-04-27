@@ -20,6 +20,7 @@ namespace Celeste.MadelineStates
             m.isDashing = false;
             m.isClimbing = false;
             m.isDangle = false;
+            m.isStarFlying = false;
             m.SetCrouching(false);
             m.velocityY = 0f;
             m.moveX = 0f;

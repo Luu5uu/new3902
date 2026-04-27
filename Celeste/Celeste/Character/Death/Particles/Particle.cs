@@ -22,6 +22,8 @@ namespace Celeste.DeathAnimation.Particles
         public float Rotation;
         public float AngularVelocity;
 
+        public Vector2 Acceleration;
+
         public Color Tint;
         public Color StartTint;
         public Color EndTint;

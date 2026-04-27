@@ -31,7 +31,7 @@ namespace Celeste.MadelineStates
                 }
                 else
                 {
-                    m.changeState(m.jumpState);
+                    m.PerformClimbJump();
                 }
                 return;
             }

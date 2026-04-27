@@ -15,6 +15,9 @@ namespace Celeste.Items
         public static ItemAnimation CreateFlyStaw(AnimationCatalog catalog)
             => new ItemAnimation(GetClip(catalog, AnimationKeys.ItemFlyStaw));
 
+        public static ItemAnimation CreateFlyFeather(AnimationCatalog catalog)
+            => new ItemAnimation(GetClip(catalog, AnimationKeys.ItemFlyFeather));
+
         public static ItemAnimation CreateCrystal(AnimationCatalog catalog)
             => new ItemAnimation(GetClip(catalog, AnimationKeys.ItemCrystal));
 

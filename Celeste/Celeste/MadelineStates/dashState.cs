@@ -9,11 +9,13 @@ namespace Celeste.MadelineStates
     {
         private float _timeLeft;
         private float _ghostTimer;
+        private float _trailTimer;
         private Vector2 _dashDirection;
         private bool _startedOnGround;
         private float _horizontalSpeedBeforeDash;
         private bool _dashStarted;
         private bool _waitingForAimFrame;
+        private const float DashTrailInterval = 0.025f;
 
         public void SetState(Madeline m)
         {
@@ -28,6 +30,7 @@ namespace Celeste.MadelineStates
 
             _timeLeft = PlayerDashDuration;
             _ghostTimer = 0f;
+            _trailTimer = 0f;
             _startedOnGround = m.onGround;
             _horizontalSpeedBeforeDash = m.GetCurrentHorizontalSpeed();
             _dashStarted = false;
@@ -46,6 +49,7 @@ namespace Celeste.MadelineStates
             }
 
             Vector2 dashVelocity = _dashDirection * PlayerDashSpeed;
+            dashVelocity += m.GetStoredLiftBoost();
             if (System.Math.Sign(_horizontalSpeedBeforeDash) == System.Math.Sign(dashVelocity.X)
                 && System.Math.Abs(_horizontalSpeedBeforeDash) > System.Math.Abs(dashVelocity.X))
             {
@@ -99,11 +103,23 @@ namespace Celeste.MadelineStates
                 BeginDash(m);
             }
 
+            if (_dashDirection.Y < 0f && m.ConsumeJumpPress() && m.TrySuperWallJump())
+            {
+                return;
+            }
+
             _ghostTimer -= dt;
             if (_ghostTimer <= 0f)
             {
                 m.AddGhost(m.position, m.FaceLeft);
                 _ghostTimer = PlayerDashGhostInterval;
+            }
+
+            _trailTimer -= dt;
+            if (_trailTimer <= 0f)
+            {
+                m.SpawnDashTrail(m.position, _dashDirection);
+                _trailTimer = DashTrailInterval;
             }
 
             _timeLeft -= dt;
