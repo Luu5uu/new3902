@@ -756,8 +756,6 @@ namespace Celeste.Scenes
                     new Vector2(279f, 132f),
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
-
-                _feathers.Add(CreateFlyFeather(new Vector2(700f, 200f)));
             }
 
             if (_currentRoom == 6)
