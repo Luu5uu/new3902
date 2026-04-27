@@ -9,6 +9,7 @@ namespace Celeste.Input
 {
     public class ControllerLoader
     {
+        private const float AnalogDeadzone = 0.24f;
         private readonly List<IController> _controllers = new();
         private readonly Character.Madeline _player;
         private KeyboardState _previousKeyboardState;
@@ -46,24 +47,28 @@ namespace Celeste.Input
             KeyboardState keyboardState = Keyboard.GetState();
             GamePadState gamepadState = GamePad.GetState(PlayerIndex.One);
 
-            float horizontal = 0f;
-            if (IsKeyboardDown(keyboardState, Keys.Left, Keys.A) || IsGamepadDown(gamepadState, Buttons.DPadLeft, Buttons.LeftThumbstickLeft))
+            Vector2 analogMove = gamepadState.IsConnected
+                ? ApplyRadialDeadzone(new Vector2(gamepadState.ThumbSticks.Left.X, -gamepadState.ThumbSticks.Left.Y))
+                : Vector2.Zero;
+
+            float horizontal = analogMove.X;
+            if (IsKeyboardDown(keyboardState, Keys.Left, Keys.A) || IsGamepadDown(gamepadState, Buttons.DPadLeft))
             {
-                horizontal -= 1f;
+                horizontal = -1f;
             }
-            if (IsKeyboardDown(keyboardState, Keys.Right, Keys.D) || IsGamepadDown(gamepadState, Buttons.DPadRight, Buttons.LeftThumbstickRight))
+            else if (IsKeyboardDown(keyboardState, Keys.Right, Keys.D) || IsGamepadDown(gamepadState, Buttons.DPadRight))
             {
-                horizontal += 1f;
+                horizontal = 1f;
             }
 
-            float vertical = 0f;
+            float vertical = analogMove.Y;
             if (IsKeyboardDown(keyboardState, Keys.Up, Keys.W) || IsGamepadDown(gamepadState, Buttons.DPadUp))
             {
-                vertical -= 1f;
+                vertical = -1f;
             }
-            if (IsKeyboardDown(keyboardState, Keys.Down, Keys.S) || IsGamepadDown(gamepadState, Buttons.DPadDown))
+            else if (IsKeyboardDown(keyboardState, Keys.Down, Keys.S) || IsGamepadDown(gamepadState, Buttons.DPadDown))
             {
-                vertical += 1f;
+                vertical = 1f;
             }
 
             bool jumpHeld = keyboardState.IsKeyDown(Keys.C) || gamepadState.IsButtonDown(Buttons.A);
@@ -112,6 +117,18 @@ namespace Celeste.Input
         private static bool IsGamepadDown(GamePadState state, Buttons primary, Buttons? alternate = null)
         {
             return state.IsButtonDown(primary) || (alternate.HasValue && state.IsButtonDown(alternate.Value));
+        }
+
+        private static Vector2 ApplyRadialDeadzone(Vector2 value)
+        {
+            float length = value.Length();
+            if (length <= AnalogDeadzone)
+            {
+                return Vector2.Zero;
+            }
+
+            float scaledLength = MathHelper.Clamp((length - AnalogDeadzone) / (1f - AnalogDeadzone), 0f, 1f);
+            return value / length * scaledLength;
         }
 
         private bool IsGamepadPressed(GamePadState state, Buttons button)

@@ -16,6 +16,7 @@ namespace Celeste.Collision
     {
         private readonly List<IBlocks> _worldBlocks;
         private readonly Madeline _player;
+        private bool _playerWasOnGround;
 
         public CollisionSystem(List<IBlocks> worldBlocks, Madeline player)
         {
@@ -25,9 +26,18 @@ namespace Celeste.Collision
 
 
 
-        public void ResolveBlockCollision(Vector2 prevPos, bool prevCrouching)
+        public void ResolveBlockCollision(Vector2 prevPos, bool prevCrouching, float dt)
         {
-            CarryPlayerByMovingBlock(prevPos, prevCrouching);
+            _playerWasOnGround = _player.onGround;
+
+            if (_player.isStarFlying)
+            {
+                ResolveStarFlyCollision(prevPos, prevCrouching);
+                ActivateTouchedCrushBlocks();
+                return;
+            }
+
+            CarryPlayerByMovingBlock(prevPos, prevCrouching, dt);
             _player.CurrentGroundBlock = null;
 
             float attemptedDx = _player.position.X - prevPos.X;
@@ -46,7 +56,58 @@ namespace Celeste.Collision
             ActivateTouchedCrushBlocks();
         }
 
-        private void CarryPlayerByMovingBlock(Vector2 prevPos, bool prevCrouching)
+        private void ResolveStarFlyCollision(Vector2 prevPos, bool prevCrouching)
+        {
+            Vector2 target = _player.position;
+            Vector2 move = target - prevPos;
+            float maxAxisMove = System.Math.Max(System.Math.Abs(move.X), System.Math.Abs(move.Y));
+            int steps = System.Math.Max(1, (int)System.Math.Ceiling(maxAxisMove / PlayerConstants.PlayerStarFlyCollisionStep));
+            Vector2 stepMove = move / steps;
+
+            _player.position = prevPos;
+            _player.onGround = false;
+            _player.hitCeiling = false;
+
+            for (int i = 0; i < steps; i++)
+            {
+                Vector2 stepStart = _player.position;
+                Vector2 expected = stepStart + stepMove;
+                Vector2 velocityBefore = new Vector2(_player.velocityX, _player.velocityY);
+
+                _player.position = expected;
+
+                ResolveHorizontal(stepStart, prevCrouching, stepMove.X);
+                if (!_player.isStarFlying)
+                {
+                    return;
+                }
+
+                ResolveVertical(stepStart, prevCrouching, stepMove.Y);
+                if (!_player.isStarFlying)
+                {
+                    return;
+                }
+
+                ResolveRemainingPenetration(stepStart, prevCrouching, stepMove.X, stepMove.Y);
+                if (!_player.isStarFlying)
+                {
+                    return;
+                }
+
+                ResolveStandingSupport();
+                UpdateWallContacts();
+
+                Vector2 velocityAfter = new Vector2(_player.velocityX, _player.velocityY);
+                bool velocityChanged = velocityAfter != velocityBefore;
+                bool positionCorrected = _player.position != expected;
+                if (velocityChanged || positionCorrected)
+                {
+                    break;
+                }
+            }
+        }
+
+        private void CarryPlayerByMovingBlock(Vector2 prevPos, bool prevCrouching, float dt)
         {
             if (_player.CurrentGroundBlock is not MoveBlock moveBlock)
             {
@@ -72,6 +133,7 @@ namespace Celeste.Collision
             if (feetOnTop && xOverlap)
             {
                 _player.position += moveBlock.MovementDelta;
+                StoreMoveBlockLift(moveBlock, dt);
             }
         }
         private void UpdateWallContacts()
@@ -241,6 +303,12 @@ namespace Celeste.Collision
             if (found)
             {
                 _player.position.Y = bestBottom + p.Height;
+                if (_player.HandleStarFlyVerticalCollision())
+                {
+                    _player.hitCeiling = true;
+                    return;
+                }
+
                 _player.velocityY = 0;
                 _player.hitCeiling = true;
             }
@@ -284,9 +352,17 @@ namespace Celeste.Collision
             if (found)
             {
                 _player.position.X = bestLeft - p.Width / 2f;
-                _player.velocityX = 0f;
-                _player.moveX = 0;
+                if (!_player.isStarFlying)
+                {
+                    _player.moveX = 0;
+                }
                 _player.touchingRightWall = true;
+                if (_player.HandleStarFlyHorizontalCollision())
+                {
+                    return;
+                }
+
+                _player.velocityX = 0f;
 
                 if (!_player.isDashing)
                 {
@@ -332,9 +408,17 @@ namespace Celeste.Collision
             if (found)
             {
                 _player.position.X = bestRight + p.Width / 2f;
-                _player.velocityX = 0f;
-                _player.moveX = 0;
+                if (!_player.isStarFlying)
+                {
+                    _player.moveX = 0;
+                }
                 _player.touchingLeftWall = true;
+                if (_player.HandleStarFlyHorizontalCollision())
+                {
+                    return;
+                }
+
+                _player.velocityX = 0f;
 
                 if (!_player.isDashing)
                 {
@@ -378,6 +462,13 @@ namespace Celeste.Collision
                     if (cameFromBelow || attemptedDy < 0f || _player.hitCeiling)
                     {
                         _player.position.Y = r.Bottom + p.Height;
+                        if (_player.HandleStarFlyVerticalCollision())
+                        {
+                            _player.hitCeiling = true;
+                            p = _player.Bounds;
+                            continue;
+                        }
+
                         _player.velocityY = 0f;
                         _player.hitCeiling = true;
                     }
@@ -393,6 +484,13 @@ namespace Celeste.Collision
                     else if (overlapBottom < overlapTop)
                     {
                         _player.position.Y = r.Bottom + p.Height;
+                        if (_player.HandleStarFlyVerticalCollision())
+                        {
+                            _player.hitCeiling = true;
+                            p = _player.Bounds;
+                            continue;
+                        }
+
                         _player.velocityY = 0f;
                         _player.hitCeiling = true;
                     }
@@ -429,7 +527,10 @@ namespace Celeste.Collision
                         _player.touchingLeftWall = true;
                     }
 
-                    _player.velocityX = 0f;
+                    if (!_player.HandleStarFlyHorizontalCollision())
+                    {
+                        _player.velocityX = 0f;
+                    }
                 }
 
                 p = _player.Bounds;
@@ -654,8 +755,19 @@ namespace Celeste.Collision
         private void LandOnBlock(IBlocks block, int top)
         {
             _player.position.Y = top;
+            if (_player.HandleStarFlyVerticalCollision())
+            {
+                _player.onGround = true;
+                _player.CurrentGroundBlock = block;
+                return;
+            }
+
             _player.velocityY = 0f;
             _player.onGround = true;
+            if (!_playerWasOnGround)
+            {
+                _player.SpawnLandDust(_player.position);
+            }
 
             if (!_player.isDashing)
             {
@@ -664,6 +776,16 @@ namespace Celeste.Collision
             }
 
             _player.CurrentGroundBlock = block;
+        }
+
+        private void StoreMoveBlockLift(MoveBlock moveBlock, float dt)
+        {
+            if (moveBlock == null || dt <= 0f || moveBlock.MovementDelta == Vector2.Zero)
+            {
+                return;
+            }
+
+            _player.StoreLiftSpeed(moveBlock.MovementDelta / dt);
         }
 
         private static bool CanStandOnBlock(IBlocks block)

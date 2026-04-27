@@ -40,6 +40,7 @@ namespace Celeste.Animation
         // Items
         public const string ItemNormalStaw = "Item/NormalStaw";
         public const string ItemFlyStaw    = "Item/FlyStaw";
+        public const string ItemFlyFeather = "Item/FlyFeather";
         public const string ItemCrystal    = "Item/Crystal";
 
         // Devices

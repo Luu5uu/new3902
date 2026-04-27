@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Celeste.Animation;
 using Celeste.AudioSystem;
+using Celeste.Background;
 using Celeste.Blocks;
 using Celeste.Blocks.Rooms;
 using Celeste.Character;
@@ -59,9 +60,12 @@ namespace Celeste.Scenes
         private List<DecorItem> _currentDecor;
 
         private readonly List<CollectibleItem> _collectibles = new();
+        private readonly List<FlyFeatherItem> _feathers = new();
         private CollisionSystem _collisionSystem;
         private HazardCollisioncs _hazardCollisionSystem;
         private Rectangle _worldBound;
+
+        private SnowEffect _snow;
 
         private bool _isRecordingRewind;
         private bool _isRewinding;
@@ -70,6 +74,7 @@ namespace Celeste.Scenes
 
         private const float RewindRecordDuration = 3.0f;
         private const float RewindCooldownDuration = 3.0f;
+        private const int RoomTransitionOutOfBoundsMargin = 160;
         private static readonly RoomTransitionZone[] RoomTransitionZones =
         {
             new(1, new Rectangle(620, 0, 120, 36), 2),
@@ -95,6 +100,8 @@ namespace Celeste.Scenes
             _uiFont = Game.Content.Load<SpriteFont>("MenuFont");
             _background = Game.Content.Load<Texture2D>("bg");
 
+            _snow = new SnowEffect();
+            _snow.Initialize(Game.GraphicsDevice, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height);
 
             var startPos = new Vector2(
                 Game.Window.ClientBounds.Width / 2f,
@@ -233,6 +240,7 @@ namespace Celeste.Scenes
 
             _player.Update(gameTime);
             _worldMap.Update(gameTime);
+            if (_currentRoom != 6) _snow.Update(dt);
             UpdateGameplayBgm();
 
             if (!wasDashing && _player.isDashing)
@@ -249,9 +257,9 @@ namespace Celeste.Scenes
             else
             {
                 _hazardCollisionSystem.ResolveHazardCollision();
-                _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching);
+                _collisionSystem.ResolveBlockCollision(previousPosition, wasCrouching, dt);
 
-                if (TryHandleRoomTransition(gameTime))
+                if (TryHandleRoomTransition(gameTime, previousPosition, wasCrouching))
                 {
                     _previousKeyboardState = keyboard;
                     return;
@@ -289,7 +297,8 @@ namespace Celeste.Scenes
                 _gameTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
-            if (_player.Bounds.Bottom > _worldBound.Bottom && !_player.IsInDeathSequence)
+            if (_player.position.Y > _worldBound.Bottom + PlayerConstants.PlayerOutOfBoundsDeathGrace
+                && !_player.IsInDeathSequence)
             {
                 _player.Die();
             }
@@ -304,6 +313,7 @@ namespace Celeste.Scenes
                 rasterizerState: RasterizerState.CullNone);
 
             spriteBatch.Draw(_background, Game.GraphicsDevice.Viewport.Bounds, Color.White);
+            if (_currentRoom != 6) _snow.Draw(spriteBatch);
             DrawDecor(spriteBatch);
 
             _worldMap.Draw(spriteBatch);
@@ -412,14 +422,17 @@ namespace Celeste.Scenes
             RebuildCurrentRoom(resetPlayer);
         }
 
-        private bool TryHandleRoomTransition(GameTime gameTime)
+        private bool TryHandleRoomTransition(GameTime gameTime, Vector2 previousPosition, bool previousCrouching)
         {
             Rectangle playerBounds = _player.Bounds;
+            Rectangle previousBounds = _player.GetBoundsAt(previousPosition, previousCrouching);
+            Rectangle sweptBounds = Rectangle.Union(previousBounds, playerBounds);
 
             for (int i = 0; i < RoomTransitionZones.Length; i++)
             {
                 RoomTransitionZone zone = RoomTransitionZones[i];
-                if (zone.SourceRoom != _currentRoom || !playerBounds.Intersects(zone.TriggerArea))
+                Rectangle triggerArea = ExpandTransitionArea(zone.TriggerArea);
+                if (zone.SourceRoom != _currentRoom || !sweptBounds.Intersects(triggerArea))
                 {
                     continue;
                 }
@@ -437,6 +450,36 @@ namespace Celeste.Scenes
             }
 
             return false;
+        }
+
+        private Rectangle ExpandTransitionArea(Rectangle area)
+        {
+            int left = area.Left;
+            int top = area.Top;
+            int right = area.Right;
+            int bottom = area.Bottom;
+
+            if (area.Top <= _worldBound.Top)
+            {
+                top -= RoomTransitionOutOfBoundsMargin;
+            }
+
+            if (area.Left <= _worldBound.Left)
+            {
+                left -= RoomTransitionOutOfBoundsMargin;
+            }
+
+            if (area.Right >= _worldBound.Right)
+            {
+                right += RoomTransitionOutOfBoundsMargin;
+            }
+
+            if (area.Bottom >= _worldBound.Bottom)
+            {
+                bottom += RoomTransitionOutOfBoundsMargin;
+            }
+
+            return new Rectangle(left, top, right - left, bottom - top);
         }
 
         private void RebuildCurrentRoom(bool resetPlayer)
@@ -568,6 +611,7 @@ namespace Celeste.Scenes
         private void RebuildCollectibles()
         {
             _collectibles.Clear();
+            _feathers.Clear();
 
             Vector2 spawn = _player.RespawnPoint;
             if (_currentRoom == 0)
@@ -626,6 +670,8 @@ namespace Celeste.Scenes
                     new Vector2(279f, 132f),
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
+
+                _feathers.Add(CreateFlyFeather(new Vector2(520f, 220f)));
             }
 
             if (_currentRoom == 6)
@@ -636,6 +682,8 @@ namespace Celeste.Scenes
                     new Vector2(37f, 365f),
                     CollectibleItem.ItemType.Strawberry,
                     fliesAwayOnDash: true));
+
+                _feathers.Add(CreateFlyFeather(new Vector2(610f, 245f)));
             }
         }
 
@@ -667,6 +715,14 @@ namespace Celeste.Scenes
             return collectible;
         }
 
+        private FlyFeatherItem CreateFlyFeather(Vector2 position, bool shielded = false)
+        {
+            ItemAnimation animation = ItemAnimationFactory.CreateFlyFeather(_catalog);
+            animation.Position = position;
+            animation.Scale = GlobalConstants.DefaultScale;
+            return new FlyFeatherItem(animation, position, shielded);
+        }
+
         private void UpdateCollectibles(GameTime gameTime)
         {
             foreach (var collectible in _collectibles)
@@ -688,6 +744,16 @@ namespace Celeste.Scenes
                     _player.Maddy.OnDashRefill();
                 }
             }
+
+            foreach (FlyFeatherItem feather in _feathers)
+            {
+                feather.Update(gameTime);
+                if (feather.TryCollect(_player))
+                {
+                    SoundManager.Play("collect");
+                    _player.StartStarFly();
+                }
+            }
         }
 
         private void DrawCollectibles(SpriteBatch spriteBatch)
@@ -695,6 +761,11 @@ namespace Celeste.Scenes
             foreach (var collectible in _collectibles)
             {
                 collectible.Draw(spriteBatch);
+            }
+
+            foreach (FlyFeatherItem feather in _feathers)
+            {
+                feather.Draw(spriteBatch);
             }
         }
 

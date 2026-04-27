@@ -31,6 +31,7 @@ namespace Celeste.DeathAnimation.Particles
                     continue;
                 }
 
+                p.Velocity += p.Acceleration * dt;
                 p.Position += p.Velocity * dt;
                 p.Rotation += p.AngularVelocity * dt;
 
