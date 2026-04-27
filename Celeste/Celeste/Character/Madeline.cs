@@ -30,6 +30,7 @@ namespace Celeste.Character
         public IMadelineState fallState;
         public IMadelineState dashState;
         public IMadelineState dangleState;
+        public IMadelineState starFlyState;
 
         public IMadelineState deathState;
 
@@ -56,6 +57,19 @@ namespace Celeste.Character
         private bool _ledgeTopOutQueued;
         private Vector2 _ledgeTopOutPosition;
         private float _ledgeTopOutTimer;
+        private Vector2 _storedLiftSpeed;
+        private float _storedLiftTimer;
+        private float _climbJumpConversionTimer;
+        private int _climbJumpConversionDirection;
+        private float _climbJumpRefundAmount;
+        private float _starFlyTimer;
+        private float _starFlyTransformTimer;
+        private float _starFlyAngle;
+        private float _starFlyCurrentSpeed;
+        private float _starFlySpeedLerp;
+        private float _starFlyTrailTimer;
+        private bool _starFlyTransforming;
+        private Color _starFlyColor = StarFlyGold;
         private readonly List<IBlocks> _worldBlocks = new();
         //
         public float ClimbStaminaPercent => climbStamina / PlayerClimbMaxStamina;
@@ -80,10 +94,21 @@ namespace Celeste.Character
 
         public Rectangle GetBoundsAt(Vector2 targetPosition, bool crouching)
         {
-            int height = crouching ? PlayerDuckHitboxHeight : PlayerNormalHitboxHeight;
-            int left = (int)(targetPosition.X - PlayerHitboxWidth / 2f);
-            int top = (int)(targetPosition.Y - height);
-            return new Rectangle(left, top, PlayerHitboxWidth, height);
+            return GetBoundsAt(targetPosition, crouching, isStarFlying);
+        }
+
+        private Rectangle GetBoundsAt(Vector2 targetPosition, bool crouching, bool starFlying)
+        {
+            int width = starFlying ? PlayerStarFlyHitboxWidth : PlayerHitboxWidth;
+            int height = starFlying
+                ? PlayerStarFlyHitboxHeight
+                : (crouching ? PlayerDuckHitboxHeight : PlayerNormalHitboxHeight);
+            int left = (int)(targetPosition.X - width / 2f);
+            int bottom = starFlying
+                ? (int)(targetPosition.Y - PlayerStarFlyHitboxBottomInset)
+                : (int)targetPosition.Y;
+            int top = bottom - height;
+            return new Rectangle(left, top, width, height);
         }
 
 
@@ -104,6 +129,8 @@ namespace Celeste.Character
         // Dash
         public bool isDashing;
         public bool canDash = true;
+        public bool climbHeldForCollision;
+        public bool isStarFlying;
         //Dangling
         public bool isDangle;
         public float dangleFallSpeed = PlayerDangleFallSpeed;
@@ -116,11 +143,16 @@ namespace Celeste.Character
         private bool _levelResetRequested;
 
         private struct GhostFrame { public Vector2 Position; public bool FaceLeft; public float Alpha; }
+        private struct StarFlyTrailFrame { public Vector2 Position; public float Alpha; public Color Color; }
         private readonly List<GhostFrame> _ghosts = new();
+        private readonly List<StarFlyTrailFrame> _starFlyTrail = new();
         private Texture2D _ghostBodyTex;
+        private Texture2D _starFlyDotTex;
         private ParticleSystem _dashParticles;
         private BurstEmitter _dashBurstEmitter;
         private OrbitRingEffect _dashRingEffect;
+        private static readonly Color StarFlyGold = new Color(255, 214, 92);
+        private static readonly Color StarFlyRed = new Color(255, 78, 78);
 
         public void AddGhost(Vector2 pos, bool faceLeft) =>
             _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
@@ -149,6 +181,8 @@ namespace Celeste.Character
             fallState = new fallState();
             dashState = new dashState();
             dangleState = new dangleState();
+            starFlyState = new StarFlyState();
+            _starFlyDotTex = content.Load<Texture2D>("hair00");
 
             deathState = new DeathState();
             climbState = new climbState();
@@ -251,6 +285,20 @@ namespace Celeste.Character
             _ledgeTopOutQueued = false;
             _ledgeTopOutPosition = position;
             _ledgeTopOutTimer = 0f;
+            _storedLiftSpeed = Vector2.Zero;
+            _storedLiftTimer = 0f;
+            _climbJumpConversionTimer = 0f;
+            _climbJumpConversionDirection = 0;
+            _climbJumpRefundAmount = 0f;
+            _starFlyTimer = 0f;
+            _starFlyTransformTimer = 0f;
+            _starFlyAngle = -MathHelper.PiOver2;
+            _starFlyCurrentSpeed = 0f;
+            _starFlySpeedLerp = 0f;
+            _starFlyTrailTimer = 0f;
+            _starFlyTransforming = false;
+            _starFlyColor = StarFlyGold;
+            _starFlyTrail.Clear();
             _tiredFlashPhase = 0f;
             _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
             _dashRingEffect = null;
@@ -262,6 +310,8 @@ namespace Celeste.Character
 
             isClimbing = false;
             isDashing = false;
+            isStarFlying = false;
+            climbHeldForCollision = false;
             isDangle = false;
             isCrouching = false;
 
@@ -369,6 +419,7 @@ namespace Celeste.Character
             }
 
             _dashParticles?.Update(dt);
+            UpdateStarFlyTrail(dt);
             if (_dashRingEffect != null)
             {
                 _dashRingEffect.Update(dt);
@@ -384,6 +435,7 @@ namespace Celeste.Character
             }
 
             RefreshLastAim();
+            climbHeldForCollision = climbHeld;
             if (ApplyQueuedTopOut(dt))
             {
                 ClearTransientInput();
@@ -393,6 +445,7 @@ namespace Celeste.Character
 
             // State logic
             _state.Update(this, dt);
+            UpdateClimbJumpConversion(dt);
 
             if (_deathEffect != null)
             {
@@ -425,16 +478,25 @@ namespace Celeste.Character
                 _variableJumpTimer = Math.Max(0f, _variableJumpTimer - dt);
             }
 
-            if (!isDashing && !isClimbing && !isDangle)
+            if (_storedLiftTimer > 0f)
+            {
+                _storedLiftTimer = Math.Max(0f, _storedLiftTimer - dt);
+                if (_storedLiftTimer <= 0f)
+                {
+                    _storedLiftSpeed = Vector2.Zero;
+                }
+            }
+
+            if (!isDashing && !isClimbing && !isDangle && !isStarFlying)
             {
                 UpdateHorizontalVelocity(dt);
             }
-            else if (!isDashing)
+            else if (!isDashing && !isStarFlying)
             {
                 velocityX = Approach(velocityX, 0f, PlayerDashCarryDeceleration * dt);
             }
 
-            if (!isDashing && !isClimbing && !isDangle)
+            if (!isDashing && !isClimbing && !isDangle && !isStarFlying)
             {
                 if (!onGround)
                 {
@@ -524,6 +586,13 @@ namespace Celeste.Character
 
             _dashRingEffect?.Draw(spriteBatch);
             _dashParticles?.Draw(spriteBatch);
+            DrawStarFlyTrail(spriteBatch);
+            if (isStarFlying)
+            {
+                DrawStarFlyBody(spriteBatch);
+                return;
+            }
+
             Maddy.Draw(spriteBatch, position, GetTiredFlashColor(), scale: DefaultScale, faceLeft: FaceLeft);
         }
 
@@ -550,6 +619,173 @@ namespace Celeste.Character
                 dotScale: 0.14f * DefaultScale,
                 color: DashDeathColor,
                 initialAngle: initialAngle);
+        }
+
+        private void UpdateStarFlyTrail(float dt)
+        {
+            for (int i = _starFlyTrail.Count - 1; i >= 0; i--)
+            {
+                StarFlyTrailFrame trail = _starFlyTrail[i];
+                trail.Alpha -= dt * 5f;
+                if (trail.Alpha <= 0f)
+                {
+                    _starFlyTrail.RemoveAt(i);
+                    continue;
+                }
+
+                _starFlyTrail[i] = trail;
+            }
+        }
+
+        private void AddStarFlyTrail()
+        {
+            Vector2 center = GetStarFlyCenter();
+            Vector2 velocity = new Vector2(velocityX, velocityY);
+            if (velocity != Vector2.Zero)
+            {
+                velocity.Normalize();
+                center -= velocity * 4f * DefaultScale;
+            }
+
+            _starFlyTrail.Add(new StarFlyTrailFrame
+            {
+                Position = center,
+                Alpha = 0.55f,
+                Color = _starFlyColor
+            });
+        }
+
+        private void DrawStarFlyTrail(SpriteBatch spriteBatch)
+        {
+            if (_starFlyDotTex == null)
+            {
+                return;
+            }
+
+            if (_starFlyTrail.Count < 2)
+            {
+                return;
+            }
+
+            for (int i = 1; i < _starFlyTrail.Count; i++)
+            {
+                StarFlyTrailFrame previous = _starFlyTrail[i - 1];
+                StarFlyTrailFrame current = _starFlyTrail[i];
+                float currentT = i / (float)(_starFlyTrail.Count - 1);
+                float previousWidth = MathHelper.Lerp(1.4f, 8f, (i - 1) / (float)(_starFlyTrail.Count - 1)) * DefaultScale;
+                float currentWidth = MathHelper.Lerp(1.4f, 8f, currentT) * DefaultScale;
+                float alpha = Math.Min(previous.Alpha, current.Alpha);
+
+                DrawStarFlyTailSegment(spriteBatch, previous.Position, current.Position, previousWidth, currentWidth, Color.Black * alpha * 0.6f, DefaultScale);
+                DrawStarFlyTailSegment(spriteBatch, previous.Position, current.Position, previousWidth, currentWidth, current.Color * alpha, 0f);
+            }
+
+            DrawStarFlyTailCap(spriteBatch, _starFlyTrail[0], 1.4f * DefaultScale);
+        }
+
+        private void DrawStarFlyBody(SpriteBatch spriteBatch)
+        {
+            if (_starFlyDotTex == null)
+            {
+                Maddy.Draw(spriteBatch, position, _starFlyColor, scale: DefaultScale, faceLeft: FaceLeft);
+                return;
+            }
+
+            Vector2 center = GetStarFlyCenter();
+            Vector2 origin = new Vector2(_starFlyDotTex.Width / 2f, _starFlyDotTex.Height / 2f);
+            float scale = 0.9f * DefaultScale;
+            Vector2[] outlineOffsets =
+            {
+                new Vector2(DefaultScale, 0f),
+                new Vector2(-DefaultScale, 0f),
+                new Vector2(0f, DefaultScale),
+                new Vector2(0f, -DefaultScale)
+            };
+
+            foreach (Vector2 offset in outlineOffsets)
+            {
+                spriteBatch.Draw(
+                    _starFlyDotTex,
+                    center + offset,
+                    null,
+                    Color.Black * 0.75f,
+                    0f,
+                    origin,
+                    scale,
+                    SpriteEffects.None,
+                    0f);
+            }
+
+            spriteBatch.Draw(
+                _starFlyDotTex,
+                center,
+                null,
+                _starFlyColor,
+                0f,
+                origin,
+                scale,
+                SpriteEffects.None,
+                0f);
+        }
+
+        private void DrawStarFlyTailSegment(
+            SpriteBatch spriteBatch,
+            Vector2 from,
+            Vector2 to,
+            float fromWidth,
+            float toWidth,
+            Color color,
+            float outlineOffset)
+        {
+            Vector2 direction = to - from;
+            if (direction == Vector2.Zero)
+            {
+                return;
+            }
+
+            direction.Normalize();
+            Vector2 normal = new Vector2(-direction.Y, direction.X);
+            from += new Vector2(outlineOffset, 0f);
+            to += new Vector2(outlineOffset, 0f);
+
+            VertexPositionColor[] vertices =
+            {
+                new(new Vector3(from + normal * fromWidth * 0.5f, 0f), color),
+                new(new Vector3(from - normal * fromWidth * 0.5f, 0f), color),
+                new(new Vector3(to + normal * toWidth * 0.5f, 0f), color),
+                new(new Vector3(to - normal * toWidth * 0.5f, 0f), color)
+            };
+
+            short[] indices = { 0, 1, 2, 2, 1, 3 };
+            spriteBatch.GraphicsDevice.DrawUserIndexedPrimitives(
+                PrimitiveType.TriangleList,
+                vertices,
+                0,
+                vertices.Length,
+                indices,
+                0,
+                2);
+        }
+
+        private void DrawStarFlyTailCap(SpriteBatch spriteBatch, StarFlyTrailFrame trail, float width)
+        {
+            Vector2 origin = new Vector2(_starFlyDotTex.Width / 2f, _starFlyDotTex.Height / 2f);
+            float scale = width / _starFlyDotTex.Width;
+            spriteBatch.Draw(
+                _starFlyDotTex,
+                trail.Position,
+                null,
+                trail.Color * trail.Alpha,
+                0f,
+                origin,
+                scale,
+                SpriteEffects.None,
+                0f);
+        }
+
+        private Vector2 GetStarFlyCenter()
+        {
+            return position + new Vector2(0f, -PlayerStarFlyHitboxHeight * 0.5f);
         }
 
         internal Vector2 GetDeathDirection()
@@ -674,14 +910,17 @@ namespace Celeste.Character
             return !onGround && !isCrouching && GetWallJumpDirection() != 0;
         }
 
-        public int GetWallJumpDirection()
+        public int GetWallJumpDirection(int checkDistance = PlayerWallJumpCheckDistance)
         {
-            if (touchingRightWall && !touchingLeftWall)
+            bool wallOnRight = touchingRightWall || IsWallNear(1, checkDistance);
+            bool wallOnLeft = touchingLeftWall || IsWallNear(-1, checkDistance);
+
+            if (wallOnRight && !wallOnLeft)
             {
                 return -1;
             }
 
-            if (touchingLeftWall && !touchingRightWall)
+            if (wallOnLeft && !wallOnRight)
             {
                 return 1;
             }
@@ -691,7 +930,60 @@ namespace Celeste.Character
 
         public void PerformWallJump()
         {
-            int direction = GetWallJumpDirection();
+            PerformWallJump(GetWallJumpDirection(), resetVerticalSpeed: true);
+        }
+
+        public bool TrySuperWallJump()
+        {
+            int direction = GetWallJumpDirection(PlayerSuperWallJumpCheckDistance);
+            if (direction == 0)
+            {
+                return false;
+            }
+
+            SetCrouching(false);
+            isClimbing = false;
+            isDangle = false;
+            isDashing = false;
+            ClearClimbJumpConversion();
+            ConsumeJumpGrace();
+            velocityX = PlayerSuperWallJumpHorizontalSpeed * direction;
+            velocityY = -PlayerSuperWallJumpSpeed;
+            ApplyLiftBoostToVelocity();
+            BeginVariableJump(PlayerSuperWallJumpVariableTime);
+            FaceLeft = direction < 0;
+            Maddy.JumpFast(restart: true);
+            ForceAirJumpState();
+            return true;
+        }
+
+        public void PerformClimbJump()
+        {
+            int conversionDirection = GetWallJumpDirection();
+
+            SetCrouching(false);
+            isClimbing = false;
+            isDangle = false;
+            ClearClimbJumpConversion();
+            ConsumeJumpGrace();
+
+            float staminaCost = Math.Min(climbStamina, PlayerClimbJumpStaminaCost);
+            climbStamina = Math.Max(0f, climbStamina - staminaCost);
+            _climbJumpConversionTimer = conversionDirection != 0 ? PlayerClimbJumpConversionTime : 0f;
+            _climbJumpConversionDirection = conversionDirection;
+            _climbJumpRefundAmount = staminaCost;
+
+            velocityX += PlayerJumpHorizontalBoost * moveX;
+            velocityY = -PlayerJumpSpeed;
+            ApplyLiftBoostToVelocity();
+            BeginVariableJump();
+            ForceAirJumpState();
+            Maddy.JumpFast(restart: true);
+            Maddy.SweatJump();
+        }
+
+        private void PerformWallJump(int direction, bool resetVerticalSpeed)
+        {
             if (direction == 0)
             {
                 return;
@@ -700,12 +992,486 @@ namespace Celeste.Character
             SetCrouching(false);
             isClimbing = false;
             isDangle = false;
+            ClearClimbJumpConversion();
             ConsumeJumpGrace();
             velocityX = PlayerWallJumpHorizontalSpeed * direction;
-            velocityY = -PlayerJumpSpeed;
+            if (resetVerticalSpeed)
+            {
+                velocityY = -PlayerJumpSpeed;
+            }
+            ApplyLiftBoostToVelocity();
             BeginVariableJump();
             FaceLeft = direction < 0;
             Maddy.JumpFast(restart: true);
+            ForceAirJumpState();
+        }
+
+        private bool IsWallNear(int side, int checkDistance)
+        {
+            Rectangle bounds = Bounds;
+            for (int distance = 1; distance <= checkDistance; distance++)
+            {
+                Rectangle probe = bounds;
+                probe.X += side * distance;
+
+                for (int i = 0; i < _worldBlocks.Count; i++)
+                {
+                    IBlocks block = _worldBlocks[i];
+                    if (!IsWallJumpSolid(block))
+                    {
+                        continue;
+                    }
+
+                    Rectangle blockBounds = block.Bounds;
+                    if (blockBounds != Rectangle.Empty && probe.Intersects(blockBounds))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsWallJumpSolid(IBlocks block)
+        {
+            return block != null && (block is not CrushBlock crushBlock || crushBlock.CanStandOn);
+        }
+
+        private void ForceAirJumpState()
+        {
+            if (_state == jumpState)
+            {
+                return;
+            }
+
+            _state.Exit(this);
+            _state = jumpState;
+        }
+
+        public void StoreLiftSpeed(Vector2 speed)
+        {
+            if (speed == Vector2.Zero)
+            {
+                return;
+            }
+
+            _storedLiftSpeed = speed;
+            _storedLiftTimer = PlayerLiftMomentumStorageTime;
+        }
+
+        public Vector2 GetStoredLiftBoost()
+        {
+            if (_storedLiftTimer <= 0f)
+            {
+                return Vector2.Zero;
+            }
+
+            Vector2 boost = _storedLiftSpeed;
+            if (Math.Abs(boost.X) > PlayerLiftSpeedXCap)
+            {
+                boost.X = PlayerLiftSpeedXCap * Math.Sign(boost.X);
+            }
+
+            if (boost.Y > 0f)
+            {
+                boost.Y = 0f;
+            }
+            else if (boost.Y < PlayerLiftSpeedYCap)
+            {
+                boost.Y = PlayerLiftSpeedYCap;
+            }
+
+            return boost;
+        }
+
+        public void ApplyLiftBoostToVelocity()
+        {
+            Vector2 boost = GetStoredLiftBoost();
+            velocityX += boost.X;
+            velocityY += boost.Y;
+        }
+
+        public void RefillDash()
+        {
+            canDash = true;
+            Maddy.OnDashRefill();
+        }
+
+        public void BounceAwayFrom(Vector2 source)
+        {
+            Vector2 center = position + new Vector2(0f, -PlayerNormalHitboxHeight * 0.5f);
+            Vector2 direction = center - source;
+            if (direction == Vector2.Zero)
+            {
+                direction = FaceLeft ? new Vector2(-1f, 0f) : Vector2.UnitX;
+            }
+            else
+            {
+                direction.Normalize();
+            }
+
+            velocityX = direction.X * PlayerDashEndSpeed;
+            velocityY = Math.Min(direction.Y * PlayerDashEndSpeed, -PlayerJumpSpeed * 0.5f);
+        }
+
+        private void UpdateClimbJumpConversion(float dt)
+        {
+            if (_climbJumpConversionTimer <= 0f)
+            {
+                return;
+            }
+
+            _climbJumpConversionTimer = Math.Max(0f, _climbJumpConversionTimer - dt);
+            if (onGround || _climbJumpConversionDirection == 0)
+            {
+                ClearClimbJumpConversion();
+                return;
+            }
+
+            if (Math.Sign(moveX) == _climbJumpConversionDirection)
+            {
+                climbStamina = Math.Min(PlayerClimbMaxStamina, climbStamina + _climbJumpRefundAmount);
+                PerformWallJump(_climbJumpConversionDirection, resetVerticalSpeed: false);
+                ClearClimbJumpConversion();
+            }
+            else if (_climbJumpConversionTimer <= 0f)
+            {
+                ClearClimbJumpConversion();
+            }
+        }
+
+        private void ClearClimbJumpConversion()
+        {
+            _climbJumpConversionTimer = 0f;
+            _climbJumpConversionDirection = 0;
+            _climbJumpRefundAmount = 0f;
+        }
+
+        public void StartStarFly()
+        {
+            if (_state == starFlyState)
+            {
+                _starFlyTimer = PlayerStarFlyTime;
+                _starFlyColor = StarFlyGold;
+                return;
+            }
+
+            changeState(starFlyState);
+        }
+
+        public void BeginStarFly()
+        {
+            SetCrouching(false);
+            isStarFlying = true;
+            isDashing = false;
+            isClimbing = false;
+            isDangle = false;
+            onGround = false;
+            hitCeiling = false;
+            canDash = true;
+            Maddy.OnDashRefill();
+            Maddy.ClearSweat();
+
+            velocityX = 0f;
+            velocityY = 0f;
+            _starFlyTimer = PlayerStarFlyTime;
+            _starFlyTransformTimer = PlayerStarFlyTransformTime;
+            _starFlyTransforming = true;
+            _starFlySpeedLerp = 0f;
+            _starFlyCurrentSpeed = 0f;
+            _starFlyAngle = -MathHelper.PiOver2;
+            _starFlyTrailTimer = 0f;
+            _starFlyColor = StarFlyGold;
+            _starFlyTrail.Clear();
+        }
+
+        public void UpdateStarFly(float dt)
+        {
+            if (_starFlyTransforming)
+            {
+                velocityX = Approach(velocityX, 0f, PlayerStarFlyTransformDeceleration * dt);
+                velocityY = Approach(velocityY, 0f, PlayerStarFlyTransformDeceleration * dt);
+                _starFlyTransformTimer = Math.Max(0f, _starFlyTransformTimer - dt);
+                if (_starFlyTransformTimer <= 0f)
+                {
+                    BeginStarFlyMovement();
+                }
+                return;
+            }
+
+            if (canDash && ConsumeDashPress())
+            {
+                changeState(dashState);
+                return;
+            }
+
+            if (climbHeld && GetWallJumpDirection() != 0)
+            {
+                changeState(climbState);
+                return;
+            }
+
+            if (onGround && ConsumeJumpPress())
+            {
+                float horizontalSign = Math.Sign((float)Math.Cos(_starFlyAngle));
+                if (horizontalSign == 0f)
+                {
+                    horizontalSign = FaceLeft ? -1f : 1f;
+                }
+
+                velocityX = PlayerStarFlyEndHorizontalSpeed * horizontalSign;
+                velocityY = -PlayerJumpSpeed;
+                BeginVariableJump(PlayerStarFlyEndVariableJumpTime);
+                ForceAirJumpState();
+                Maddy.JumpFast(restart: true);
+                return;
+            }
+
+            _starFlyTimer -= dt;
+            if (_starFlyTimer <= 0f)
+            {
+                FinishStarFlyTimer();
+                return;
+            }
+
+            _starFlyColor = _starFlyTimer < PlayerStarFlyEndWarningTime
+                && ((int)(_starFlyTimer * 20f) % 2 == 0)
+                    ? StarFlyRed
+                    : StarFlyGold;
+
+            Vector2 input = new Vector2(moveX, moveY);
+            bool hasInput = input != Vector2.Zero;
+            if (hasInput)
+            {
+                input.Normalize();
+                float targetAngle = (float)Math.Atan2(input.Y, input.X);
+                _starFlyAngle = ApproachAngle(_starFlyAngle, targetAngle, PlayerStarFlyTurnSpeed * dt);
+
+                Vector2 currentDirection = AngleToVector(_starFlyAngle);
+                float maxSpeed;
+                if (Vector2.Dot(currentDirection, input) >= 0.45f)
+                {
+                    _starFlySpeedLerp = Approach(_starFlySpeedLerp, 1f, dt / PlayerStarFlyMaxLerpTime);
+                    maxSpeed = MathHelper.Lerp(PlayerStarFlyTargetSpeed, PlayerStarFlyMaxSpeed, _starFlySpeedLerp);
+                }
+                else
+                {
+                    _starFlySpeedLerp = 0f;
+                    maxSpeed = PlayerStarFlyTargetSpeed;
+                }
+
+                _starFlyCurrentSpeed = Approach(_starFlyCurrentSpeed, maxSpeed, PlayerStarFlyAcceleration * dt);
+            }
+            else
+            {
+                _starFlySpeedLerp = 0f;
+                _starFlyCurrentSpeed = Approach(
+                    _starFlyCurrentSpeed,
+                    PlayerStarFlySlowSpeed,
+                    PlayerStarFlyAcceleration * 0.5f * dt);
+            }
+
+            Vector2 velocity = AngleToVector(_starFlyAngle) * _starFlyCurrentSpeed;
+            velocityX = velocity.X;
+            velocityY = velocity.Y;
+
+            _starFlyTrailTimer -= dt;
+            if (_starFlyTrailTimer <= 0f)
+            {
+                AddStarFlyTrail();
+                _starFlyTrailTimer = PlayerStarFlyTrailInterval;
+            }
+        }
+
+        public void EndStarFly()
+        {
+            ResolveStarFlyExitHitbox();
+            isStarFlying = false;
+            _starFlyTransforming = false;
+            _starFlyTrailTimer = 0f;
+            _starFlyColor = StarFlyGold;
+        }
+
+        public bool HandleStarFlyHorizontalCollision()
+        {
+            if (!isStarFlying)
+            {
+                return false;
+            }
+
+            if (climbHeldForCollision && !IsTired)
+            {
+                changeState(climbState);
+                return true;
+            }
+
+            if (_starFlyTimer < PlayerStarFlyEndNoBounceTime)
+            {
+                velocityX = 0f;
+            }
+            else
+            {
+                velocityX *= PlayerStarFlyWallBounce;
+            }
+
+            SyncStarFlyFromVelocity();
+            return true;
+        }
+
+        public bool HandleStarFlyVerticalCollision()
+        {
+            if (!isStarFlying)
+            {
+                return false;
+            }
+
+            if (_starFlyTimer < PlayerStarFlyEndNoBounceTime)
+            {
+                velocityY = 0f;
+            }
+            else
+            {
+                velocityY *= PlayerStarFlyWallBounce;
+            }
+
+            SyncStarFlyFromVelocity();
+            return true;
+        }
+
+        private void BeginStarFlyMovement()
+        {
+            Vector2 input = new Vector2(moveX, moveY);
+            if (input == Vector2.Zero)
+            {
+                input = new Vector2(0f, -1f);
+            }
+            else
+            {
+                input.Normalize();
+            }
+
+            _starFlyAngle = (float)Math.Atan2(input.Y, input.X);
+            _starFlyCurrentSpeed = PlayerStarFlyStartSpeed;
+            Vector2 velocity = input * _starFlyCurrentSpeed;
+            velocityX = velocity.X;
+            velocityY = velocity.Y;
+            _starFlyTransforming = false;
+            _starFlyTimer = PlayerStarFlyTime;
+            AddStarFlyTrail();
+        }
+
+        private void FinishStarFlyTimer()
+        {
+            if (moveY < 0f)
+            {
+                velocityY = PlayerStarFlyExitUpSpeed;
+            }
+
+            if (moveY < 1f)
+            {
+                BeginVariableJump(PlayerVariableJumpTime);
+            }
+
+            if (velocityY > PlayerStarFlyMaxExitY)
+            {
+                velocityY = PlayerStarFlyMaxExitY;
+            }
+
+            if (Math.Abs(velocityX) > PlayerStarFlyMaxExitX)
+            {
+                velocityX = PlayerStarFlyMaxExitX * Math.Sign(velocityX);
+            }
+
+            changeState(onGround ? (moveX == 0f ? standState : runState) : fallState);
+        }
+
+        private void SyncStarFlyFromVelocity()
+        {
+            Vector2 velocity = new Vector2(velocityX, velocityY);
+            _starFlyCurrentSpeed = velocity.Length();
+            if (velocity != Vector2.Zero)
+            {
+                _starFlyAngle = (float)Math.Atan2(velocity.Y, velocity.X);
+            }
+        }
+
+        private void ResolveStarFlyExitHitbox()
+        {
+            if (!OverlapsWorld(GetBoundsAt(position, isCrouching, starFlying: false)))
+            {
+                return;
+            }
+
+            Vector2 start = position;
+
+            position.Y -= PlayerStarFlyHitboxBottomInset;
+            if (!OverlapsWorld(GetBoundsAt(position, isCrouching, starFlying: false)))
+            {
+                return;
+            }
+
+            position = start;
+            isCrouching = true;
+            position.Y -= PlayerStarFlyHitboxBottomInset;
+            if (!OverlapsWorld(GetBoundsAt(position, crouching: true, starFlying: false)))
+            {
+                return;
+            }
+
+            position = start;
+            isCrouching = false;
+        }
+
+        private bool OverlapsWorld(Rectangle bounds)
+        {
+            for (int i = 0; i < _worldBlocks.Count; i++)
+            {
+                IBlocks block = _worldBlocks[i];
+                if (!IsWallJumpSolid(block))
+                {
+                    continue;
+                }
+
+                Rectangle blockBounds = block.Bounds;
+                if (blockBounds != Rectangle.Empty && bounds.Intersects(blockBounds))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static Vector2 AngleToVector(float angle)
+        {
+            return new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+        }
+
+        private static float ApproachAngle(float current, float target, float maxDelta)
+        {
+            float difference = WrapAngle(target - current);
+            if (Math.Abs(difference) <= maxDelta)
+            {
+                return target;
+            }
+
+            return current + Math.Sign(difference) * maxDelta;
+        }
+
+        private static float WrapAngle(float angle)
+        {
+            while (angle > MathHelper.Pi)
+            {
+                angle -= MathHelper.TwoPi;
+            }
+
+            while (angle < -MathHelper.Pi)
+            {
+                angle += MathHelper.TwoPi;
+            }
+
+            return angle;
         }
 
         public void LaunchFromSpring(float launchSpeed = PlayerSpringLaunchSpeed)
@@ -823,9 +1589,9 @@ namespace Celeste.Character
             _jumpGraceTimer = 0f;
         }
 
-        public void BeginVariableJump()
+        public void BeginVariableJump(float duration = PlayerVariableJumpTime)
         {
-            _variableJumpTimer = PlayerVariableJumpTime;
+            _variableJumpTimer = duration;
             _variableJumpSpeed = velocityY;
             SoundManager.Play("jump");
             
