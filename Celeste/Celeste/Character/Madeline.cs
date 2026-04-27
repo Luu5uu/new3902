@@ -106,9 +106,7 @@ namespace Celeste.Character
                 ? PlayerStarFlyHitboxHeight
                 : (crouching ? PlayerDuckHitboxHeight : PlayerNormalHitboxHeight);
             int left = (int)(targetPosition.X - width / 2f);
-            int bottom = starFlying
-                ? (int)(targetPosition.Y - PlayerStarFlyHitboxBottomInset)
-                : (int)targetPosition.Y;
+            int bottom = (int)targetPosition.Y;
             int top = bottom - height;
             return new Rectangle(left, top, width, height);
         }
@@ -1427,9 +1425,17 @@ namespace Celeste.Character
         {
             Vector2 velocity = new Vector2(velocityX, velocityY);
             _starFlyCurrentSpeed = velocity.Length();
-            if (velocity != Vector2.Zero)
+            if (_starFlyCurrentSpeed > 0.001f)
             {
                 _starFlyAngle = (float)Math.Atan2(velocity.Y, velocity.X);
+            }
+            else
+            {
+                // If stopped, ensure angle is somewhat consistent with intent if we hit a surface
+                if (hitCeiling) _starFlyAngle = Math.Cos(_starFlyAngle) >= 0 ? 0 : MathHelper.Pi;
+                else if (onGround) _starFlyAngle = Math.Cos(_starFlyAngle) >= 0 ? 0 : MathHelper.Pi;
+                else if (touchingLeftWall) _starFlyAngle = Math.Sin(_starFlyAngle) >= 0 ? MathHelper.PiOver2 : -MathHelper.PiOver2;
+                else if (touchingRightWall) _starFlyAngle = Math.Sin(_starFlyAngle) >= 0 ? MathHelper.PiOver2 : -MathHelper.PiOver2;
             }
         }
 
@@ -1442,18 +1448,31 @@ namespace Celeste.Character
 
             Vector2 start = position;
 
-            position.Y -= PlayerStarFlyHitboxBottomInset;
-            if (!OverlapsWorld(GetBoundsAt(position, isCrouching, starFlying: false)))
+            // Try crouching to fit in small spaces
+            isCrouching = true;
+            if (!OverlapsWorld(GetBoundsAt(position, crouching: true, starFlying: false)))
             {
                 return;
             }
 
+            // If still overlapping, try nudging up slightly (up to 8 pixels)
+            position = start;
+            isCrouching = false;
+            for (int i = 1; i <= 8; i++)
+            {
+                position.Y--;
+                if (!OverlapsWorld(GetBoundsAt(position, isCrouching, starFlying: false)))
+                    return;
+            }
+
+            // Final fallback: crouch and nudge
             position = start;
             isCrouching = true;
-            position.Y -= PlayerStarFlyHitboxBottomInset;
-            if (!OverlapsWorld(GetBoundsAt(position, crouching: true, starFlying: false)))
+            for (int i = 1; i <= 8; i++)
             {
-                return;
+                position.Y--;
+                if (!OverlapsWorld(GetBoundsAt(position, crouching: true, starFlying: false)))
+                    return;
             }
 
             position = start;
