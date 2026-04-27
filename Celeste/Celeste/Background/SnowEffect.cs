@@ -36,9 +36,9 @@ namespace Celeste.Background
 
         private static readonly SnowLayer[] Layers =
         {
-            new(new Color(110, 168, 255), 160f, 220f, 32, 3.0f, 1.5f),
-            new(Color.White,              160f, 220f, 32, 3.0f, 1.2f),
-            new(new Color(58,  64,  71),   40f,  80f, 32, 5.0f, 2.0f),
+            new(new Color(110, 168, 255), 160f, 220f, 32, 6.0f, 1.5f),
+            new(Color.White,              160f, 220f, 32, 6.0f, 1.2f),
+            new(new Color(58,  64,  71),   40f,  80f, 32, 6.0f, 2.0f),
         };
 
         private readonly List<SnowParticle> _particles = new();
@@ -59,7 +59,7 @@ namespace Celeste.Background
             {
                 for (int i = 0; i < layer.Count; i++)
                 {
-                    _particles.Add(SpawnParticle(layer, scattered: true));
+                    _particles.Add(SpawnParticle(layer, scattered: true, randomizeAge: true));
                 }
             }
         }
@@ -73,10 +73,12 @@ namespace Celeste.Background
                 p.Position.X += p.SpeedX * dt;
                 p.Position.Y += p.SpeedY * dt + (float)Math.Sin(p.Age * 2.5f) * 6f * dt;
 
-                if (p.Age >= p.Lifetime || p.Position.X < -4f)
+                bool exitedLeft = p.Position.X < -4f;
+                bool expired    = p.Age >= p.Lifetime;
+                if (exitedLeft || expired)
                 {
                     _particles.RemoveAt(i);
-                    _particles.Insert(i, RespawnParticle(p));
+                    _particles.Insert(i, RespawnParticle(p, scattered: expired && !exitedLeft));
                     continue;
                 }
 
@@ -105,13 +107,13 @@ namespace Celeste.Background
             }
         }
 
-        private SnowParticle SpawnParticle(SnowLayer layer, bool scattered)
+        private SnowParticle SpawnParticle(SnowLayer layer, bool scattered, bool randomizeAge = false)
         {
             float x = scattered ? (float)(_rng.NextDouble() * _screenWidth) : _screenWidth + 4f;
             float y = (float)(_rng.NextDouble() * _screenHeight);
             float speedX = -(layer.MinSpeed + (float)(_rng.NextDouble() * (layer.MaxSpeed - layer.MinSpeed)));
             float spreadY = (float)(_rng.NextDouble() * 20f - 10f);
-            float age     = scattered ? (float)(_rng.NextDouble() * layer.Lifetime) : 0f;
+            float age     = randomizeAge ? (float)(_rng.NextDouble() * layer.Lifetime) : 0f;
             return new SnowParticle
             {
                 Position = new Vector2(x, y),
@@ -124,16 +126,16 @@ namespace Celeste.Background
             };
         }
 
-        private SnowParticle RespawnParticle(SnowParticle old)
+        private SnowParticle RespawnParticle(SnowParticle old, bool scattered)
         {
             foreach (var layer in Layers)
             {
                 if (layer.Color == old.Color)
                 {
-                    return SpawnParticle(layer, scattered: false);
+                    return SpawnParticle(layer, scattered);
                 }
             }
-            return SpawnParticle(Layers[0], scattered: false);
+            return SpawnParticle(Layers[0], scattered);
         }
     }
 }
