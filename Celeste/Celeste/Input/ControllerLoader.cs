@@ -72,7 +72,7 @@ namespace Celeste.Input
             bool grabHeld = keyboardState.IsKeyDown(Keys.Z) || gamepadState.IsButtonDown(Buttons.RightShoulder);
             bool deathPressed = IsKeyboardPressed(keyboardState, Keys.E);
             bool rewindPressed = IsKeyboardPressed(keyboardState, Keys.V) || IsGamepadPressed(gamepadState, Buttons.Y);
-            
+
             RewindPressedThisFrame = rewindPressed;
 
             _player.Move(MathHelper.Clamp(horizontal, -1f, 1f));
@@ -201,12 +201,15 @@ namespace Celeste.Input
             keyboard.RegisterCommand(Keys.D3, new ActionCommand(() => scene.JumpToRoom(3)));
             keyboard.RegisterCommand(Keys.D4, new ActionCommand(() => scene.JumpToRoom(4)));
             keyboard.RegisterCommand(Keys.D5, new ActionCommand(() => scene.JumpToRoom(5)));
+            keyboard.RegisterCommand(Keys.D6, new ActionCommand(() => scene.JumpToRoom(6)));
+
             keyboard.RegisterCommand(Keys.NumPad0, new ActionCommand(() => scene.JumpToRoom(0)));
             keyboard.RegisterCommand(Keys.NumPad1, new ActionCommand(() => scene.JumpToRoom(1)));
             keyboard.RegisterCommand(Keys.NumPad2, new ActionCommand(() => scene.JumpToRoom(2)));
             keyboard.RegisterCommand(Keys.NumPad3, new ActionCommand(() => scene.JumpToRoom(3)));
             keyboard.RegisterCommand(Keys.NumPad4, new ActionCommand(() => scene.JumpToRoom(4)));
             keyboard.RegisterCommand(Keys.NumPad5, new ActionCommand(() => scene.JumpToRoom(5)));
+            keyboard.RegisterCommand(Keys.NumPad6, new ActionCommand(() => scene.JumpToRoom(6)));
         }
     }
 }
