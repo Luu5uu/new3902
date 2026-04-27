@@ -32,6 +32,9 @@ namespace Celeste.Blocks.Rooms
             _mapBuilder.PlaceBlock("wood", 5, 20, 1);
             _mapBuilder.PlaceBlock("wood", 6, 20, 2);
 
+            _mapBuilder.PlaceBlock("wood", 10, 9, 0);
+            _mapBuilder.PlaceBlock("wood", 11, 9, 1);
+
             _mapBuilder.PlaceMoveBlock(
                 position: new Vector2(250f, 230f),
                 distance: 200f,
