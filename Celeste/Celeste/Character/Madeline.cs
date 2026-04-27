@@ -154,10 +154,12 @@ namespace Celeste.Character
         private ParticleSystem _dashParticles;
         private BurstEmitter _dashBurstEmitter;
         private OrbitRingEffect _dashRingEffect;
-        private ParticleSystem _landDustParticles;
+        private SmokeParticleSystem _landDustParticles;
+        private Texture2D[] _smokeFrames;
         private static readonly Color StarFlyGold = new Color(255, 214, 92);
         private static readonly Color StarFlyRed = new Color(255, 78, 78);
         private static readonly Color DashTrailCyan = new Color(74, 204, 255);
+        private static readonly Random ParticleRng = new();
 
         public void AddGhost(Vector2 pos, bool faceLeft) =>
             _ghosts.Add(new GhostFrame { Position = pos, FaceLeft = faceLeft, Alpha = 0.6f });
@@ -188,6 +190,13 @@ namespace Celeste.Character
             dangleState = new dangleState();
             starFlyState = new StarFlyState();
             _starFlyDotTex = content.Load<Texture2D>("hair00");
+            _smokeFrames = new[]
+            {
+                content.Load<Texture2D>("smoke0"),
+                content.Load<Texture2D>("smoke1"),
+                content.Load<Texture2D>("smoke2"),
+                content.Load<Texture2D>("smoke3")
+            };
 
             deathState = new DeathState();
             climbState = new climbState();
@@ -204,7 +213,7 @@ namespace Celeste.Character
             _deathDownClip = deathDownClip;
             _deathDotTex = dotTexture;
             _dashParticles = new ParticleSystem(dotTexture);
-            _landDustParticles = new ParticleSystem(dotTexture);
+            _landDustParticles = new SmokeParticleSystem(_smokeFrames);
             _dashBurstEmitter = new BurstEmitter(
                 count: 8,
                 minSpeed: 90f * DefaultScale,
@@ -309,7 +318,7 @@ namespace Celeste.Character
             _starFlyTrail.Clear();
             _tiredFlashPhase = 0f;
             _dashParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
-            _landDustParticles = _deathDotTex != null ? new ParticleSystem(_deathDotTex) : null;
+            _landDustParticles?.Clear();
             _dashRingEffect = null;
 
             velocityY = 0f;
@@ -638,55 +647,69 @@ namespace Celeste.Character
         public void SpawnLandDust(Vector2 pos)
         {
             if (_landDustParticles == null) return;
-            var rng = new Random();
-            for (int i = 0; i < 6; i++)
+
+            Vector2 origin = pos + new Vector2(0f, -2f);
+            for (int i = 0; i < 8; i++)
             {
-                float spreadAngle = MathHelper.ToRadians(-90f + (float)(rng.NextDouble() * 120f - 60f));
-                float speed = 60f + (float)(rng.NextDouble() * 60f);
-                var p = new Particle
+                float spreadAngle = MathHelper.ToRadians(-90f + RandomRange(-75f, 75f));
+                float speed = RandomRange(32f, 46f);
+                var particle = new SmokeParticle
                 {
-                    Position = pos,
+                    Position = origin + new Vector2(RandomRange(-2f, 2f), RandomRange(-1f, 1f)),
                     Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed),
-                    Acceleration = new Vector2(0f, 300f),
+                    Acceleration = new Vector2(0f, 5f),
+                    Damping = RandomRange(21.5f, 22.5f),
                     Age = 0f,
-                    Lifetime = 0.3f + (float)(rng.NextDouble() * 0.2f),
-                    StartSize = 0.28f * DefaultScale,
-                    EndSize = 0f,
-                    StartAlpha = 0.9f,
+                    Lifetime = 0.5f,
+                    StartScale = RandomRange(0.25f, 0.65f) * DefaultScale,
+                    EndScale = 0f,
+                    StartAlpha = 1.0f,
                     EndAlpha = 0f,
                     Tint = Color.White,
-                    StartTint = Color.White,
-                    EndTint = Color.White,
+                    Rotation = RandomRange(0f, MathHelper.TwoPi),
+                    AngularVelocity = RandomRange(-3f, 3f),
+                    Effects = RandomFlip()
                 };
-                _landDustParticles.Add(p);
+
+                _landDustParticles.Add(particle);
             }
         }
 
         public void SpawnWallKickDust(Vector2 pos, int wallDir)
         {
             if (_landDustParticles == null) return;
-            var rng = new Random();
-            for (int i = 0; i < 4; i++)
+
+            float wallSide = Math.Sign(wallDir);
+            if (wallSide == 0f)
             {
-                float baseAngle = wallDir > 0 ? 0f : MathHelper.Pi;
-                float spreadAngle = baseAngle + MathHelper.ToRadians((float)(rng.NextDouble() * 120f - 60f));
-                float speed = 50f + (float)(rng.NextDouble() * 70f);
-                var p = new Particle
+                wallSide = FaceLeft ? -1f : 1f;
+            }
+
+            Vector2 origin = pos + new Vector2(wallSide * 7f, -PlayerNormalHitboxHeight * 0.55f);
+            for (int i = 0; i < 6; i++)
+            {
+                float baseAngle = wallSide > 0f ? MathHelper.Pi : 0f;
+                float spreadAngle = baseAngle + MathHelper.ToRadians(RandomRange(-70f, 70f));
+                float speed = RandomRange(28f, 42f);
+                var particle = new SmokeParticle
                 {
-                    Position = pos,
-                    Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed - 40f),
-                    Acceleration = new Vector2(0f, 280f),
+                    Position = origin + new Vector2(RandomRange(-1f, 1f), RandomRange(-3f, 3f)),
+                    Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed - 8f),
+                    Acceleration = new Vector2(0f, 5f),
+                    Damping = RandomRange(21.5f, 22.5f),
                     Age = 0f,
-                    Lifetime = 0.25f + (float)(rng.NextDouble() * 0.15f),
-                    StartSize = 0.24f * DefaultScale,
-                    EndSize = 0f,
-                    StartAlpha = 0.85f,
+                    Lifetime = 0.45f,
+                    StartScale = RandomRange(0.25f, 0.6f) * DefaultScale,
+                    EndScale = 0f,
+                    StartAlpha = 1.0f,
                     EndAlpha = 0f,
                     Tint = Color.White,
-                    StartTint = Color.White,
-                    EndTint = Color.White,
+                    Rotation = RandomRange(0f, MathHelper.TwoPi),
+                    AngularVelocity = RandomRange(-3f, 3f),
+                    Effects = RandomFlip()
                 };
-                _landDustParticles.Add(p);
+
+                _landDustParticles.Add(particle);
             }
         }
 
@@ -694,19 +717,20 @@ namespace Celeste.Character
         {
             if (_dashParticles == null) return;
             var rng = new Random();
-            for (int i = 0; i < 10; i++)
+            float baseAngle = (float)Math.Atan2(dashDir.Y, dashDir.X);
+            for (int i = 0; i < 2; i++)
             {
-                float spreadAngle = (float)Math.Atan2(dashDir.Y, dashDir.X) + MathHelper.ToRadians((float)(rng.NextDouble() * 90f - 45f));
-                float speed = 20f + (float)(rng.NextDouble() * 30f);
+                float spreadAngle = baseAngle + MathHelper.ToRadians((float)(rng.NextDouble() * 30f - 15f));
+                float speed = 12f + (float)(rng.NextDouble() * 18f);
                 var p = new Particle
                 {
                     Position = pos,
                     Velocity = new Vector2((float)Math.Cos(spreadAngle) * speed, (float)Math.Sin(spreadAngle) * speed),
                     Age = 0f,
-                    Lifetime = 0.25f + (float)(rng.NextDouble() * 0.15f),
-                    StartSize = 0.22f * DefaultScale,
+                    Lifetime = 0.2f + (float)(rng.NextDouble() * 0.1f),
+                    StartSize = 0.35f,
                     EndSize = 0f,
-                    StartAlpha = 1.0f,
+                    StartAlpha = 0.9f,
                     EndAlpha = 0f,
                     StartTint = DashTrailCyan,
                     EndTint = DashTrailCyan,
@@ -714,6 +738,24 @@ namespace Celeste.Character
                 };
                 _dashParticles.Add(p);
             }
+        }
+
+        private static float RandomRange(float min, float max)
+        {
+            return min + (float)ParticleRng.NextDouble() * (max - min);
+        }
+
+        private static SpriteEffects RandomFlip()
+        {
+            bool horizontal = ParticleRng.Next(2) == 0;
+            bool vertical = ParticleRng.Next(2) == 0;
+            return (horizontal, vertical) switch
+            {
+                (true, true) => SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically,
+                (true, false) => SpriteEffects.FlipHorizontally,
+                (false, true) => SpriteEffects.FlipVertically,
+                _ => SpriteEffects.None
+            };
         }
 
         private void UpdateStarFlyTrail(float dt)
