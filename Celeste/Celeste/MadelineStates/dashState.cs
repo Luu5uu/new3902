@@ -64,6 +64,7 @@ namespace Celeste.MadelineStates
             m.velocityY = dashVelocity.Y;
             m.AddGhost(m.position, m.FaceLeft);
             m.TriggerDashVisual(_dashDirection);
+            m.SpawnDashTrail(m.position, _dashDirection);
 
             if (_dashDirection.X != 0f)
             {
